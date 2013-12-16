@@ -120,28 +120,26 @@ Input.method("cancelCall", function()
 */
 Input.method("beginQuery", function(formData, jqForm, options) {
 
-    if (this.host.findModule("mdControl").sessionActive) // if there is an active IG session
+    if (!this.settings.onBeginQuery())
     {
-        alert("Please stop the instance generator and save your results first");
         return false;
     }
 
-	$("#load_area #myform").hide();
-	$("#load_area").append('<div id="preloader"><img id="preloader_img" src="/commons/Client/images/preloader.gif" alt="Loading..."/><span id="status_label">Loading and processing...</span><button id="cancel">Cancel</button></div>');	
+    $("#load_area #myform").hide();
+    $("#load_area").append('<div id="preloader"><img id="preloader_img" src="/commons/Client/images/preloader.gif" alt="Loading..."/><span id="status_label">Loading and processing...</span><button id="cancel">Cancel</button></div>');   
     $("#cancel").click(this.cancelCall.bind(this));
-    this.host.findModule("mdControl").disableAll();
 
     return true; 
 });
 
 // post-submit callback 
 Input.method("endQuery", function()  { 
-	$("#preloader").remove();
-	$("#load_area #myform").show();
+    $("#preloader").remove();
+    $("#load_area #myform").show();
 
     $("#claferFileURL").val(""); // empty the URL
-	
-	return true;
+    
+    return true;
 });
 
 Input.method("onPoll", function(responseObject)
@@ -204,16 +202,16 @@ Input.method("fileSent", function(responseText, statusText, xhr, $form)  {
 });
 
 Input.method("handleError", function(response, statusText, xhr)  { 
-	clearTimeout(this.pollingTimeoutObject);
-	var er = document.getElementById("error_overlay");
-	er.style.display = "block";	
+    clearTimeout(this.pollingTimeoutObject);
+    var er = document.getElementById("error_overlay");
+    er.style.display = "block"; 
     var caption = this.settings.onError(this, statusText, response.responseText);
     
-	document.getElementById("error_report").innerHTML = ('<span id="close_error" alt="close">Close Message</span><p>' + caption + "</p>");
-	document.getElementById("close_error").onclick = function(){ 
-		document.getElementById("error_overlay").style.display = "none";
-	};
-	this.endQuery();
+    document.getElementById("error_report").innerHTML = ('<span id="close_error" alt="close">Close Message</span><p>' + caption + "</p>");
+    document.getElementById("close_error").onclick = function(){ 
+        document.getElementById("error_overlay").style.display = "none";
+    };
+    this.endQuery();
     
 });
 
@@ -247,12 +245,12 @@ Input.method("exampleChange", function(){
     }
     else
     {
- 		$("#submitExample").attr("disabled", "disabled");       
+        $("#submitExample").attr("disabled", "disabled");       
     }
 });
 
 Input.method("inputChange", function(){
-	var filename = $("#myform [type='file']").val();
+    var filename = $("#myform [type='file']").val();
     
     if (filename)
     {
@@ -320,8 +318,6 @@ Input.method("getInitContent", function()
 
     result += '</tr></table>';
 
-    result += '</form>';
-
     if (this.settings.optimization_backend)
     {
         result += '<div style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-20px;">';
@@ -333,6 +329,8 @@ Input.method("getInitContent", function()
 
         result += '</div>';
     }
+
+    result += '</form>';
 
 
 //    result += '<form id="saveSourceForm" action="/savesource" method="post" enctype="multipart/form-data">';
