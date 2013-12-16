@@ -120,7 +120,7 @@ Input.method("cancelCall", function()
 */
 Input.method("beginQuery", function(formData, jqForm, options) {
 
-    if (!this.settings.onBeginQuery())
+    if (!this.settings.onBeginQuery(this))
     {
         return false;
     }
