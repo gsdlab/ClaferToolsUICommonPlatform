@@ -278,7 +278,7 @@ Control.method("handleError", function(response, statusText, xhr)  {
     
     var er = document.getElementById("error_overlay");
     er.style.display = "block"; 
-    var caption = this.settings.onError(this, statusText, response.responseText);
+    var caption = this.settings.onError(this, statusText, response, xhr);
 
     document.getElementById("error_report").innerHTML = ('<span id="close_error" alt="close">Close Message</span><p>' + caption + "</p>");
     document.getElementById("close_error").onclick = function(){ 
