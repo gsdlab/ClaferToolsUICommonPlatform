@@ -36,7 +36,9 @@ function Output(host, settings)
 
     this.editor = null;
 
-    this.resize = this.onResize.bind(this);     
+    this.resize = this.onResize.bind(this);  
+
+    this.host.loaded(this); // notify about getting fully loaded   
 }
 
 Output.method("onResize", function() {

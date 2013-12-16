@@ -76,6 +76,8 @@ Control.method("getInitContent", function(){
    
     ret += '</form>';
 
+    var context = this;
+
     $.getJSON('/Backends/backends.json', 
         function(data)
         {
@@ -110,14 +112,14 @@ Control.method("getInitContent", function(){
 //                return false;
             });
 
-            $("#myform").submit();
+            context.host.loaded(context); // notify about getting fully loaded
 
         }
     ).error(function() 
         { 
             var options = '<option value="">(Could not load instance generators)</option>';
             $("#backend").html(options);
-            $("#myform").submit();
+            context.host.loaded(context); // notify about getting fully loaded
 
         });
 

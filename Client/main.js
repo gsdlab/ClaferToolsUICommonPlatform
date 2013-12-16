@@ -29,9 +29,9 @@ var host = null;
 
 $(document).ready(function()
 {
-    var modules = getConfiguration();    
+    var configuration = getConfiguration();    
     
-    host = new Host(modules);
+    host = new Host(configuration.modules, configuration.settings);
 
     window.onbeforeunload = exitConfirmation;
 });
@@ -47,8 +47,10 @@ function getParameterByName(name) {
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
-function Host(modules)
+function Host(modules, settings)
 {
+    this.settings = settings;
+
     /* GUID for each browser tab */
     /* Note that page refresh is supposed to create a new session */
 
@@ -75,8 +77,9 @@ function Host(modules)
     this.key = GUID();
     this.claferFileURL = getParameterByName("claferFileURL");
     this.modules = new Array();
-    this.configurations = new Array();    
     this.helpGetter = new helpGetter(this);
+    
+    this.loadCounter = modules.length + 1; // the host should also be loaded, so that +1.    
 
     for (var i = 0; i < modules.length; i++)
     {
@@ -85,7 +88,7 @@ function Host(modules)
         
         this.modules.push(instance);
     }    
-
+    
     for (var i = 0; i < this.modules.length; i++)
     {
         var resize = null;
@@ -153,7 +156,23 @@ function Host(modules)
         $("#help").hide();
         $(".fadeOverlay").hide();
     }
+
+    this.loaded(this);
 }
+
+Host.method("loaded", function(module)
+{
+    this.loadCounter = this.loadCounter - 1;
+    
+    if (this.loadCounter == 0)
+    {
+        this.settings.onLoaded(this);
+    }
+    else if (this.loadCounter < 0)
+    {
+        alert("The loaded() is called more times than expected");
+    }
+});
 
 Host.method("print", function(text)
 {

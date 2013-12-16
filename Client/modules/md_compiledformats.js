@@ -154,11 +154,14 @@ CompiledFormats.method("onInitRendered", function()
                 iframes[i].onload = context.onDocLoad.bind(context); 
             }
 
+            context.host.loaded(context); // notify about getting fully loaded            
+
         }
     ).error(function() 
         { 
             var options = '<option value="">(Could not load formats)</option>';
             $("#formats").html(options);
+            context.host.loaded(context); // notify about getting fully loaded            
 
         });
 

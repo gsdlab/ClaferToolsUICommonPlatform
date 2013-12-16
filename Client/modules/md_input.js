@@ -47,6 +47,13 @@ function Input(host, settings)
     this.editorHeight = this.height - 83;
 
     this.resize = this.onResize.bind(this);
+
+    if (this.settings.optimization_backend)
+    {
+        this.loadCounter = 2; // because 2 xmls to be loaded
+    }
+    else
+        this.loadCounter = 1;
 }
 
 //Input.method("recalculateEditorSize", function()
@@ -318,6 +325,8 @@ Input.method("getInitContent", function()
 
     result += '</tr></table>';
 
+    var context = this;
+
     if (this.settings.optimization_backend)
     {
         result += '<div style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-20px;">';
@@ -328,6 +337,31 @@ Input.method("getInitContent", function()
         result += '<input id="useCache" type="checkbox" name="useCache" value="checked">Use Cache</input>';
 
         result += '</div>';
+
+        $.getJSON('/Backends/backends.json', 
+            function(data)
+            {
+                var backends = data.backends;
+                var options = "";
+
+                var display = "block";
+
+                for (var i = 0; i < backends.length; i++)
+                {
+                    options += '<option value="' + backends[i].id + '" title="' + backends[i].tooltip + '">' + backends[i].label + '</option>';
+                }
+
+                $("#optimizationBackend").html(options);
+
+                context.partLoaded();
+            }
+        ).error(function() 
+            { 
+                var options = '<option value="">(Could not load instance generators)</option>';
+                $("#optimizationBackend").html(options);
+                context.partLoaded();
+
+            });
     }
 
     result += '</form>';
@@ -337,6 +371,7 @@ Input.method("getInitContent", function()
 //    result += '<input type="hidden" name="windowKey" value="' + this.host.key + '"/>';
 //    result += '<input type="hidden" name="saveSourceField" id="saveSourceField" value=""></form>';
 
+    var context = this;
 
     $.getJSON('/Examples/examples.json', 
         function(data)
@@ -356,12 +391,15 @@ Input.method("getInitContent", function()
             
             $("#exampleURL").html(options);
 
+            context.partLoaded();
+
         }
     ).error(function() 
         { 
             var optionClass = 'first_option';
             var options = '<option class="' + optionClass + '" value="">Or Choose Example (Could not load examples)</option>';
             $("#exampleURL").html(options);
+            context.partLoaded();
             
         });
 
@@ -369,8 +407,19 @@ Input.method("getInitContent", function()
 
 });
 
-Input.method("onResize", function() {
+Input.method("onResize", function()
+{
     this.editor.resize();
+});
+
+Input.method("partLoaded", function()
+{
+    this.loadCounter = this.loadCounter - 1;
+
+    if (this.loadCounter == 0)
+    {
+       this.host.loaded(this); // notify about getting fully loaded
+    }
 });
 
 function unescapeJSON(escaped) 
