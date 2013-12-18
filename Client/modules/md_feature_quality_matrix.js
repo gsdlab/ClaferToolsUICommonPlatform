@@ -38,6 +38,9 @@ function FeatureQualityMatrix(host, settings)
 
     this.host = host;
 
+    this.SavedFilters = [];
+    this.permahidden = [];
+
 //    this.dataTable.matrix = null;
 //    this.dataTable.
     
@@ -46,6 +49,7 @@ function FeatureQualityMatrix(host, settings)
 FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
     this.processor = new ClaferProcessor(data.claferXML);
+    this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this);    
 //    this.filter = new InstanceFilter(this.host)
     this.abstractClaferOutput = "";    
     this.toggled = false;
@@ -60,6 +64,7 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
 
 FeatureQualityMatrix.method("onRendered", function()
 {
+    this.filter.onRendered();
     
     $.resizeWindow(this.id, this.width, $("#comparison").height() + 80); // resize the table to fit everything
 
@@ -89,6 +94,7 @@ FeatureQualityMatrix.method("onRendered", function()
     $('#filter_reset').html("Reset");
     $('#filter_reset').click(function(event){
         event.stopPropagation(); //to keep table from sorting by instance number
+        that.filter.cleanFilters();
         that.settings.onReset(that);
             //if currently set to distinct mode, refresh distinct rows
         if (this.toggled){
@@ -212,20 +218,20 @@ FeatureQualityMatrix.method("onRendered", function()
             $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_empty.bmp" class="maybe">');
             $("#r" + i + "box").click(function(){
                 if (this.className == "maybe"){
-                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 1);
                     this.src = "commons/Client/images/checkbox_ticked.bmp";
                     this.className = "wanted";
                     $(this).parent().parent().attr("FilterStatus", "require");
+                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 1);
                 } else if (this.className == "wanted"){
-                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), -1);
                     this.src = "commons/Client/images/checkbox_x.bmp";
                     this.className = "unwanted";
                     $(this).parent().parent().attr("FilterStatus", "exclude");
+                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), -1);
                 } else {
-                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 0);                    
                     this.src = "commons/Client/images/checkbox_empty.bmp";
                     this.className = "maybe";
                     $(this).parent().parent().attr("FilterStatus", "none");
+                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 0);                    
                 }
             }).css("cursor", "pointer");
         }
@@ -250,11 +256,11 @@ FeatureQualityMatrix.method("onRendered", function()
                 $("#r" + i + " .td_abstract").append('<text id="r' + i + 'collapse" status="false">   \u21B4<text>')
                 $("#r" + i + "collapse").click(function(){
                     if ($(this).attr("status") === "false"){
-                        that.settings.onFeatureCollapsed(that, $(this).parent().text().replaceAll(/[^A-z]/g, ''));
+                        that.onFeatureCollapsed($(this).parent().text().replaceAll(/[^A-z]/g, ''));
                         $(this).attr("status", "true")
                         $(this).text("   \u2192")
                     } else {
-                        that.settings.onFeatureExpanded(that, $(this).parent().text().replaceAll(/[^A-z]/g, ''));
+                        that.onFeatureExpanded($(this).parent().text().replaceAll(/[^A-z]/g, ''));
                         $(this).attr("status", "false")
                         $(this).text("   \u21B4")
                     }
@@ -321,8 +327,12 @@ FeatureQualityMatrix.method("onRendered", function()
         event.stopPropagation(); //to keep table from sorting by instance number
     });
 
+    this.filter.resetFilters(this.SavedFilters, this.permahidden);
+
     //fire the scroll handler to align table after half a second (fixes chrome bug)
     setTimeout(function(){$('#mdFeatureQualityMatrix .window-content').scroll()},500);
+
+    this.filter.filterContent();
 
 });
 
@@ -844,9 +854,26 @@ FeatureQualityMatrix.method("getSVGSquare", function(cx, cy, r){
 });
 
 FeatureQualityMatrix.method("featureChecked", function (feature, state){
+    this.filter.filterContent(); // filter after changing the feature status
     this.settings.onFeatureCheckedStateChange(this, feature, state);
 });
 
 FeatureQualityMatrix.method("removeInstance", function(instanceNum){
+    this.filter.removeInstance(instanceNum);
     this.settings.onInstanceRemove(this, instanceNum);
-})
+});
+
+FeatureQualityMatrix.method("onFeatureCollapsed", function(feature){
+    this.filter.closeFeature(feature);
+    this.settings.onFeatureCollapsed(this, feature);
+});
+
+FeatureQualityMatrix.method("onFeatureExpanded", function(feature){
+    this.filter.openFeature(feature);
+    this.settings.onFeatureExpanded(this, feature);
+});
+
+FeatureQualityMatrix.method("clearFilters", function (){
+    this.SavedFilters = [];
+    this.permahidden = [];
+});
