@@ -275,11 +275,11 @@ FeatureQualityMatrix.method("onRendered", function()
     for(i=1; i<=length; i++){
         $("#th0_" + i).click(function(){
             var pid = getPID($(this).attr('id').substring(4))
-            var locationInArray = $.inArray(pid, this.host.storage.selection)
+            var locationInArray = $.inArray(pid, that.settings.getSelection());
             if (locationInArray == -1)
-                this.settings.onSelected(pid);
+                that.settings.onSelected(pid);
             else
-                this.settings.onDeselected(pid);
+                that.settings.onDeselected(pid);
         }).css("cursor", "pointer");
     }
 
