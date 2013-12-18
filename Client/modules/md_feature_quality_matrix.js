@@ -46,7 +46,7 @@ function FeatureQualityMatrix(host, settings)
 FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
     this.processor = new ClaferProcessor(data.claferXML);
-    this.filter = new InstanceFilter(this.host)
+//    this.filter = new InstanceFilter(this.host)
     this.abstractClaferOutput = "";    
     this.toggled = false;
     
@@ -89,7 +89,7 @@ FeatureQualityMatrix.method("onRendered", function()
     $('#filter_reset').html("Reset");
     $('#filter_reset').click(function(event){
         event.stopPropagation(); //to keep table from sorting by instance number
-        that.filter.resetFilters();
+        that.filter.onFilterReset(that);
             //if currently set to distinct mode, refresh distinct rows
         if (this.toggled){
             this.toggleDistinct(); //one to turn off distinct
@@ -188,15 +188,15 @@ FeatureQualityMatrix.method("onRendered", function()
                 if (this.className == "maybe"){
                     this.src = "commons/Client/images/checkbox_ticked.bmp";
                     this.className = "wanted";
-                    that.filter.filterContent();
+                    that.settings.onFiltered(that);
                 } else if (this.className == "wanted"){
                     this.src = "commons/Client/images/checkbox_x.bmp";
                     this.className = "unwanted";
-                    that.filter.filterContent();
+                    that.settings.onFiltered(that);
                 } else {
                     this.src = "commons/Client/images/checkbox_empty.bmp";
                     this.className = "maybe";
-                    that.filter.filterContent();
+                    that.settings.onFiltered(that);
                 }
             }).css("cursor", "pointer");
         }
@@ -221,11 +221,11 @@ FeatureQualityMatrix.method("onRendered", function()
                 $("#r" + i + " .td_abstract").append('<text id="r' + i + 'collapse" status="false">   \u21B4<text>')
                 $("#r" + i + "collapse").click(function(){
                     if ($(this).attr("status") === "false"){
-                        that.filter.closeFeature($(this).parent().text().replaceAll(/[^A-z]/g, ''));
+                        that.onFeatureCollapsed(that, $(this).parent().text().replaceAll(/[^A-z]/g, ''));
                         $(this).attr("status", "true")
                         $(this).text("   \u2192")
                     } else {
-                        that.filter.openFeature($(this).parent().text().replaceAll(/[^A-z]/g, ''));
+                        that.onFeatureExpanded(that, $(this).parent().text().replaceAll(/[^A-z]/g, ''));
                         $(this).attr("status", "false")
                         $(this).text("   \u21B4")
                     }
@@ -275,11 +275,11 @@ FeatureQualityMatrix.method("onRendered", function()
     for(i=1; i<=length; i++){
         $("#th0_" + i).click(function(){
             var pid = getPID($(this).attr('id').substring(4))
-            var locationInArray = $.inArray(pid, that.settings.getSelection());
+            var locationInArray = $.inArray(pid, that.settings.getSelection(that));
             if (locationInArray == -1)
-                that.settings.onSelected(pid);
+                that.settings.onSelected(that,pid);
             else
-                that.settings.onDeselected(pid);
+                that.settings.onDeselected(that,pid);
         }).css("cursor", "pointer");
     }
 
@@ -294,7 +294,7 @@ FeatureQualityMatrix.method("onRendered", function()
 
     //fire the scroll handler to align table after half a second (fixes chrome bug)
     setTimeout(function(){$('#mdFeatureQualityMatrix .window-content').scroll()},500);
-    this.filter.filterContent();
+    this.settings.onFiltered(this);
 
 });
 
