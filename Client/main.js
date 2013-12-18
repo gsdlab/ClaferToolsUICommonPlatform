@@ -50,6 +50,8 @@ function getParameterByName(name) {
 function Host(modules, settings)
 {
     this.settings = settings;
+    this.storage = new Object();
+    this.settings.onInitialize(this);
 
     /* GUID for each browser tab */
     /* Note that page refresh is supposed to create a new session */
