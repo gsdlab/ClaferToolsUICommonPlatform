@@ -30,11 +30,11 @@ function FeatureQualityMatrix(host, settings)
     this.posx = this.settings.layout.posx;
     this.posy = this.settings.layout.posy;
     
-	this.fadeColor = "#777";
-	this.normalColor = "#000"
+    this.fadeColor = "#777";
+    this.normalColor = "#000"
 
-	this.fadeOpacity = "0.7";
-	this.normalOpacity = "1.0"
+    this.fadeOpacity = "0.7";
+    this.normalOpacity = "1.0"
 
     this.host = host;
 
@@ -89,7 +89,7 @@ FeatureQualityMatrix.method("onRendered", function()
     $('#filter_reset').html("Reset");
     $('#filter_reset').click(function(event){
         event.stopPropagation(); //to keep table from sorting by instance number
-        that.filter.onFilterReset(that);
+        that.settings.onReset(that);
             //if currently set to distinct mode, refresh distinct rows
         if (this.toggled){
             this.toggleDistinct(); //one to turn off distinct
@@ -103,11 +103,12 @@ FeatureQualityMatrix.method("onRendered", function()
     //  Add remove buttons to instances
         var instances = $("#comparison #r0").find(".td_instance");
         for (i=0; i<$(instances).length; i++){
-            $(instances[i]).prepend('<image id="rem' + $(instances[i]).text() + '" src="images/remove.png" alt="remove">')
+            $(instances[i]).prepend('<image id="rem' + $(instances[i]).text() + '" src="commons/Client/images/remove.png" alt="remove">')
             var buttonId = "#rem" + $(instances[i]).text();
             $(buttonId).attr("name", $(instances[i]).text());
-            $(buttonId).click(function(){
+            $(buttonId).click(function(event){
                 that.removeInstance($(this).attr("name"));
+                event.stopPropagation();
             });
             $(buttonId).css("float", "left");
             $(buttonId).css("vertical-align", "middle");
@@ -115,10 +116,10 @@ FeatureQualityMatrix.method("onRendered", function()
             
             $(buttonId).hover(
             function () {
-                $(this).attr("src", "images/removeMouseOver.png");
+                $(this).attr("src", "/commons/Client/images/removeMouseOver.png");
             }, 
             function () {
-                $(this).attr("src", "images/remove.png");
+                $(this).attr("src", "/commons/Client/images/remove.png");
             });
         }
     }
@@ -211,23 +212,20 @@ FeatureQualityMatrix.method("onRendered", function()
             $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_empty.bmp" class="maybe">');
             $("#r" + i + "box").click(function(){
                 if (this.className == "maybe"){
-                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 1);
+                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 1);
                     this.src = "commons/Client/images/checkbox_ticked.bmp";
                     this.className = "wanted";
                     $(this).parent().parent().attr("FilterStatus", "require");
-                    that.settings.onFiltered(that);
                 } else if (this.className == "wanted"){
-                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), -1);
+                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), -1);
                     this.src = "commons/Client/images/checkbox_x.bmp";
                     this.className = "unwanted";
                     $(this).parent().parent().attr("FilterStatus", "exclude");
-                    that.settings.onFiltered(that);
                 } else {
-                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 0);                    
+                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 0);                    
                     this.src = "commons/Client/images/checkbox_empty.bmp";
                     this.className = "maybe";
                     $(this).parent().parent().attr("FilterStatus", "none");
-                    that.settings.onFiltered(that);
                 }
             }).css("cursor", "pointer");
         }
@@ -252,11 +250,11 @@ FeatureQualityMatrix.method("onRendered", function()
                 $("#r" + i + " .td_abstract").append('<text id="r' + i + 'collapse" status="false">   \u21B4<text>')
                 $("#r" + i + "collapse").click(function(){
                     if ($(this).attr("status") === "false"){
-                        that.onFeatureCollapsed(that, $(this).parent().text().replaceAll(/[^A-z]/g, ''));
+                        that.settings.onFeatureCollapsed(that, $(this).parent().text().replaceAll(/[^A-z]/g, ''));
                         $(this).attr("status", "true")
                         $(this).text("   \u2192")
                     } else {
-                        that.onFeatureExpanded(that, $(this).parent().text().replaceAll(/[^A-z]/g, ''));
+                        that.settings.onFeatureExpanded(that, $(this).parent().text().replaceAll(/[^A-z]/g, ''));
                         $(this).attr("status", "false")
                         $(this).text("   \u21B4")
                     }
@@ -325,7 +323,6 @@ FeatureQualityMatrix.method("onRendered", function()
 
     //fire the scroll handler to align table after half a second (fixes chrome bug)
     setTimeout(function(){$('#mdFeatureQualityMatrix .window-content').scroll()},500);
-    this.settings.onFiltered(this);
 
 });
 
@@ -339,46 +336,46 @@ FeatureQualityMatrix.method("getContent", function()
 //output: object with unique clafer id, id for display and, display id with indentation
 FeatureQualityMatrix.method("collector", function(clafer, spaceCount)
 {
-	var unit = new Object();
-	unit.claferId = clafer.claferId;
-	unit.displayId = clafer.displayId;
+    var unit = new Object();
+    unit.claferId = clafer.claferId;
+    unit.displayId = clafer.displayId;
 
-	unit.displayWithMargins = unit.displayId;
-	
-	for (var i = 0; i < spaceCount; i++)
-		unit.displayWithMargins = " " + unit.displayWithMargins;
+    unit.displayWithMargins = unit.displayId;
+    
+    for (var i = 0; i < spaceCount; i++)
+        unit.displayWithMargins = " " + unit.displayWithMargins;
 
-	abstractClaferOutput.push(unit);
+    abstractClaferOutput.push(unit);
 });
 
 //Traverses clafer tree to and runs collector on every node
 FeatureQualityMatrix.method("traverse", function(clafer, level)
 {
-	this.collector (clafer, level);
+    this.collector (clafer, level);
 
     if (clafer.subclafers != null){
-    	for (var i = 0; i < clafer.subclafers.length; i++)
-    	{
-    		this.traverse(clafer.subclafers[i], level + 1);
-    	}
+        for (var i = 0; i < clafer.subclafers.length; i++)
+        {
+            this.traverse(clafer.subclafers[i], level + 1);
+        }
     }
 });
 
 //generate data table
 FeatureQualityMatrix.method("getDataTable", function()
 {
-	var instanceCount = this.instanceProcessor.getInstanceCount();
-	var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
-	var abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceSuperClafer);
+    var instanceCount = this.instanceProcessor.getInstanceCount();
+    var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
+    var abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceSuperClafer);
     var EMfeatures = this.processor.getEffectivelyMandatoryFeatures(abstractClaferTree)
-	
-	var parent = null;
-	var current = abstractClaferTree;
-	abstractClaferOutput = new Array();
+    
+    var parent = null;
+    var current = abstractClaferTree;
+    abstractClaferOutput = new Array();
 
-	this.traverse(current, 0);
-	output = abstractClaferOutput;
-	
+    this.traverse(current, 0);
+    output = abstractClaferOutput;
+    
 
     var originalPoints = this.host.storage.originalPoints;
     var goalNames = this.processor.getGoals();
@@ -389,9 +386,9 @@ FeatureQualityMatrix.method("getDataTable", function()
     {
         result.products.push(String(j));
     }
-	
-	for (var i = 0; i < output.length; i++)
-	{
+    
+    for (var i = 0; i < output.length; i++)
+    {
         var currentMatrixRow = new Array();
         var currentContextRow = new Array();
         if (i > 0){ // do not push the parent clafer
@@ -404,25 +401,25 @@ FeatureQualityMatrix.method("getDataTable", function()
 
         denyAddContextRow = false;
         
-		for (var j = 1; j <= instanceCount; j++)
-		{
-			if (i == 0)
+        for (var j = 1; j <= instanceCount; j++)
+        {
+            if (i == 0)
             {
-				currentContextRow.push(String(j));
+                currentContextRow.push(String(j));
             }
-			else
-			{
-				sVal = this.instanceProcessor.getFeatureValue(j, output[i].claferId, false);
-				currentMatrixRow.push(sVal);
+            else
+            {
+                sVal = this.instanceProcessor.getFeatureValue(j, output[i].claferId, false);
+                currentMatrixRow.push(sVal);
                 if (sVal == "yes")
                     currentContextRow.push("X");
                 else if (sVal == "-")
                     currentContextRow.push("");
                 else
                     denyAddContextRow = true;
-			}
-		}
-		
+            }
+        }
+        
         if (i > 0)
             result.matrix.push(currentMatrixRow);
             
@@ -431,8 +428,8 @@ FeatureQualityMatrix.method("getDataTable", function()
             result.EMcontext.push(featureIsEM);
 
 
-	}
-	return result;
+    }
+    return result;
 
 });
 
@@ -525,26 +522,26 @@ FeatureQualityMatrix.method("toggleDistinct", function()
 /*
 //  Adds hot-tracking and highlighting for table and graph
 FeatureQualityMatrix.method("addHovering", function()
-{	
+{   
     var that = this;
     this.interval = null;
     this.timeout = null;
-	$("#comparison #tBody tr").hover(
-	  function () {
-		$('#comparison table tr:gt(0)').css("color", this.fadeColor);
-		$('#comparison table tr:gt(0) img').css("opacity", this.fadeOpacity);
-		
-		$(this).css("color", this.normalColor);
-		$(this).find("img").css("opacity", this.normalOpacity);
+    $("#comparison #tBody tr").hover(
+      function () {
+        $('#comparison table tr:gt(0)').css("color", this.fadeColor);
+        $('#comparison table tr:gt(0) img').css("opacity", this.fadeOpacity);
+        
+        $(this).css("color", this.normalColor);
+        $(this).find("img").css("opacity", this.normalOpacity);
 
-		$(this).css("background", "#ffffcc");
-	  }, 
-	  function () {
-		$('#comparison table tr:gt(0)').css("color", this.normalColor);
-		$('#comparison table tr:gt(0) img').css("opacity", this.normalOpacity);
-		$(this).css("background", "");
-	  }
-	);
+        $(this).css("background", "#ffffcc");
+      }, 
+      function () {
+        $('#comparison table tr:gt(0)').css("color", this.normalColor);
+        $('#comparison table tr:gt(0) img').css("opacity", this.normalOpacity);
+        $(this).css("background", "");
+      }
+    );
 
     $("#comparison #r0 .td_instance").hover(
       function () {
@@ -810,7 +807,7 @@ FeatureQualityMatrix.method("getCrosshairs", function(x, y){
 
 FeatureQualityMatrix.method("getInitContent", function()
 {
-	return '';	   
+    return '';     
 });
 
 
@@ -846,8 +843,8 @@ FeatureQualityMatrix.method("getSVGSquare", function(cx, cy, r){
     return rect;
 });
 
-FeatureQualityMatrix.method("changeConstraint", function (feature, require){
-    this.settings.onConstraintChange(this, feature, require);
+FeatureQualityMatrix.method("featureChecked", function (feature, state){
+    this.settings.onFeatureCheckedStateChange(this, feature, state);
 });
 
 FeatureQualityMatrix.method("removeInstance", function(instanceNum){
