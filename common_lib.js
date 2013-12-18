@@ -4,9 +4,48 @@
 var fs = require("fs");
 var http = require("http");
 var core = require("./core_lib");
+var config = require("./../config.json");
+var includes = require("./../includes.json");
 var formatConfig = require('./../Formats/formats.json');
 var spawn = require('child_process').spawn;    
 var ROOT = __dirname.substring(0, __dirname.length - "/commons".length);
+
+var getMainHTML = function()
+{
+	var contents = fs.readFileSync("commons/Client/app.html");
+
+    var scripts = new Array();
+    var styles = new Array();
+
+    for (var i = 0; i < includes.scripts.length; i++)
+    {
+    	scripts.push('<script type="text/javascript" src="/Client/' + includes.scripts[i] + '"></script>');
+    }
+
+    for (var i = 0; i < includes.styles.length; i++)
+    {
+    	styles.push('<link rel="stylesheet" type="text/css" href="/Client/' + includes.styles[i] + '"/>');
+    }
+
+    var replacementMap = [
+            {
+                "needle": "$title$", 
+                "replacement": config.pageTitle
+            },
+			{
+                "needle": "$scripts$", 
+                "replacement": scripts.join("\n")
+            },
+			{
+                "needle": "$styles$", 
+                "replacement": styles.join("\n")
+            }                                    
+        ];
+
+    contents = core.replaceTemplate(contents.toString(), replacementMap);
+
+    return contents;
+}
 
 var handleUploads = function(req, res, next, finalCallback)
 	{
@@ -299,4 +338,5 @@ var runClaferCompiler = function(key, specifiedArgs, genericArgs, onComplete)
 };
 
 module.exports.handleUploads = handleUploads;
+module.exports.getMainHTML = getMainHTML;
 module.exports.runClaferCompiler = runClaferCompiler;
