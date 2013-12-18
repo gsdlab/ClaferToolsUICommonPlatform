@@ -60,11 +60,11 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
 
 FeatureQualityMatrix.method("onRendered", function()
 {
-// Add circles to table headers
     
     $.resizeWindow(this.id, this.width, $("#comparison").height() + 80); // resize the table to fit everything
 
-    this.addShapes();
+// Add circles to table headers
+///////////    this.addShapes(); will be enabled later
 
 // Add search bar 
     var td = $('#comparison .table_title')[0];
@@ -97,6 +97,31 @@ FeatureQualityMatrix.method("onRendered", function()
         }
     }).css("cursor", "pointer");
 
+
+    if (this.settings.buttonsForRemoval)
+    {
+    //  Add remove buttons to instances
+        var instances = $("#comparison #r0").find(".td_instance");
+        for (i=0; i<$(instances).length; i++){
+            $(instances[i]).prepend('<image id="rem' + $(instances[i]).text() + '" src="images/remove.png" alt="remove">')
+            var buttonId = "#rem" + $(instances[i]).text();
+            $(buttonId).attr("name", $(instances[i]).text());
+            $(buttonId).click(function(){
+                that.removeInstance($(this).attr("name"));
+            });
+            $(buttonId).css("float", "left");
+            $(buttonId).css("vertical-align", "middle");
+            $(buttonId).css("cursor", "pointer");
+            
+            $(buttonId).hover(
+            function () {
+                $(this).attr("src", "images/removeMouseOver.png");
+            }, 
+            function () {
+                $(this).attr("src", "images/remove.png");
+            });
+        }
+    }
 //************************* Most of the following is to get proper formatting on the table  *******************
 
 // Move headers into new div
@@ -175,7 +200,7 @@ FeatureQualityMatrix.method("onRendered", function()
 // Mostly done formatting table. adding interactive features now.
 
 // Add mouseover effects to table
-    this.addHovering();
+///////////    this.addHovering(); will be brought later
 
 // Add tristate checkboxes for filtering features
     i = 1;
@@ -186,16 +211,22 @@ FeatureQualityMatrix.method("onRendered", function()
             $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_empty.bmp" class="maybe">');
             $("#r" + i + "box").click(function(){
                 if (this.className == "maybe"){
+                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 1);
                     this.src = "commons/Client/images/checkbox_ticked.bmp";
                     this.className = "wanted";
+                    $(this).parent().parent().attr("FilterStatus", "require");
                     that.settings.onFiltered(that);
                 } else if (this.className == "wanted"){
+                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), -1);
                     this.src = "commons/Client/images/checkbox_x.bmp";
                     this.className = "unwanted";
+                    $(this).parent().parent().attr("FilterStatus", "exclude");
                     that.settings.onFiltered(that);
                 } else {
+                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 0);                    
                     this.src = "commons/Client/images/checkbox_empty.bmp";
                     this.className = "maybe";
+                    $(this).parent().parent().attr("FilterStatus", "none");
                     that.settings.onFiltered(that);
                 }
             }).css("cursor", "pointer");
@@ -324,10 +355,13 @@ FeatureQualityMatrix.method("collector", function(clafer, spaceCount)
 FeatureQualityMatrix.method("traverse", function(clafer, level)
 {
 	this.collector (clafer, level);
-	for (var i = 0; i < clafer.subclafers.length; i++)
-	{
-		this.traverse(clafer.subclafers[i], level + 1);
-	}
+
+    if (clafer.subclafers != null){
+    	for (var i = 0; i < clafer.subclafers.length; i++)
+    	{
+    		this.traverse(clafer.subclafers[i], level + 1);
+    	}
+    }
 });
 
 //generate data table
@@ -488,6 +522,7 @@ FeatureQualityMatrix.method("toggleDistinct", function()
     return true;
 });
 
+/*
 //  Adds hot-tracking and highlighting for table and graph
 FeatureQualityMatrix.method("addHovering", function()
 {	
@@ -572,7 +607,7 @@ FeatureQualityMatrix.method("addHovering", function()
     );
 
 });
-
+*/
 //makes instance red on graph, for actual selection function see onSelected(pid) in selector.js
 FeatureQualityMatrix.method("makePointsSelected", function (pid){;
     $("#mdFeatureQualityMatrix #th0_" + pid.substring(1)).find("text").css("fill", "Red");
@@ -810,3 +845,11 @@ FeatureQualityMatrix.method("getSVGSquare", function(cx, cy, r){
     rect.setAttributeNS(null, "y",cy-r);
     return rect;
 });
+
+FeatureQualityMatrix.method("changeConstraint", function (feature, require){
+    this.settings.onConstraintChange(this, feature, require);
+});
+
+FeatureQualityMatrix.method("removeInstance", function(instanceNum){
+    this.settings.onInstanceRemove(this, instanceNum);
+})
