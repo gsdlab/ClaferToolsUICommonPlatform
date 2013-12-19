@@ -16,7 +16,7 @@ var getMainHTML = function()
 
     var scripts = new Array();
     var styles = new Array();
-    var urlRegExp = /^http:\/\/\w+(\.\w+)*(:[0-9]+)?\/?(\/[.\w]*)*$/;
+    var urlRegExp = /^http[s]?:\/\/\w+(\.\w+)*(:[0-9]+)?\/?(\/[.\w]*)*$/;
 
     for (var i = 0; i < includes.scripts.length; i++)
     {
