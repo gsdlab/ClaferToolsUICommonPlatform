@@ -16,15 +16,32 @@ var getMainHTML = function()
 
     var scripts = new Array();
     var styles = new Array();
+    var urlRegExp = /^http:\/\/\w+(\.\w+)*(:[0-9]+)?\/?(\/[.\w]*)*$/;
 
     for (var i = 0; i < includes.scripts.length; i++)
     {
-    	scripts.push('<script type="text/javascript" src="/Client/' + includes.scripts[i] + '"></script>');
+    	var prefix;
+    	if (urlRegExp.test(includes.scripts[i]))
+    	{
+    		prefix = '';
+    	}
+    	else
+    		prefix = '/Client/';
+
+    	scripts.push('<script type="text/javascript" src="' + prefix + includes.scripts[i] + '"></script>');
     }
 
     for (var i = 0; i < includes.styles.length; i++)
     {
-    	styles.push('<link rel="stylesheet" type="text/css" href="/Client/' + includes.styles[i] + '"/>');
+    	var prefix;
+    	if (urlRegExp.test(includes.styles[i]))
+    	{
+    		prefix = '';
+    	}
+    	else
+    		prefix = '/Client/';
+
+    	styles.push('<link rel="stylesheet" type="text/css" href="' + prefix + includes.styles[i] + '"/>');
     }
 
     var replacementMap = [
