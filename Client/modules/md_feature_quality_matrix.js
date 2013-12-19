@@ -41,6 +41,8 @@ function FeatureQualityMatrix(host, settings)
     this.SavedFilters = [];
     this.permahidden = [];
 
+    this.host.loaded();
+
 //    this.dataTable.matrix = null;
 //    this.dataTable.
     
