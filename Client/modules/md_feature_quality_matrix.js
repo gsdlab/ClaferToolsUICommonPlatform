@@ -71,7 +71,7 @@ FeatureQualityMatrix.method("onRendered", function()
     $.resizeWindow(this.id, this.width, $("#comparison").height() + 80); // resize the table to fit everything
 
 // Add circles to table headers
-///////////    this.addShapes(); will be enabled later
+    this.addShapes();
 
 // Add search bar 
     var td = $('#comparison .table_title')[0];
