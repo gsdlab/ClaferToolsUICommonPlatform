@@ -52,7 +52,7 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
     this.processor = new ClaferProcessor(data.claferXML);
     this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this);    
-//    this.filter = new InstanceFilter(this.host)
+    this.clearFilters();
     this.abstractClaferOutput = "";    
     this.toggled = false;
     
