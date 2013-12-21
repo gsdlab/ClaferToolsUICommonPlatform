@@ -277,27 +277,26 @@ DataTable.method("getMissingProductsInCommonData", function(commonData, productL
             commonProducts.push(this.products[j]);
     }
 
-    var commonSet = new JS.Set(commonProducts); 
+    var commonSet = commonProducts; 
     
     if (productList.length == 0)
         return;
     
 //    alert(productList);
     
-    var baseSet = new JS.Set(productList);
-    
-    var missingSet = commonSet.difference(baseSet); // subtract what we have from what we get    
+    var baseSet = productList;
+    var missingSet = commonSet;
+
+//    var missingSet = commonSet.difference(baseSet); // subtract what we have from what we get    
     if (missingSet.length == 0)
         return new Array();
         
-    var result = missingSet.toArray();
+    var result = missingSet;
     
     return result;
 });
 
 DataTable.method("toSetOfFeatures", function()
 {
-    var result = new JS.Set(this.features);
-    
-    return result;
+    return this.features;
 });
