@@ -285,7 +285,7 @@ DataTable.method("getMissingProductsInCommonData", function(commonData, productL
 //    alert(productList);
     
     var baseSet = productList;
-    var missingSet = commonSet;
+    var missingSet = commonSet.diff(baseSet);
 
 //    var missingSet = commonSet.difference(baseSet); // subtract what we have from what we get    
     if (missingSet.length == 0)
@@ -294,9 +294,4 @@ DataTable.method("getMissingProductsInCommonData", function(commonData, productL
     var result = missingSet;
     
     return result;
-});
-
-DataTable.method("toSetOfFeatures", function()
-{
-    return this.features;
 });

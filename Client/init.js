@@ -97,6 +97,10 @@ function parsePID(PID){
     return PID.replace("V", "");
 }
 
+Array.prototype.diff = function(other) {
+    return this.filter( function ( i ) {return !(other.indexOf(i) > -1);});
+};
+
 //cookie functions from http://www.w3schools.com/js/js_cookies.asp
 
 function setCookie(c_name,value,exdays)
