@@ -308,7 +308,7 @@ Input.method("getInitContent", function()
 
     result += '</tr><tr height="1em">';
     result += '<td style="border-top: 2px groove threedface;">';
-    result += 'Or enter your model:</td>';
+    result += '<span id="input_editor_caption">Or enter your model:</span></td>';
     result += '<td style="border-top: 2px groove threedface; "><input id="submitText" type="submit" value="' + this.settings.button_editor_caption + '" title="' + this.settings.button_editor_tooltip + '"/></td>';
 
     result += '<td style="padding: 0px 2px 0px 2px;border-left: 2px groove threedface"><div id="input_flags">Flags: <input id="args" type="text" style="width:90px;" name="args" value="' + this.settings.input_default_flags + '" title="You can specify any additional compilation flags supported by the compiler"></input></div></td>';
@@ -332,9 +332,9 @@ Input.method("getInitContent", function()
         result += '<div id="input_bottom_container" style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-20px;">';
         result += '<div style="height:2px; border-top: 2px groove threedface;"></div>';
 
-        result += 'Optimization backend: <select id="optimizationBackend" style="width:180px" name="optimizationBackend" title=""></select>';
+        result += '<span id="input_backend_label">Optimization backend: </span><select id="optimizationBackend" style="width:180px" name="optimizationBackend" title=""></select>';
 
-        result += '<input id="useCache" type="checkbox" name="useCache" value="' + this.settings.input_default_cache + '">Use Cache</input>';
+        result += '<input id="useCache" type="checkbox" name="useCache" value="Use Cache" checked="' + this.settings.input_default_cache + '"></input>';
 
         result += '</div>';
 
