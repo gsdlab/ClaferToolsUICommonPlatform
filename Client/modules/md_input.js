@@ -334,7 +334,7 @@ Input.method("getInitContent", function()
 
         result += '<span id="input_backend_label">Optimization backend: </span><select id="optimizationBackend" style="width:180px" name="optimizationBackend" title=""></select>';
 
-        result += '<input id="useCache" type="checkbox" name="useCache" value="Use Cache" checked="' + this.settings.input_default_cache + '"></input>';
+        result += '<input id="useCache" type="checkbox" name="useCache" checked="' + this.settings.input_default_cache + '">Use Cache</input>';
 
         result += '</div>';
 
