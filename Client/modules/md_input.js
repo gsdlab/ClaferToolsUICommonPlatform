@@ -329,7 +329,7 @@ Input.method("getInitContent", function()
 
     if (this.settings.optimization_backend)
     {
-        result += '<div style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-20px;">';
+        result += '<div id="input_bottom_container" style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-20px;">';
         result += '<div style="height:2px; border-top: 2px groove threedface;"></div>';
 
         result += 'Optimization backend: <select id="optimizationBackend" style="width:180px" name="optimizationBackend" title=""></select>';
