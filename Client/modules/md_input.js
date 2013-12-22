@@ -298,20 +298,20 @@ Input.method("getInitContent", function()
     result += '</select></td>';
     result += '<td><input id="submitExample" type="submit" value="' + this.settings.button_example_caption + '" title="' + this.settings.button_example_tooltip + '"></input></td>';
 
-    result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface">Scopes: <select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using bounded model checking">';
+    result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface"><div id="input_scopes">Scopes: <select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using bounded model checking">';
 
     result += '<option value="none" title="Disable scope computing strategy. All scopes are to be set to 1">Disabled</option>';
     result += '<option value="simple" selected="selected" title="Fast computation. Scopes are not precise, but this strategy works in most cases">Fast</option>';
     result += '<option value="full" title="Full computation. This method is very slow, but for small models works relatively fast">Full</option>';
 
-    result += '</select></td>';
+    result += '</select></div></td>';
 
     result += '</tr><tr height="1em">';
     result += '<td style="border-top: 2px groove threedface;">';
     result += 'Or enter your model:</td>';
     result += '<td style="border-top: 2px groove threedface; "><input id="submitText" type="submit" value="' + this.settings.button_editor_caption + '" title="' + this.settings.button_editor_tooltip + '"/></td>';
 
-    result += '<td style="padding: 0px 2px 0px 2px;border-left: 2px groove threedface">Flags: <input id="args" type="text" style="width:90px;" name="args" value="-k" title="You can specify any additional compilation flags supported by the compiler"></input></td>';
+    result += '<td style="padding: 0px 2px 0px 2px;border-left: 2px groove threedface"><div id="input_flags">Flags: <input id="args" type="text" style="width:90px;" name="args" value="' + this.settings.input_default_flags + '" title="You can specify any additional compilation flags supported by the compiler"></input></div></td>';
 
     var padding = "";
     if (this.settings.optimization_backend)
@@ -334,7 +334,7 @@ Input.method("getInitContent", function()
 
         result += 'Optimization backend: <select id="optimizationBackend" style="width:180px" name="optimizationBackend" title=""></select>';
 
-        result += '<input id="useCache" type="checkbox" name="useCache" value="checked">Use Cache</input>';
+        result += '<input id="useCache" type="checkbox" name="useCache" value="' + this.settings.input_default_cache + '">Use Cache</input>';
 
         result += '</div>';
 
