@@ -226,7 +226,9 @@ Input.method("onSubmit", function(){
         clearTimeout(this.pollingTimeoutObject);
 });
 
-Input.method("submitFileCall", function(){
+Input.method("submitFileCall", function()
+{
+    $("#fileExt").val($("#fileExtFile").val());
 
     $("#exampleURL").val(null);
     $("#exampleFlag").val("0");
@@ -234,11 +236,13 @@ Input.method("submitFileCall", function(){
 });
 
 Input.method("submitExampleCall", function(){
+    $("#fileExt").val($("#fileExtExample").val());
     $("#exampleFlag").val("1");
     this.onSubmit();
 });
 
 Input.method("submitTextCall", function(){
+    $("#fileExt").val(this.settings.file_extensions[0].ext); // allow only clafer files
     $("#claferText").val(this.editor.getValue());
     $("#exampleFlag").val("2");
     this.onSubmit();
@@ -247,12 +251,31 @@ Input.method("submitTextCall", function(){
 Input.method("exampleChange", function(){
     if ($("#exampleURL").val())
     {
-        $("#submitExample").removeAttr("disabled");
-    }
-    else
-    {
+        var filename = $("#exampleURL").val();
+        for (var i = 0; i < this.settings.file_extensions.length; i++)
+        {
+            if (filename.length > this.settings.file_extensions[i].ext.length && 
+                filename.toLowerCase().substring(filename.length - this.settings.file_extensions[i].ext.length) == this.settings.file_extensions[i].ext                
+                )
+            {
+                $("#submitExample").removeAttr("disabled");                    
+                $("#fileExtExample").val(this.settings.file_extensions[i].ext);                    
+                $("#submitExample").val(this.settings.file_extensions[i].button_example_caption);            
+
+                return;
+            }
+        }  
+
+        $("#submitExample").val("Unknown");
         $("#submitExample").attr("disabled", "disabled");       
+        $("#fileExtExample").val("");                            
     }
+    else{ // no file
+        $("#submitExample").attr("disabled", "disabled");       
+        $("#submitExample").val(this.settings.file_extensions[0].button_example_caption);            
+        $("#fileExtExample").val("");                            
+    }
+
 });
 
 Input.method("inputChange", function(){
@@ -260,18 +283,28 @@ Input.method("inputChange", function(){
     
     if (filename)
     {
-        if (filename.substring(filename.length-4) == ".cfr"){
-            $("#submitFile").removeAttr("disabled");                    
-            $("#submitFile").val(this.settings.button_file_caption);            
+        for (var i = 0; i < this.settings.file_extensions.length; i++)
+        {
+            if (filename.length > this.settings.file_extensions[i].ext.length && 
+                filename.toLowerCase().substring(filename.length - this.settings.file_extensions[i].ext.length) == this.settings.file_extensions[i].ext                
+                )
+            {
+                $("#submitFile").removeAttr("disabled");                    
+                $("#fileExtFile").val(this.settings.file_extensions[i].ext);                    
+                $("#submitFile").val(this.settings.file_extensions[i].button_file_caption);            
+
+                return;
+            }
         }  
-        else{ // unknown file
-            $("#submitFile").val("Unknown");
-            $("#submitFile").attr("disabled", "disabled");       
-        }
+
+        $("#submitFile").val("Unknown");
+        $("#submitFile").attr("disabled", "disabled");       
+        $("#fileExtFile").val("");                            
     }
     else{ // no file
         $("#submitFile").attr("disabled", "disabled");       
-        $("#submitFile").val(this.settings.button_file_caption);            
+        $("#submitFile").val(this.settings.file_extensions[0].button_file_caption);            
+        $("#fileExtFile").val("");                            
     }
     
 });
@@ -283,19 +316,22 @@ Input.method("getInitContent", function()
 
     result += '<input type="hidden" name="claferFileURL" id="claferFileURL" value="' + this.host.claferFileURL + '">';
     result += '<input type="hidden" name="exampleFlag" id="exampleFlag" value="0">';
+    result += '<input type="hidden" name="fileExt" id="fileExt" value="' + this.settings.file_extensions[0].ext + '">';
+    result += '<input type="hidden" id="fileExtFile" value="' + this.settings.file_extensions[0].ext + '">';
+    result += '<input type="hidden" id="fileExtExample" value="' + this.settings.file_extensions[0].ext + '">';
     result += '<input type="hidden" id="windowKey" name="windowKey" value="' + this.host.key + '">';
     result += '<input id="claferText" name="claferText" type="hidden"/>';
 
     result += '<table width="100%" height="100%" cellspacing="0" cellpadding="0">';    
     result += '<tr height="1em">';
     result += '<td><input type="file" size="20" name="claferFile" id="claferFile" title="If you want to upload your clafer file, select one here "/></td>';
-    result += '<td width="60"><input id="submitFile" type="submit" value="' + this.settings.button_file_caption + '" title="' + this.settings.button_file_tooltip + '"/></td>';
+    result += '<td width="60"><input id="submitFile" type="submit" value="' + this.settings.file_extensions[0].button_file_caption + '" title="' + this.settings.file_extensions[0].button_file_tooltip + '"/></td>';
     result += '<td width="160"><input id="loadExampleInEditor" type="checkbox" name="loadExampleInEditor" value="unchecked" title="If checked, the editor window below will be loaded with a file or an example submitted">Load into editor</input></td>';
     result += '</tr><tr height="1em">';
     result += '<td><select id="exampleURL" style="width:220px" name="exampleURL" title="If you want, you can choose to compile an example clafer model from the list">';   
     
     result += '</select></td>';
-    result += '<td><input id="submitExample" type="submit" value="' + this.settings.button_example_caption + '" title="' + this.settings.button_example_tooltip + '"></input></td>';
+    result += '<td><input id="submitExample" type="submit" value="' + this.settings.file_extensions[0].button_example_caption + '" title="' + this.settings.file_extensions[0].button_example_tooltip + '"></input></td>';
 
     result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface"><div id="input_scopes">Scopes: <select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using bounded model checking">';
 
@@ -308,7 +344,7 @@ Input.method("getInitContent", function()
     result += '</tr><tr height="1em">';
     result += '<td style="border-top: 2px groove threedface;">';
     result += '<span id="input_editor_caption">Or enter your model:</span></td>';
-    result += '<td style="border-top: 2px groove threedface; "><input id="submitText" type="submit" value="' + this.settings.button_editor_caption + '" title="' + this.settings.button_editor_tooltip + '"/></td>';
+    result += '<td style="border-top: 2px groove threedface; "><input id="submitText" type="submit" value="' + this.settings.file_extensions[0].button_editor_caption + '" title="' + this.settings.file_extensions[0].button_editor_tooltip + '"/></td>';
 
     result += '<td style="padding: 0px 2px 0px 2px;border-left: 2px groove threedface"><div id="input_flags">Flags: <input id="args" type="text" style="width:90px;" name="args" value="' + this.settings.input_default_flags + '" title="You can specify any additional compilation flags supported by the compiler"></input></div></td>';
 
