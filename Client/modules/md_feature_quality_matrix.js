@@ -38,8 +38,8 @@ function FeatureQualityMatrix(host, settings)
 
     this.host = host;
 
-    this.SavedFilters = [];
-    this.permahidden = [];
+//    this.SavedFilters = [];
+//    this.permahidden = [];
 
     this.host.loaded();
 
@@ -52,7 +52,7 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
     this.processor = new ClaferProcessor(data.claferXML);
     this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this);    
-    this.clearFilters();
+//    this.clearFilters();
     this.abstractClaferOutput = "";    
     this.toggled = false;
     
@@ -94,6 +94,7 @@ FeatureQualityMatrix.method("onRendered", function()
     $('#filter_reset').click(function(event){
         event.stopPropagation(); //to keep table from sorting by instance number
         that.filter.cleanFilters();
+        that.filter.filterContent();
         that.settings.onReset(that);
             //if currently set to distinct mode, refresh distinct rows
         if (this.toggled){
@@ -208,24 +209,25 @@ FeatureQualityMatrix.method("onRendered", function()
 // Add tristate checkboxes for filtering features
     i = 1;
     row = $("#r" + i);
+    $(row).attr("FilterStatus", "none");
     var that = this;
     while (row.length != 0){
         if (!row.find(".numeric").length && !row.find(".EffectMan").length){
-            $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_empty.bmp" class="maybe">');
+            $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_empty.bmp">');
             $("#r" + i + "box").click(function(){
-                if (this.className == "maybe"){
+                if ($(this).parent().parent().attr("FilterStatus") == "none"){
                     this.src = "commons/Client/images/checkbox_ticked.bmp";
-                    this.className = "wanted";
+//                    this.className = "wanted";
                     $(this).parent().parent().attr("FilterStatus", "require");
                     that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 1);
-                } else if (this.className == "wanted"){
+                } else if ($(this).parent().parent().attr("FilterStatus") == "require"){
                     this.src = "commons/Client/images/checkbox_x.bmp";
-                    this.className = "unwanted";
+//                    this.className = "unwanted";
                     $(this).parent().parent().attr("FilterStatus", "exclude");
                     that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), -1);
                 } else {
                     this.src = "commons/Client/images/checkbox_empty.bmp";
-                    this.className = "maybe";
+//                    this.className = "maybe";
                     $(this).parent().parent().attr("FilterStatus", "none");
                     that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 0);                    
                 }
@@ -233,7 +235,7 @@ FeatureQualityMatrix.method("onRendered", function()
         }
 //  Add Greyed out checkboxes to denote effectively mandatory features
         else if (!row.find(".numeric").length && row.find(".EffectMan").length){
-            $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_ticked_greyed.png" class="wanted">');
+            $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_ticked_greyed.png">');
         }
         i++;
         row = $("#r" + i);
@@ -323,7 +325,7 @@ FeatureQualityMatrix.method("onRendered", function()
         event.stopPropagation(); //to keep table from sorting by instance number
     });
 
-    this.filter.resetFilters(this.SavedFilters, this.permahidden);
+//    this.filter.resetFilters(this.SavedFilters, this.permahidden);
 
     //fire the scroll handler to align table after half a second (fixes chrome bug)
     setTimeout(function(){$('#mdFeatureQualityMatrix .window-content').scroll()},500);
@@ -662,8 +664,9 @@ FeatureQualityMatrix.method("onFeatureExpanded", function(feature){
     this.filter.openFeature(feature);
     this.settings.onFeatureExpanded(this, feature);
 });
-
+/*
 FeatureQualityMatrix.method("clearFilters", function (){
     this.SavedFilters = [];
     this.permahidden = [];
 });
+*/

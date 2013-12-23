@@ -36,7 +36,7 @@ tableFilter.method("onRendered", function(){
 
 tableFilter.method("filterContent", function (){
 	this.showAll();
-	this.saveFilters();
+//	this.saveFilters();
 	//filter by features
  	for (var i=0;i<this.rows.length;i++){
  		var curRow = this.rows[i];
@@ -135,6 +135,7 @@ tableFilter.method("openFeature", function (feature){
 	this.filterContent();
 });
 
+/*
 tableFilter.method("resetFilters", function (filters, permahidden){
 	if(filters != []){
 		for (var i=1;i<this.rows.length;i++){
@@ -172,7 +173,7 @@ tableFilter.method("saveFilters", function(){
  	}
  	this.host.SavedFilters = filters;
 });
-
+*/
 tableFilter.method("cleanFilters", function (){
 	this.showAll();
  	for (var i=1;i<this.rows.length;i++){
