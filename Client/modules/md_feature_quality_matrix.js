@@ -210,13 +210,11 @@ FeatureQualityMatrix.method("onRendered", function()
     i = 1;
     row = $("#r" + i);
     
-    // setting the default filtering status to each tow - none
-    $(row).each(function(){
-        $(this).attr("FilterStatus", "none");
-    });
         
     var that = this;
     while (row.length != 0){
+        // setting the default filtering status to each row - none
+        $(row).attr("FilterStatus", "none");
         if (!row.find(".numeric").length && !row.find(".EffectMan").length){
             $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_empty.bmp">');
             $("#r" + i + "box").click(function(){
