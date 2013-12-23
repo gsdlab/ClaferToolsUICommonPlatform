@@ -140,10 +140,10 @@ var handleUploads = function(req, res, next, finalCallback)
 	        uploadedFilePath = req.body.windowKey;
 	        uploadedFilePath = uploadedFilePath.replace(/[\/\\]/g, "");
 	        uploadedFilePath = ROOT + "/uploads/" + uploadedFilePath;
-	        while(fs.existsSync(uploadedFilePath + i.toString() + ".cfr")){
+	        while(fs.existsSync(uploadedFilePath + i.toString() + req.body.fileExt)){
 	            i = i+1;
 	        }
-	        uploadedFilePath = uploadedFilePath + i.toString() + ".cfr";
+	        uploadedFilePath = uploadedFilePath + i.toString() + req.body.fileExt;
 	        
 	        core.logSpecific('Creating a file with the contents...', req.body.windowKey);
 
@@ -168,10 +168,10 @@ var handleUploads = function(req, res, next, finalCallback)
 	        uploadedFilePath = req.body.windowKey;
 	        uploadedFilePath = uploadedFilePath.replace(/[\/\\]/g, "");
 	        uploadedFilePath = ROOT + "/uploads/" + uploadedFilePath;
-	        while(fs.existsSync(uploadedFilePath + i.toString() + ".cfr")){
+	        while(fs.existsSync(uploadedFilePath + i.toString() + req.body.fileExt)){
 	            i = i+1;
 	        }
-	        uploadedFilePath = uploadedFilePath + i.toString() + ".cfr";
+	        uploadedFilePath = uploadedFilePath + i.toString() + req.body.fileExt;
 	        
 	        core.logSpecific('Downloading file at "' + currentURL + '"...', req.body.windowKey);
 	        var file = fs.createWriteStream(uploadedFilePath);
@@ -219,7 +219,7 @@ var moveUploadedFile = function (req, res, next, uploadedFilePath, urlFile, call
 	        uploadedFilePath += pathTokens[2];
 	        uploadedFilePath = uploadedFilePath.substring(0, uploadedFilePath.length - 4); // to remove the extention
 
-	        fs.rename(oldPath, uploadedFilePath + ".cfr", function (err){
+	        fs.rename(oldPath, uploadedFilePath + req.body.fileExt, function (err){
 	            if (err) throw err;
 	            core.logSpecific("Proceeding with " + uploadedFilePath, req.body.windowKey);
 	            callback(uploadedFilePath, uploadedFileDir, urlFile);
