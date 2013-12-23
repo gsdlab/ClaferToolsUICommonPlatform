@@ -66,7 +66,6 @@ Input.method("onInitRendered", function()
 {
     this.optimizeFlag = 1;
     this.addInstancesFlag = 1;
-    this.previousData = null;
     this.toCancel = false;
 
     $("#submitFile").click(this.submitFileCall.bind(this));
