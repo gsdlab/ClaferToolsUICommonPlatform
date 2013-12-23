@@ -209,7 +209,12 @@ FeatureQualityMatrix.method("onRendered", function()
 // Add tristate checkboxes for filtering features
     i = 1;
     row = $("#r" + i);
-    $(row).attr("FilterStatus", "none");
+    
+    // setting the default filtering status to each tow - none
+    $(row).each(function(){
+        $(this).attr("FilterStatus", "none");
+    });
+        
     var that = this;
     while (row.length != 0){
         if (!row.find(".numeric").length && !row.find(".EffectMan").length){
