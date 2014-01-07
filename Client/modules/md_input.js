@@ -333,7 +333,7 @@ Input.method("getInitContent", function()
     result += '</select></td>';
     result += '<td><input id="submitExample" type="submit" value="' + this.settings.file_extensions[0].button_example_caption + '" title="' + this.settings.file_extensions[0].button_example_tooltip + '"></input></td>';
 
-    result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface"><div id="input_scopes">Scopes: <select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using bounded model checking">';
+    result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface"><div id="input_scopes">Scopes: <select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using finite scope reasoners">';
 
     result += '<option value="none" title="Disable scope computing strategy. All scopes are to be set to 1">Disabled</option>';
     result += '<option value="simple" selected="selected" title="Fast computation. Scopes are not precise, but this strategy works in most cases">Fast</option>';

@@ -73,7 +73,7 @@ CompiledFormats.method("getInitContent", function()
 
     if (this.settings.allow_downloading)
     {
-        result += '<a id="saveFormat" href="" target="_blank">Download</a>';
+        result += '<a id="saveFormat" href="" target="_blank" title="Download the selected format">Download</a>';
     }
 
     result += '</td></tr><tr height="100%"><td colspan="2" style="border-top: 2px groove threedface; height:100%">';    

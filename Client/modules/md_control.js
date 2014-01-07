@@ -52,7 +52,7 @@ Control.method("getInitContent", function(){
     ret += '</select>';
 
     ret += '<input type="hidden" id="windowKey" name="windowKey" value="' + this.host.key + '">';
-	ret += '<input type="button" class="inputRunStopButton" id="RunStop" value="Run" disabled="disabled"/><br>';
+	ret += '<input type="button" class="inputRunStopButton" id="RunStop" value="Run" title="Run the chosen instance generator" disabled="disabled"/><br>';
     ret += '<fieldset id="backendButtonsFieldset"><div id="backendButtons"></div></fieldset>';
 
     ret += '<div style="height:5px;"></div><fieldset id="scopeControl">';
@@ -65,7 +65,7 @@ Control.method("getInitContent", function(){
 
     ret += '<tr><td style="padding-left:5px">Default:</td><td><input type="text" class="scopeInput" title="Enter the scope (an integer from 0 up to a number the backend can handle)" size="2" value="1" id="globalScopeValue"/><button id="setGlobalScope" title="Set the global (or default) scope">Set</button></td>' + saveLink + '</tr>';
     ret += '<tr><td style="padding-left:5px">Integers:</td><td colspan="2"><input type="text" class="scopeInput" size="2" value="-128" id="intLowScopeValue" title="Enter the lower bound for unknown integers (can be negative)"/> to <input type="text" class="scopeInput" size="2" value="127" id="intHighScopeValue" title="Enter the upper bound for unknown integers (normally positive)"/><button id="setIntScope" title="Set the selected scope for integers">Set</button></td></tr>';
-    ret += '<tr><td style="padding-left:5px">Clafers:</td><td colspan="2"><input type="text" style="width:120px;" id="individualClafer" placeholder="Clafer name(s)" title="Enter the clafer name, namespace, path or choose ones from a drop down, depending on the backend"></input>';
+    ret += '<tr><td style="padding-left:5px">Clafers:</td><td colspan="2"><input type="text" style="width:100px;" id="individualClafer" placeholder="Clafer name(s)" title="Enter the clafer name, namespace, path or choose ones from a drop down, depending on the backend"></input>';
 
     ret += '<span id="ClaferListCont" style="width:30px"></span>';
     ret += '<input type="text" size="2" value="1" class="scopeInput" id="individualScopeValue" title="Enter the scope value (an integer from 0 up to a number the backend can handle)"/>';
@@ -150,7 +150,7 @@ Control.method("onInitRendered", function()
 Control.method("resetControls", function(){
     $("#RunStop").removeAttr("disabled");
     $("#RunStop").val("Run");
-    $("#RunStop").attr("title", "Run the selected backend");
+    $("#RunStop").attr("title", "Run the chosen instance generator");
 });
 
 Control.method("runStopClick", function(){
