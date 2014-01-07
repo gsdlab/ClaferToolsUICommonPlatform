@@ -176,33 +176,38 @@ var addDependency = function(path, args, title)
     dependencies.push({path : path, args : args, title : title});
 };
 
+function checkDependency(dependency, callback)
+{
+    var tool  = spawn(dependency.path, dependency.args);
+    var tool_version = "";
+
+    tool.on('error', function (err){
+        logNormal('ERROR: Cannot find "' + dependency.title + '". Please check whether it is installed and accessible.');
+    });
+    
+    tool.stdout.on('data', function (data){ 
+        tool_version += data;
+    });
+    
+    tool.stderr.on('data', function (data){ 
+        tool_version += data;
+    });
+
+    tool.on('exit', function (code){    
+        logNormal(tool_version.trim());
+        if (code == 0) dependency_ok(callback);
+    });
+}
+
 var runWithDependencyCheck = function(callback)
 {
     var node_version = process.version + ", " + JSON.stringify(process.versions);
     logNormal("Node.JS: " + node_version);    
     dependencyCount = dependencies.length;
 
-    for (var i = 0; i < dependencies.length; i++) // don't replace by dependencyCount
+    for (var i = 0; i < dependencies.length; i++)
     {
-        var tool  = spawn(dependencies[i].path, dependencies[i].args);
-        var tool_version = "";
-        
-        tool.on('error', function (err){
-            logNormal('ERROR: Cannot find "' + dependencies[i].title + '". Please check whether it is installed and accessible.');
-        });
-        
-        tool.stdout.on('data', function (data){ 
-            tool_version += data;
-        });
-        
-        tool.stderr.on('data', function (data){ 
-            tool_version += data;
-        });
-
-        tool.on('exit', function (code){    
-            logNormal(tool_version.trim());
-            if (code == 0) dependency_ok(callback);
-        });
+        checkDependency(dependencies[i], callback);
     }
 };
 
