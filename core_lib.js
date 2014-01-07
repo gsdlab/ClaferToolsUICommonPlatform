@@ -2,6 +2,7 @@ var fs = require("fs");
 var config = require('./../config.json');
 var backendConfig = require('./../Backends/backends.json');
 var formatConfig = require('./../Formats/formats.json');
+var packageConfig = require('./package.json');
 
 var spawn = require('child_process').spawn;    
 
@@ -372,6 +373,16 @@ var filterArgs = function (argString)
         return resultArgs;
     };
 
+var getVersion = function()
+    {
+        return "v" + packageConfig.version + "." + packageConfig.release_date;
+    };                            
+
+var getTitle = function()
+    {
+        return packageConfig.name;
+    };                            
+
 module.exports.addProcess = addProcess;
 module.exports.getProcess = getProcess;
 module.exports.timeoutProcessSetPing = timeoutProcessSetPing;
@@ -395,3 +406,6 @@ module.exports.escapeJSON = escapeJSON;
 module.exports.replaceTemplate = replaceTemplate;
 module.exports.replaceTemplateList = replaceTemplateList;
 module.exports.filterArgs = filterArgs;
+
+module.exports.getTitle = getTitle;
+module.exports.getVersion = getVersion;
