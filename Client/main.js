@@ -56,7 +56,8 @@ function Host(modules, settings)
     /* GUID for each browser tab */
     /* Note that page refresh is supposed to create a new session */
 
-    var GUID = function () {
+    var GUID = function () { 
+    // taken from a sample at http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
                 //------------------
                 var S4 = function () {
                     return(
@@ -128,8 +129,6 @@ function Host(modules, settings)
             draggable: true,
             resizeable: true
         });    
-    
-//        this.modules[i].window = x;
 
         if (this.modules[i].getInitContent)
             $.updateWindowContent(this.modules[i].id, this.modules[i].getInitContent());
