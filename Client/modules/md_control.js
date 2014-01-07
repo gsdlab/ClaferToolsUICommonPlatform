@@ -43,8 +43,8 @@ function Control(host, settings)
 }
 
 Control.method("getInitContent", function(){
-	var ret = '<form id="ControlForm" method="post" action="/control" style="display: block">';
-	ret += '<input type="hidden" id="ControlOp" name="operation" value=""/>';
+    var ret = '<form id="ControlForm" method="post" action="/control" style="display: block">';
+    ret += '<input type="hidden" id="ControlOp" name="operation" value=""/>';
     ret += '<input type="hidden" id="ControlOpArg1" name="operation_arg1" value=""/>';
     ret += '<input type="hidden" id="ControlOpArg2" name="operation_arg2" value=""/>';
 
@@ -52,7 +52,7 @@ Control.method("getInitContent", function(){
     ret += '</select>';
 
     ret += '<input type="hidden" id="windowKey" name="windowKey" value="' + this.host.key + '">';
-	ret += '<input type="button" class="inputRunStopButton" id="RunStop" value="Run" title="Run the chosen instance generator" disabled="disabled"/><br>';
+    ret += '<input type="button" class="inputRunStopButton" id="RunStop" value="Run" title="Run the chosen instance generator" disabled="disabled"/><br>';
     ret += '<fieldset id="backendButtonsFieldset"><div id="backendButtons"></div></fieldset>';
 
     ret += '<div style="height:5px;"></div><fieldset id="scopeControl">';
@@ -64,7 +64,8 @@ Control.method("getInitContent", function(){
 //    var saveLink = '<td style="padding-right:5px" align="right"><a href="">Download scopes</a></td>';
 
     ret += '<tr><td style="padding-left:5px">Default:</td><td><input type="text" class="scopeInput" title="Enter the scope (an integer from 0 up to a number the backend can handle)" size="2" value="1" id="globalScopeValue"/><button id="setGlobalScope" title="Set the global (or default) scope">Set</button></td>' + saveLink + '</tr>';
-    ret += '<tr><td style="padding-left:5px">Integers:</td><td colspan="2"><input type="text" class="scopeInput" size="2" value="-128" id="intLowScopeValue" title="Enter the lower bound for unknown integers (can be negative)"/> to <input type="text" class="scopeInput" size="2" value="127" id="intHighScopeValue" title="Enter the upper bound for unknown integers (normally positive)"/><button id="setIntScope" title="Set the selected scope for integers">Set</button></td></tr>';
+    ret += '<tr id="intScopeSettings"><td style="padding-left:5px">Integers:</td><td colspan="2"><input type="text" class="scopeInput" size="2" value="-128" id="intLowScopeValue" title="Enter the lower bound for unknown integers (can be negative)"/> to <input type="text" class="scopeInput" size="2" value="127" id="intHighScopeValue" title="Enter the upper bound for unknown integers (normally positive)"/><button id="setIntScope" title="Set the selected scope for integers">Set</button></td></tr>';
+    ret += '<tr id="bitwidthSettings"><td style="padding-left:5px">Bitwidth:</td><td colspan="2"><input type="text" class="scopeInput" size="2" value="4" id="bitwidthValue" title="Enter the bitwidth for unknown integers"/><button id="setBitwidth" title="Set the selected bitwidth">Set</button></td></tr>';
     ret += '<tr><td style="padding-left:5px">Clafers:</td><td colspan="2"><input type="text" style="width:100px;" id="individualClafer" placeholder="Clafer name(s)" title="Enter the clafer name, namespace, path or choose ones from a drop down, depending on the backend"></input>';
 
     ret += '<span id="ClaferListCont" style="width:30px"></span>';
@@ -82,6 +83,7 @@ Control.method("getInitContent", function(){
         function(data)
         {
             var backends = data.backends;
+            context.backends = data.backends;
             var options = "";
         
             var backendButtons = "";
@@ -112,6 +114,8 @@ Control.method("getInitContent", function(){
 //                return false;
             });
 
+            context.onBackendChange();
+
             context.host.loaded(context); // notify about getting fully loaded
 
         }
@@ -138,6 +142,7 @@ Control.method("onInitRendered", function()
     $("#setGlobalScope")[0].onclick = this.setGlobalScopeClick.bind(this);
     $("#setIndividualScope")[0].onclick = this.setIndividualScopeClick.bind(this);
     $("#setIntScope")[0].onclick = this.setIntScopeClick.bind(this);
+    $("#setBitwidth")[0].onclick = this.setBitwidthClick.bind(this);
 
     var options = new Object();
     options.beforeSubmit = this.beginQuery.bind(this);
@@ -188,6 +193,12 @@ Control.method("setIntScopeClick", function(){
 //    $("#ControlForm").submit();
 });
 
+Control.method("setBitwidthClick", function(){
+    $("#ControlOp").val("setBitwidth");
+    $("#ControlOpArg1").val($ ("#bitwidthValue").val());
+//    $("#ControlForm").submit();
+});
+
 Control.method("enableRuntimeControls", function(){
     $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button").removeAttr("disabled");
     $("#RunStop").val("Stop");
@@ -202,6 +213,9 @@ Control.method("enableRuntimeControls", function(){
     $("#intLowScopeValue").removeAttr("disabled");    
     $("#intHighScopeValue").removeAttr("disabled");   
     $("#setIntScope").removeAttr("disabled");   
+    
+    $("#bitwidthValue").removeAttr("disabled");   
+    $("#setBitwidth").removeAttr("disabled");   
 
 });
 
@@ -220,6 +234,9 @@ Control.method("disableRuntimeControls", function(){
     $("#intHighScopeValue").attr("disabled", "disabled");   
     $("#setIntScope").attr("disabled", "disabled");   
 
+    $("#bitwidthValue").attr("disabled", "disabled");   
+    $("#setBitwidth").attr("disabled", "disabled"); 
+
 });
 
 Control.method("disableAll", function(){
@@ -235,6 +252,9 @@ Control.method("disableAll", function(){
     $("#intLowScopeValue").attr("disabled", "disabled");    
     $("#intHighScopeValue").attr("disabled", "disabled");   
     $("#setIntScope").attr("disabled", "disabled");   
+
+    $("#bitwidthValue").attr("disabled", "disabled");   
+    $("#setBitwidth").attr("disabled", "disabled"); 
 });
 
 Control.method("beginQuery", function(formData, jqForm, options){
@@ -257,6 +277,14 @@ Control.method("showResponse", function(responseText, statusText, xhr, $form)
     {
         this.settings.onGlobalScopeSet(this);
     }
+    else if (responseText == "int_scope_set")
+    {
+        this.settings.onIntScopeSet(this);
+    }
+    else if (responseText == "bitwidth_set")
+    {
+        this.settings.onBitwidthSet(this);
+    }        
     else if (responseText == "individual_scope_set")
     {
         this.settings.onClaferScopeSet(this);
@@ -396,4 +424,28 @@ Control.method("onBackendChange", function()
     var selectedId = $( "#backend option:selected" ).val();
 
     $("#backendButtons").children("#" + selectedId + "_buttons")[0].style.display = "block";
+
+    for (var i = 0; i < this.backends.length; i++)
+    {
+        if (this.backends[i].id == selectedId)
+        {
+            if (this.backends[i].scope_options.int_scope)
+            {
+                $("#intScopeSettings").show();
+            }
+            else
+            {
+                $("#intScopeSettings").hide();                
+            }
+
+            if (this.backends[i].scope_options.bitwidth)
+            {
+                $("#bitwidthSettings").show();
+            }
+            else
+            {
+                $("#bitwidthSettings").hide();                
+            }            
+        }
+    }
 });
