@@ -96,7 +96,7 @@ Control.method("getInitContent", function(){
             {
                 options += '<option value="' + backends[i].id + '" title="' + backends[i].tooltip + '">' + backends[i].label + '</option>';
 
-                backendButtons += '<div id="' + backends[i].id + '_buttons" style="display:' + display + ';">';
+                backendButtons += '<div id="' + backends[i].id + '_buttons" class="button_panel" style="display:' + display + ';">';
                 display = "none";
 
                 for (var j = 0; j < backends[i].control_buttons.length; j++)
