@@ -300,16 +300,20 @@ FeatureQualityMatrix.method("onRendered", function()
         that.rowSort($(this).text());
     }).css("cursor", "pointer");
 // Selection of instances for analysis from top row of table
-    var length = $("#r0").find(".td_instance").length;
-    for(i=1; i<=length; i++){
-        $("#th0_" + i).click(function(){
-            var pid = getPID($(this).attr('id').substring(4))
-            var locationInArray = $.inArray(pid, that.settings.getSelection(that));
-            if (locationInArray == -1)
-                that.settings.onSelected(that,pid);
-            else
-                that.settings.onDeselected(that,pid);
-        }).css("cursor", "pointer");
+
+    if (this.settings.instancesSelectable) // can select instances
+    {
+        var length = $("#r0").find(".td_instance").length;
+        for(i=1; i<=length; i++){
+            $("#th0_" + i).click(function(){
+                var pid = getPID($(this).attr('id').substring(4))
+                var locationInArray = $.inArray(pid, that.settings.getSelection(that));
+                if (locationInArray == -1)
+                    that.settings.onSelected(that,pid);
+                else
+                    that.settings.onDeselected(that,pid);
+            }).css("cursor", "pointer");
+        }
     }
 
 // add handler to search bar
