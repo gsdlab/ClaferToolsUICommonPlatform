@@ -455,4 +455,7 @@ Control.method("onBackendChange", function()
             }            
         }
     }
+
+    if (this.settings.onBackendChange) 
+        this.settings.onBackendChange(this, selectedId);
 });
