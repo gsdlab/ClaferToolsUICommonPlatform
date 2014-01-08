@@ -113,7 +113,11 @@ Control.method("getInitContent", function(){
 
             $(".control_button").click(function(){
                 $("#ControlOp").val(this.id);
-//                return false;
+
+                if (context.settings.onControlButtonClick)
+                {
+                    context.settings.onControlButtonClick(context, this.id);
+                }
             });
 
             context.onBackendChange();
