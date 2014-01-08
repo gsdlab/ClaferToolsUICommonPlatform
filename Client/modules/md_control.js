@@ -47,8 +47,10 @@ Control.method("getInitContent", function(){
     ret += '<input type="hidden" id="ControlOp" name="operation" value=""/>';
     ret += '<input type="hidden" id="ControlOpArg1" name="operation_arg1" value=""/>';
     ret += '<input type="hidden" id="ControlOpArg2" name="operation_arg2" value=""/>';
+    ret += '<input type="hidden" id="BackendId" name="backend" value=""/>';
 
-    ret += '<select id="backend" name="backend" title="Choose an instance generator backend">';       
+    ret += '<select id="backend" title="Choose an instance generator backend">'; 
+        // no name here, because if disabled, then the id is not submitted at all
     ret += '</select>';
 
     ret += '<input type="hidden" id="windowKey" name="windowKey" value="' + this.host.key + '">';
@@ -427,7 +429,7 @@ Control.method("onBackendChange", function()
     });
 
     var selectedId = $( "#backend option:selected" ).val();
-
+    $("#BackendId").val(selectedId);
     $("#backendButtons").children("#" + selectedId + "_buttons")[0].style.display = "block";
 
     for (var i = 0; i < this.backends.length; i++)
