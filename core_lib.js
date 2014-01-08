@@ -195,7 +195,14 @@ function checkDependency(dependency, callback)
 
     tool.on('exit', function (code){    
         logNormal(tool_version.trim());
-        if (code == 0) dependency_ok(callback);
+        if (code == 0)
+        {
+            dependency_ok(callback);
+        }
+        else
+        {
+            logNormal('ERROR: Non-zero return code of "' + dependency.title + '": "' + code + '". Please check whether it is installed and accessible.');
+        }
     });
 }
 
