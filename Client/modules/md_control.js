@@ -217,6 +217,8 @@ Control.method("enableRuntimeControls", function(){
     $("#bitwidthValue").removeAttr("disabled");   
     $("#setBitwidth").removeAttr("disabled");   
 
+    $("#backend").attr("disabled", "disabled");
+
 });
 
 Control.method("disableRuntimeControls", function(){
@@ -237,6 +239,7 @@ Control.method("disableRuntimeControls", function(){
     $("#bitwidthValue").attr("disabled", "disabled");   
     $("#setBitwidth").attr("disabled", "disabled"); 
 
+    $("#backend").removeAttr("disabled");
 });
 
 Control.method("disableAll", function(){
@@ -255,6 +258,8 @@ Control.method("disableAll", function(){
 
     $("#bitwidthValue").attr("disabled", "disabled");   
     $("#setBitwidth").attr("disabled", "disabled"); 
+
+    $("#backend").removeAttr("disabled");    
 });
 
 Control.method("beginQuery", function(formData, jqForm, options){
