@@ -145,17 +145,6 @@ function Host(modules, settings)
         $("#" + this.modules[i].id + " .window-titleBar").append(helpButton);   
     }
 
-    var displayHelp=getCookie("displayIntroHelp")
-    if(displayHelp==null){
-        $("body").prepend(this.helpGetter.getInitial());
-        this.helpGetter.setListeners();
-    }else{
-        $("body").prepend(this.helpGetter.getInitial());
-        this.helpGetter.setListeners();
-        $("#help").hide();
-        $(".fadeOverlay").hide();
-    }
-
     this.print("ClaferIDE> Welcome! Session: " + this.key + "\n");
 
     var context = this;
@@ -166,14 +155,29 @@ function Host(modules, settings)
             var versions = data.versions;
             context.print(versions);            
             context.loaded(context);
+            context.displayHelp(data.title, data.version);
         }
     ).error(function() 
         { 
             alert("Could not get server initialization data. Could not print versions");
             context.loaded(context);
+            context.displayHelp(data.title, data.version);
         });
-
 }
+
+Host.method("displayHelp", function(title, version)
+{
+    var displayHelp=getCookie("displayIntroHelp");
+    if(displayHelp==null){
+        $("body").prepend(this.helpGetter.getInitial(title, version));
+        this.helpGetter.setListeners();
+    }else{
+        $("body").prepend(this.helpGetter.getInitial(title, version));
+        this.helpGetter.setListeners();
+        $("#help").hide();
+        $(".fadeOverlay").hide();
+    }
+});
 
 Host.method("loaded", function(module)
 {
