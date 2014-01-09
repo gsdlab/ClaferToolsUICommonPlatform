@@ -141,8 +141,8 @@ function Host(modules, settings)
         if (this.modules[i].onInitRendered)
             this.modules[i].onInitRendered();        
 
-        var helpButton = this.getHelpButton(this.modules[i].id);
-        $("#" + this.modules[i].id + " .window-titleBar").append(helpButton);   
+//        var helpButton = this.getHelpButton(this.modules[i].id);
+//        $("#" + this.modules[i].id + " .window-titleBar").append(helpButton);   
     }
 
     this.print("ClaferIDE> Welcome! Session: " + this.key + "\n");
@@ -177,6 +177,13 @@ Host.method("displayHelp", function(title, version)
         $("#help").hide();
         $(".fadeOverlay").hide();
     }
+
+    for (var i = 0; i < this.modules.length; i++)
+    {
+        var helpButton = this.getHelpButton(this.modules[i].id);
+        $("#" + this.modules[i].id + " .window-titleBar").append(helpButton);   
+    }
+
 });
 
 Host.method("loaded", function(module)
