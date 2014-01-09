@@ -43,7 +43,7 @@ function FeatureQualityMatrix(host, settings)
 
 FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
-    this.processor = new ClaferProcessor(data.claferXML);
+    this.processor = new ClaferProcessor(data.claferXML, data.qualities);
     this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this);    
 //    this.clearFilters();
     this.abstractClaferOutput = "";    
