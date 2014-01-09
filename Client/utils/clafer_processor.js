@@ -19,9 +19,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-function ClaferProcessor (sourceXML) {
+function ClaferProcessor (sourceXML, qualities) {
     this.source = (new XMLHelper()).stringToXML(sourceXML);
     this.xmlHelper = new XMLHelper();
+    this.qualities = qualities;
+    if (this.qualities == null)
+    	this.qualities = [];
 }
 
 //returns claferid without the cXX_ extension
@@ -131,10 +134,23 @@ ClaferProcessor.method("getAbstractClaferSubTree", function(root)
 			var nextSubtree = this.getAbstractClaferSubTree(current);
 			if (nextSubtree != null)
 				result.subclafers[subLength++] = nextSubtree; 
-		}
+		} else if (current.tagName == "supers"){
+			var nextSubtree = this.getAbstractClaferTree(this.currentXpathToIdSiblings, $(current).find("id").text());
+			if (nextSubtree != null)
+				for (var i = 0; i<nextSubtree.subclafers.length; i++)
+					result.subclafers[subLength++] = nextSubtree.subclafers[i];		 
+		}		
 	}
 	
-	if (result.claferId != null)
+
+	var notQuality = true;
+	for (j=0; j<this.qualities.length; j++){
+		if (result.claferId != null)
+			if (result.claferId.replace(/c[0-9]{1,}_/, "") == this.qualities[j])
+				notQuality = false;
+	}
+	
+	if (result.claferId != null && notQuality)
 		return result;
 	
 	return null;
@@ -144,6 +160,7 @@ ClaferProcessor.method("getAbstractClaferTree", function(xpathToIdSiblings, id)
 {
 	try
 	{
+		this.currentXpathToIdSiblings = xpathToIdSiblings;
 		var clafers = this.xmlHelper.queryXML(this.source, xpathToIdSiblings); // IE8 cannot handle the entire path (with checking text value)
 		
 		for (var i = 0; i < clafers.length; i++)
@@ -156,15 +173,19 @@ ClaferProcessor.method("getAbstractClaferTree", function(xpathToIdSiblings, id)
 			}
 		}
 		
-		alert("Not found a super clafer specified by the xpath: '" + xpathToIdSiblings + "' " + id);
+		if (id != "clafer" && id != "integer") //overflows the console without this
+			console.log("Not found a super clafer specified by the xpath: '" + xpathToIdSiblings + "' " + id);
+		return null;
 	}
 	catch(e)
 	{
-		alert("Could not get a super clafer specified by the xpath: '" + xpathToIdSiblings + "' " + id);
+		if (id != "clafer" && id != "integer")
+			console.log("Could not get a super clafer specified by the xpath: '" + xpathToIdSiblings + "' " + id);
 		return "";
 	}
 		
 });
+
 
 ClaferProcessor.method("getIfMandatory", function(claferID){
 	var min = this.xmlHelper.queryXML(this.source, "//declaration[@type='IClafer'][uniqueid='" + claferID + "']/card/min[intliteral=1]");
@@ -175,13 +196,17 @@ ClaferProcessor.method("getIfMandatory", function(claferID){
 
 });
 
-
 ClaferProcessor.method("getEffectivelyMandatoryFeatures", function(tree){
-	var list = [];
-	for (var i = 0; i<tree.subclafers.length; i++){
-		list = list.concat(this.recursiveEMcheck(tree.subclafers[i]));
+	if(tree.subclafers != null){
+		var list = [];
+		for (var i = 0; i<tree.subclafers.length; i++){
+			list = list.concat(this.recursiveEMcheck(tree.subclafers[i]));
+		}
+	//	console.log(list);
+		return list;
+	} else {
+		return [];
 	}
-	return list;
 });
 
 ClaferProcessor.method("recursiveEMcheck", function(root){
