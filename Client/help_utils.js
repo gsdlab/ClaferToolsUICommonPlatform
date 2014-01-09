@@ -10,6 +10,17 @@ function docLoad()
 
 	if (versionElem)
 		versionElem.innerHTML = version;
+
+	var homeLinkElements = document.getElementByTagName("a");
+
+	for (var i = 0; i < homeLinkElements.length; i++)
+	{
+		if (homeLinkElements[i].className == "local")
+		{
+			homeLinkElements[i].href = homeLinkElements[i].href + "?title=" + title + "&version=" + version;
+		}
+	}
+
 }
 
 /* from stackoverflow.com */

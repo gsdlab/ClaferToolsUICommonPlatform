@@ -24,7 +24,7 @@ helpGetter.method("setListeners", function(){
 });
 
 helpGetter.method("getHelp", function (moduleName){
-	$("#helpForm").attr("action", "/Client/help_pages/" + moduleName + ".html")
+	$("#helpForm").attr("action", "/Client/help_pages/" + moduleName + ".html?title=" + title + "&version=" + version);
     $("#helpForm").submit();
     $("#help").show(500);
     $(".fadeOverlay").show(500);
