@@ -11,7 +11,7 @@ function docLoad()
 	if (versionElem)
 		versionElem.innerHTML = version;
 
-	var homeLinkElements = document.getElementByTagName("a");
+	var homeLinkElements = document.getElementsByTagName("a");
 
 	for (var i = 0; i < homeLinkElements.length; i++)
 	{
