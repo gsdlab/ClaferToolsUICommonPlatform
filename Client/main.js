@@ -180,7 +180,7 @@ Host.method("displayHelp", function(title, version)
 
     for (var i = 0; i < this.modules.length; i++)
     {
-        var helpButton = this.getHelpButton(this.modules[i].id, title, version);
+        var helpButton = this.getHelpButton(this.modules[i].id);
         $("#" + this.modules[i].id + " .window-titleBar").append(helpButton);   
     }
 
@@ -222,6 +222,6 @@ Host.method("getHelp", function(moduleName){
     this.helpGetter.getHelp(moduleName);
 });
 
-Host.method("getHelpButton", function(moduleName, title, version){
-    return this.helpGetter.getHelpButton(moduleName, title, version);
+Host.method("getHelpButton", function(moduleName){
+    return this.helpGetter.getHelpButton(moduleName);
 });
