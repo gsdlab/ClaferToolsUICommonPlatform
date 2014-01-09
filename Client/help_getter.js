@@ -5,7 +5,7 @@ function helpGetter(host){
 helpGetter.method("getInitial", function (title, version){
 	var content = '<div class="fadeOverlay"></div>';
 	content += '<div id="help" class="help" style="top:50px; left:100px;">';
-	content += '<iframe id="helpContainer" name="helpContainer" class="help" src="/Client/help_pages/intro.html?title=' + title + '&version=' + version;
+	content += '<iframe id="helpContainer" name="helpContainer" class="help" src="/Client/help_pages/intro.html?title=' + title + '&version=' + version + '">';
 	content += '</iframe></div>';
 	content += '<form id="helpForm" target="helpContainer" method="get"><form>';
 	return $(content);
