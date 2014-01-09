@@ -237,8 +237,8 @@ FeatureQualityMatrix.method("onRendered", function()
         row = $("#r" + i);
     }
     //  Add collapse buttons for features with children
-    var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
-    var abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceSuperClafer);
+    var instanceName = this.instanceProcessor.getInstanceName();
+    var abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceName);
     var hasChild = this.processor.getFeaturesWithChildren(abstractClaferTree)
     i = 1;
     row = $("#r" + i);
@@ -373,9 +373,9 @@ FeatureQualityMatrix.method("traverse", function(clafer, level)
 FeatureQualityMatrix.method("getDataTable", function()
 {
     var instanceCount = this.instanceProcessor.getInstanceCount();
-    var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
-    var abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceSuperClafer);
-    var EMfeatures = this.processor.getEffectivelyMandatoryFeatures(abstractClaferTree)
+    var instanceName = this.instanceProcessor.getInstanceName();
+    var abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceName);
+    var EMfeatures = this.processor.getEffectivelyMandatoryFeatures(abstractClaferTree);
     
     var parent = null;
     var current = abstractClaferTree;
