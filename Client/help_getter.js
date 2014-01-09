@@ -23,19 +23,19 @@ helpGetter.method("setListeners", function(){
 	});
 });
 
-helpGetter.method("getHelp", function (moduleName){
+helpGetter.method("getHelp", function (moduleName, title, version){
 	$("#helpForm").attr("action", "/Client/help_pages/" + moduleName + ".html?title=" + title + "&version=" + version);
     $("#helpForm").submit();
     $("#help").show(500);
     $(".fadeOverlay").show(500);
 });
 
-helpGetter.method("getHelpButton", function(moduleName){
+helpGetter.method("getHelpButton", function(moduleName, title, version){
 	var that = this;
 	var button = '<div class="window-helpButton"></div>';
 	button = $(button);
 	$(button).click(function(){
-		that.getHelp(moduleName);
+		that.getHelp(moduleName, title, version);
 	});
 	$(button).hover(function(){
 		$(this).addClass("active");
