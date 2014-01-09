@@ -46,18 +46,15 @@ Output.method("onResize", function() {
 });
 
 Output.method("getInitContent", function(){
-	var result = "";
+    var result = "";
 
     result += '<div style="height:100%;overflow:hidden">';
-    result += '<table cellspacing="0" width="100%" height="100%" cellpadding="0">';
-    result += '<tr height="1em"><td style="border-bottom: 2px groove threedface"><button id="clearOutput">Clear output</button></td></tr>';
-    result += '<tr height="100%"><td style="height:100%">';
-//    result += '<div style="display:inline-block;height:100%;">';
+
+    result += '<div height="1em" style="position:absolute; top: 0; right:60px; margin-top: -1px;background: none"><button id="clearOutput">Clear</button></div>';
+
     result += '<div style="height:100%; width:100%" name="clafer_editor" id="console_editor">';
-//    result += '</div>';
     result += '</div>';
-    result += '</td></tr>';
-    result += '</table>';
+
     result += '</div>';
     return result;
 });
@@ -65,9 +62,9 @@ Output.method("getInitContent", function(){
 Output.method("appendConsole", function(text){
     this.editor.setValue(this.editor.getValue() + text);
 
-	var count = this.editor.getSession().getLength();
-	//Go to end of the last line
-	this.editor.gotoLine(count, this.editor.getSession().getLine(count - 1).length);
+    var count = this.editor.getSession().getLength();
+    //Go to end of the last line
+    this.editor.gotoLine(count, this.editor.getSession().getLine(count - 1).length);
 
 });
 
@@ -86,8 +83,8 @@ Output.method("onInitRendered", function(){
 
     $("#clearOutput")[0].onclick = this.onClearClick.bind(this);
 
-	this.editor.getSession().setUseWrapMode(false);   
-	this.editor.setReadOnly(true); 
-	this.editor.setHighlightActiveLine(false);	 
-	this.editor.renderer.setShowGutter(false);
+    this.editor.getSession().setUseWrapMode(false);   
+    this.editor.setReadOnly(true); 
+    this.editor.setHighlightActiveLine(false);   
+    this.editor.renderer.setShowGutter(false);
 });
