@@ -185,22 +185,21 @@ var addDependency = function(path, args, title)
 function checkDependency(dependency, callback)
 {
     var tool  = spawn(dependency.path, dependency.args);
-    var tool_version = "";
 
     tool.on('error', function (err){
         logNormal('ERROR: Cannot find "' + dependency.title + '". Please check whether it is installed and accessible.');
     });
     
     tool.stdout.on('data', function (data){ 
-        tool_version += data;
+        dependency.tool_version += data;
     });
     
     tool.stderr.on('data', function (data){ 
-        tool_version += data;
+        dependency.tool_version += data;
     });
 
     tool.on('exit', function (code){
-        dependency.tool_version = tool_version.trim();   
+        dependency.tool_version = dependency.tool_version.trim();   
         logNormal(dependency.tool_version);
         if (code == 0)
         {
