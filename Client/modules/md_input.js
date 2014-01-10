@@ -332,6 +332,13 @@ Input.method("getInitContent", function()
     
     result += '</select></td>';
     result += '<td><input id="submitExample" type="submit" value="' + this.settings.file_extensions[0].button_example_caption + '" title="' + this.settings.file_extensions[0].button_example_tooltip + '"></input></td>';
+    result += '<td></td>';
+
+    result += '</tr>'
+    result += '<tr height="1em">';
+    result += '<td style="border-top: 2px groove threedface;">';
+    result += '<span id="input_editor_caption">Or enter your model:</span></td>';
+    result += '<td style="border-top: 2px groove threedface; "><input id="submitText" type="submit" value="' + this.settings.file_extensions[0].button_editor_caption + '" title="' + this.settings.file_extensions[0].button_editor_tooltip + '"/></td>';
 
     result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface"><div id="input_scopes">Scopes: <select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using finite scope reasoners">';
 
@@ -341,12 +348,7 @@ Input.method("getInitContent", function()
 
     result += '</select></div></td>';
 
-    result += '</tr><tr height="1em">';
-    result += '<td style="border-top: 2px groove threedface;">';
-    result += '<span id="input_editor_caption">Or enter your model:</span></td>';
-    result += '<td style="border-top: 2px groove threedface; "><input id="submitText" type="submit" value="' + this.settings.file_extensions[0].button_editor_caption + '" title="' + this.settings.file_extensions[0].button_editor_tooltip + '"/></td>';
-
-    result += '<td style="padding: 0px 2px 0px 2px;border-left: 2px groove threedface"><div id="input_flags">Flags: <input id="args" type="text" style="width:90px;" name="args" value="' + this.settings.input_default_flags + '" title="You can specify any additional compilation flags supported by the compiler"></input></div></td>';
+//    result += '<td style="padding: 0px 2px 0px 2px;border-left: 2px groove threedface"><div id="input_flags">Flags: <input id="args" type="text" style="width:90px;" name="args" value="' + this.settings.input_default_flags + '" title="You can specify any additional compilation flags supported by the compiler"></input></div></td>';
 
     var padding = "";
     if (this.settings.optimization_backend)
