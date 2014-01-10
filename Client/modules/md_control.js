@@ -167,15 +167,20 @@ Control.method("resetControls", function(){
 Control.method("runStopClick", function(){
     if ($("#RunStop").val() == "Run")
     {
-        $("#ControlOp").val("run");
-//        $("#backend").attr("disabled", "disabled");
-        this.sessionActive = true; // activating IG session
-        $("#ControlForm").submit();
+        if (this.settings.onStart(this))
+        {
+            $("#ControlOp").val("run");
+            this.sessionActive = true; // activating IG session
+            $("#ControlForm").submit();
+        }
     }
     else
     {
-        $("#ControlOp").val("stop");
-        $("#ControlForm").submit();
+        if (this.settings.onStop(this))
+        {
+            $("#ControlOp").val("stop");
+            $("#ControlForm").submit();
+        }
     }
 });
 
