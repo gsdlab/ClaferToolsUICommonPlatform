@@ -179,7 +179,7 @@ var getDependencyVersionsText = function(callback)
 
 var addDependency = function(path, args, title)
 {
-    dependencies.push({path : path, args : args, title : title, id: dependencies.length});
+    dependencies.push({path : path, args : args, title : title, id: dependencies.length, tool_version: ""});
 };
 
 function checkDependency(dependency, callback)
@@ -198,7 +198,7 @@ function checkDependency(dependency, callback)
         dependency.tool_version += data;
     });
 
-    tool.on('exit', function (code){
+    tool.on('close', function (code){
         dependency.tool_version = dependency.tool_version.trim();   
         logNormal(dependency.tool_version);
         if (code == 0)
