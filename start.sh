@@ -1,5 +1,5 @@
 echo "Starting the server under the supervisor."
-echo "Running against ~/0.3.5/cabal-sandbox/bin"
+echo "Running against ~/0.3.5/.cabal-sandbox/bin"
 export PATH=~/0.3.5/.cabal-sandbox/bin:$PATH
 clafer -V
 claferIG -V
