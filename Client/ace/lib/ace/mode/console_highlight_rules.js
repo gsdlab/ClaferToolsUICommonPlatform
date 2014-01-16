@@ -12,7 +12,7 @@ var ConsoleHighlightRules = function() {
     this.$rules = { start: 
        [ { caseInsensitive: true,
            token: 'keyword.control.console',
-           regex: '^(?:(ClaferIDE|Compiler))\\b' },
+           regex: '^(?:(ClaferIDE|Compiler|ClaferConfigurator|ClaferMooVisualizer))\\b' },
          { caseInsensitive: true,           
            token: 
             [ 'variable.console', "text",
