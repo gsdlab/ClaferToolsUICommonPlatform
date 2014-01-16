@@ -380,6 +380,10 @@ Control.method("showResponse", function(responseText, statusText, xhr, $form)
     {
         this.settings.onIndividualScopeIncreased(this);
     }
+    else if (this.settings.onCustomEvent)
+    {
+        this.settings.onCustomEvent(this, responseText);
+    }
 
     this.endQuery();
 });
