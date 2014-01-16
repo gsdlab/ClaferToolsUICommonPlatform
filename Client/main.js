@@ -37,7 +37,7 @@ $(document).ready(function()
 });
 
 function exitConfirmation() {
-    return 'Are you sure you want to quit? ClaferIDE does not save any of results, so you are responsible for saving your results.';
+    return 'Are you sure you want to quit? The tool does not save any of results, so you are responsible for saving your results.';
 }
 
 function getParameterByName(name) {
@@ -145,7 +145,7 @@ function Host(modules, settings)
 //        $("#" + this.modules[i].id + " .window-titleBar").append(helpButton);   
     }
 
-    this.print("ClaferIDE> Welcome! Session: " + this.key + "\n");
+    this.print("Welcome! Session: " + this.key + "\n");
 
     var context = this;
 
