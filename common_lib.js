@@ -446,7 +446,7 @@ var handleControlRequest = function(req, res, settings){
                 settings.onData(data);
             });
 
-            process.tool.stderr.on("data", , function(data) {
+            process.tool.stderr.on("data", function(data) {
                 settings.onError(data);
             });
 
