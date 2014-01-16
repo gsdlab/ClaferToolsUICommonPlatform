@@ -442,8 +442,13 @@ var handleControlRequest = function(req, res, settings){
                 }
             });
 
-            process.tool.stdout.on("data", settings.onData(data));
-            process.tool.stderr.on("data", settings.onError(data));
+            process.tool.stdout.on("data", function(data) {
+                settings.onData(data);
+            });
+
+            process.tool.stderr.on("data", , function(data) {
+                settings.onError(data);
+            });
 
             process.tool.on("close", function (code)
             {
