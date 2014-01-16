@@ -43,7 +43,7 @@ function Control(host, settings)
 }
 
 Control.method("getInitContent", function(){
-    var ret = '<form id="ControlForm" method="post" action="/control" style="display: block">';
+    var ret = '<form id="ControlForm" method="post" action="/control" style="display: block; padding:1px;">';
     ret += '<input type="hidden" id="ControlOp" name="operation" value=""/>';
     ret += '<input type="hidden" id="ControlOpArg1" name="operation_arg1" value=""/>';
     ret += '<input type="hidden" id="ControlOpArg2" name="operation_arg2" value=""/>';
@@ -59,21 +59,58 @@ Control.method("getInitContent", function(){
 
     ret += '<div style="height:5px;"></div><fieldset id="scopeControl">';
 
-    ret += '<legend>Scope Settings</legend>';  
+    ret += '<legend>Scopes</legend>';  
     ret += '<table width="100%" border="0" cellspacing="0" cellpadding="0">'; 
 
-    var saveLink = '<td></td>';
-//    var saveLink = '<td style="padding-right:5px" align="right"><a href="">Download scopes</a></td>';
+    ret += '<tr id="defaultScopeSettings">';
 
-    ret += '<tr id="defaultScopeSettings"><td style="padding-left:5px">Default:</td><td><input type="text" class="scopeInput" title="Enter the scope (an integer from 0 up to a number the backend can handle)" size="2" value="1" id="globalScopeValue"/><button id="setGlobalScope" title="Set the global (or default) scope">Set</button></td>' + saveLink + '</tr>';
-    ret += '<tr id="intScopeSettings"><td style="padding-left:5px">Integers:</td><td colspan="2"><input type="text" class="scopeInput" size="2" value="-128" id="intLowScopeValue" title="Enter the lower bound for unknown integers (can be negative)"/> to <input type="text" class="scopeInput" size="2" value="127" id="intHighScopeValue" title="Enter the upper bound for unknown integers (normally positive)"/><button id="setIntScope" title="Set the selected scope for integers">Set</button></td></tr>';
-    ret += '<tr id="bitwidthSettings"><td style="padding-left:5px">Bitwidth:</td><td colspan="2"><input type="text" class="scopeInput" size="2" value="4" id="bitwidthValue" title="Enter the bitwidth for unknown integers"/><button id="setBitwidth" title="Set the selected bitwidth">Set</button></td></tr>';
-    ret += '<tr id="claferScopeSettings"><td style="padding-left:5px">Clafers:</td><td colspan="2"><input type="text" style="width:100px;" id="individualClafer" placeholder="Clafer name(s)" title="Enter the clafer name, namespace, path or choose ones from a drop down, depending on the backend"></input>';
+    ret += '<td width="60" style="padding: 0px 4px 0px 4px">All:</td>';
+    ret += '<td><input type="text" class="scopeInput" title="Enter the delta by which increase scopes" size="2" value="1" id="allScopesDelta"/><button id="incAllScopes" title="Increase all the scopes by the specified value">Inc</button></td>';
 
-    ret += '<span id="ClaferListCont" style="width:30px"></span>';
-    ret += '<input type="text" size="2" value="1" class="scopeInput" id="individualScopeValue" title="Enter the scope value (an integer from 0 up to a number the backend can handle)"/>';
+    ret += '<td width="60" style="padding: 0px 4px 0px 12px; border-left: 2px groove threedface;">Default:</td>';
+    ret += '<td ><input type="text" class="scopeInput" title="Enter the scope (an integer from 0 up to a number the backend can handle)" size="2" value="1" id="globalScopeValue"/><button id="setGlobalScope" title="Set the global (or default) scope">Set</button></td>';
 
-    ret += '<button id="setIndividualScope" title="Set the scope of the specified clafer(s)">Set</button></td></tr>';    
+    ret += '</tr>';
+
+    ret += '<tr><td colspan="4"><div style="border-bottom: 2px groove threedface; height:6px;"></div></td>';
+    ret += '</tr>';
+
+    ret += '<tr id="claferScopeSettings1">';
+    ret += '<td style="padding: 0px 4px 0px 4px">Custom:</td>';
+    ret += '<td colspan="3">';
+    ret += '<input type="text" id="individualClafer" class="fullwidth" placeholder="Clafer name(s)" title="Enter the clafer name, namespace, path or choose ones from a drop down, depending on the backend"></input>';
+    ret += '</td>';
+    ret += '</tr>';
+
+    ret += '<tr id="claferScopeSettings2">';
+    ret += '<td><span id="ClaferListCont" style="width:30px"></span></td>';
+    ret += '<td>';    
+    ret += '<input type="text" size="2" value="1" class="scopeInput" id="individualScopeDelta" title="Scope value"/>';
+    ret += '<button id="incIndividualScope" title="Increase the scope of the specified clafer(s) by the specified delta">Inc</button>';
+    ret += '</td>';
+
+    ret += '<td colspan="2">';
+    ret += '<input type="text" size="2" value="1" class="scopeInput" id="individualScopeValue" title="Scope value"/>';
+    ret += '<button id="setIndividualScope" title="Set the scope of the specified clafer(s)">Set</button>';
+    ret += '</td>';
+    ret += '</tr>';
+
+    ret += '</table>';
+    ret += '</fieldset>';
+    ret += '<div style="height:4px;"></div>';
+
+    ret += '<fieldset id="intControl">';  
+    ret += '<table width="100%" border="0" cellspacing="0" cellpadding="0">'; 
+
+    ret += '<tr id="intScopeSettings">';
+    ret += '<td style="padding-left:4px;padding-right:4px;" width="60">Integers:</td>';
+    ret += '<td><input type="text" class="scopeInput" size="2" value="-128" id="intLowScopeValue" title="Enter the lower bound for unknown integers (can be negative)"/> to <input type="text" class="scopeInput" size="2" value="127" id="intHighScopeValue" title="Enter the upper bound for unknown integers (normally positive)"/>';
+    ret += '<button id="setIntScope" title="Set the selected scope for integers">Set</button></td>';
+    ret += '</tr>';
+
+    ret += '<tr id="bitwidthSettings"><td style="padding-left:4px;padding-right:4px" width="60">Bitwidth:</td>';
+    ret += '<td><input type="text" class="scopeInput" size="2" value="4" id="bitwidthValue" title="Enter the bitwidth for unknown integers"/><button id="setBitwidth" title="Set the selected bitwidth">Set</button></td></tr>';
+
     ret += '</table>';
     ret += '</fieldset>';
    
@@ -392,16 +429,16 @@ Control.method("updateClaferList", function(jsonList){
 
     var options = "";
 
-    if (!jsonList.list)
+    if (!jsonList.length)
         return;
 
-    for (var i = 0; i < jsonList.list.length; i++)
+    for (var i = 0; i < jsonList.length; i++)
     {
         var hierarchy = "";
-        if (jsonList.list[i].hierarchy)
-            hierarchy = " [" + jsonList.list[i].hierarchy + "]";
+        if (jsonList[i].hierarchy)
+            hierarchy = " [" + jsonList[i].hierarchy + "]";
 
-        options += '<option value="' + jsonList.list[i].name + "|" + jsonList.list[i].value + '">' + jsonList.list[i].name + ": " + jsonList.list[i].value + "" + hierarchy + '</option>';
+        options += '<option value="' + jsonList[i].lpqName + "|" + jsonList[i].scope + '">' + jsonList[i].lpqName + ": " + jsonList[i].scope + "" + hierarchy + '</option>';
     }
 
     $("#ClaferListCont").html('<select id="ClaferList"></select>');
@@ -445,7 +482,7 @@ Control.method("onBackendChange", function()
     {
         if (this.backends[i].id == selectedId)
         {
-            if (this.backends[i].scope_options.int_scope)
+            if (this.backends[i].scope_options.set_int_scope)
             {
                 $("#intScopeSettings").show();
             }
@@ -454,7 +491,7 @@ Control.method("onBackendChange", function()
                 $("#intScopeSettings").hide();                
             }
 
-            if (this.backends[i].scope_options.bitwidth)
+            if (this.backends[i].scope_options.set_bitwidth)
             {
                 $("#bitwidthSettings").show();
             }
