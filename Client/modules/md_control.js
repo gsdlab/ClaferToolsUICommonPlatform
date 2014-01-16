@@ -68,7 +68,7 @@ Control.method("getInitContent", function(){
     ret += '<td><input type="text" class="scopeInput" title="Enter the delta by which increase scopes" size="2" value="1" id="allScopesDelta"/><button id="incAllScopes" title="Increase all the scopes by the specified value">Inc</button></td>';
 
     ret += '<td width="60" style="padding: 0px 4px 0px 12px; border-left: 2px groove threedface;">Default:</td>';
-    ret += '<td ><input type="text" class="scopeInput" title="Enter the scope (an integer from 0 up to a number the backend can handle)" size="2" value="1" id="globalScopeValue"/><button id="setGlobalScope" title="Set the global (or default) scope">Set</button></td>';
+    ret += '<td ><input type="text" class="scopeInput" title="Enter the scope (an integer from 0 up to a number the backend can handle)" size="2" value="1" id="defaultScopeValue"/><button id="setDefaultScope" title="Set the default scope">Set</button></td>';
 
     ret += '</tr>';
 
@@ -182,11 +182,13 @@ Control.method("onInitRendered", function()
     $("#backend")[0].onchange = this.onBackendChange.bind(this);        
     $("#RunStop")[0].onclick = this.runStopClick.bind(this);
 
-    $("#setGlobalScope")[0].onclick = this.setGlobalScopeClick.bind(this);
+    $("#setDefaultScope")[0].onclick = this.setDefaultScopeClick.bind(this);
     $("#setIndividualScope")[0].onclick = this.setIndividualScopeClick.bind(this);
     $("#setIntScope")[0].onclick = this.setIntScopeClick.bind(this);
     $("#setBitwidth")[0].onclick = this.setBitwidthClick.bind(this);
-
+    $("#incAllScopes")[0].onclick = this.incAllScopesClick.bind(this);
+    $("#incIndividualScope")[0].onclick = this.incIndividualScopeClick.bind(this);
+ 
     var options = new Object();
     options.beforeSubmit = this.beginQuery.bind(this);
     options.success = this.showResponse.bind(this);
@@ -221,15 +223,28 @@ Control.method("runStopClick", function(){
     }
 });
 
-Control.method("setGlobalScopeClick", function(){
-    $("#ControlOp").val("setGlobalScope");
-    $("#ControlOpArg1").val($ ("#globalScopeValue").val());
+Control.method("setDefaultScopeClick", function(){
+    $("#ControlOp").val("setDefaultScope");
+    $("#ControlOpArg1").val($ ("#defaultScopeValue").val());
+//    $("#ControlForm").submit();
+});
+
+Control.method("incAllScopesClick", function(){
+    $("#ControlOp").val("incAllScopes");
+    $("#ControlOpArg1").val($ ("#allScopesDelta").val());
 //    $("#ControlForm").submit();
 });
 
 Control.method("setIndividualScopeClick", function(){
     $("#ControlOp").val("setIndividualScope");
     $("#ControlOpArg1").val($ ("#individualScopeValue").val());
+    $("#ControlOpArg2").val($ ("#individualClafer").val());
+//    $("#ControlForm").submit();
+});
+
+Control.method("incIndividualScopeClick", function(){
+    $("#ControlOp").val("incIndividualScope");
+    $("#ControlOpArg1").val($ ("#individualScopeDelta").val());
     $("#ControlOpArg2").val($ ("#individualClafer").val());
 //    $("#ControlForm").submit();
 });
@@ -253,10 +268,15 @@ Control.method("enableRuntimeControls", function(){
     $("#RunStop").attr("title", "Force the running backend to stop");
 
     $("#setIndividualScope").removeAttr("disabled");
-    $("#setGlobalScope").removeAttr("disabled");
-    $("#globalScopeValue").removeAttr("disabled");    
+    $("#setDefaultScope").removeAttr("disabled");
+    $("#defaultScopeValue").removeAttr("disabled");    
     $("#individualScopeValue").removeAttr("disabled");    
     $("#individualClafer").removeAttr("disabled");   
+
+    $("#incIndividualScope").removeAttr("disabled");
+    $("#individualScopeDelta").removeAttr("disabled");    
+    $("#incAllScopes").removeAttr("disabled");
+    $("#allScopesDelta").removeAttr("disabled");
 
     $("#intLowScopeValue").removeAttr("disabled");    
     $("#intHighScopeValue").removeAttr("disabled");   
@@ -275,10 +295,15 @@ Control.method("disableRuntimeControls", function(){
     $("#RunStop").attr("title", "Run the selected backend");
 
     $("#setIndividualScope").attr("disabled", "disabled");
-    $("#setGlobalScope").attr("disabled", "disabled");
-    $("#globalScopeValue").attr("disabled", "disabled");    
+    $("#setDefaultScope").attr("disabled", "disabled");
+    $("#defaultScopeValue").attr("disabled", "disabled");    
     $("#individualScopeValue").attr("disabled", "disabled");    
     $("#individualClafer").attr("disabled", "disabled");    
+
+    $("#incIndividualScope").attr("disabled", "disabled");
+    $("#individualScopeDelta").attr("disabled", "disabled");    
+    $("#incAllScopes").attr("disabled", "disabled");
+    $("#allScopesDelta").attr("disabled", "disabled");
 
     $("#intLowScopeValue").attr("disabled", "disabled");    
     $("#intHighScopeValue").attr("disabled", "disabled");   
@@ -295,10 +320,15 @@ Control.method("disableAll", function(){
     $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button").attr("disabled", "disabled");
 
     $("#setIndividualScope").attr("disabled", "disabled");
-    $("#setGlobalScope").attr("disabled", "disabled");
-    $("#globalScopeValue").attr("disabled", "disabled");    
+    $("#setDefaultScope").attr("disabled", "disabled");
+    $("#defaultScopeValue").attr("disabled", "disabled");    
     $("#individualScopeValue").attr("disabled", "disabled");    
     $("#individualClafer").attr("disabled", "disabled");    
+
+    $("#incIndividualScope").attr("disabled", "disabled"); 
+    $("#individualScopeDelta").attr("disabled", "disabled");    
+    $("#incAllScopes").attr("disabled", "disabled"); 
+    $("#allScopesDelta").attr("disabled", "disabled"); 
 
     $("#intLowScopeValue").attr("disabled", "disabled");    
     $("#intHighScopeValue").attr("disabled", "disabled");   
@@ -316,31 +346,39 @@ Control.method("beginQuery", function(formData, jqForm, options){
 
 Control.method("showResponse", function(responseText, statusText, xhr, $form)
 {
-    if (responseText == "started")
+    if (responseText == "started" && this.settings.onStarted)
     {   
         this.settings.onStarted(this);
         this.pollingTimeoutObject = setTimeout(this.poll.bind(this), this.pollingDelay); // start polling
         this.enableRuntimeControls();
     }
-    else if (responseText == "stopped")
+    else if (responseText == "stopped" && this.settings.onStopped)
     {
         this.settings.onStopped(this);
     }
-    else if (responseText == "global_scope_set")
+    else if (responseText == "default_scope_set" && this.settings.onDefaultScopeSet)
     {
-        this.settings.onGlobalScopeSet(this);
+        this.settings.onDefaultScopeSet(this);
     }
-    else if (responseText == "int_scope_set")
+    else if (responseText == "all_scopes_increased" && this.settings.onAllScopesIncreased)
+    {
+        this.settings.onAllScopesIncreased(this);
+    }
+    else if (responseText == "int_scope_set" && this.settings.onIntScopeSet)
     {
         this.settings.onIntScopeSet(this);
     }
-    else if (responseText == "bitwidth_set")
+    else if (responseText == "bitwidth_set" && this.settings.onBitwidthSet)
     {
         this.settings.onBitwidthSet(this);
     }        
-    else if (responseText == "individual_scope_set")
+    else if (responseText == "individual_scope_set" && this.settings.onIndividualScopeSet)
     {
-        this.settings.onClaferScopeSet(this);
+        this.settings.onIndividualScopeSet(this);
+    }
+    else if (responseText == "individual_scope_increased" && this.settings.onIndividualScopeIncreased)
+    {
+        this.settings.onIndividualScopeIncreased(this);
     }
 
     this.endQuery();
