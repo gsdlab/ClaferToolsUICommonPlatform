@@ -110,14 +110,14 @@ ClaferProcessor.method("getGoals", function()
 });
 
 
-ClaferProcessor.method("getAbstractClaferSubTree", function(root)
+ClaferProcessor.method("getAbstractClaferSubTree", function(root, options)
 {
 	var subLength = 0;
 	var result = new Object();
 	result.subclafers = new Array();
 	result.claferId = null;
 	result.displayId = null;
-	
+
 	for (var j = 0; j < root.childNodes.length; j++)
 	{
 		var current = root.childNodes[j];
@@ -131,32 +131,40 @@ ClaferProcessor.method("getAbstractClaferSubTree", function(root)
 			result.displayId = current.firstChild.nodeValue;
 		else if (current.tagName == "declaration")
 		{
-			var nextSubtree = this.getAbstractClaferSubTree(current);
+			var nextSubtree = this.getAbstractClaferSubTree(current, options);
 			if (nextSubtree != null)
 				result.subclafers[subLength++] = nextSubtree; 
-		} else if (current.tagName == "supers"){
-			var nextSubtree = this.getAbstractClaferTree(this.currentXpathToIdSiblings, $(current).find("id").text());
+		} else if (current.tagName == "supers" && options.includeSupers == "true"){
+			var nextSubtree = this.getAbstractClaferTree(this.currentXpathToIdSiblings, $(current).find("id").text(), options);
 			if (nextSubtree != null)
 				for (var i = 0; i<nextSubtree.subclafers.length; i++)
 					result.subclafers[subLength++] = nextSubtree.subclafers[i];		 
 		}		
 	}
 	
+	if (this.qualities && this.qualities.length > 0)
+	{
 
-	var notQuality = true;
-	for (j=0; j<this.qualities.length; j++){
-		if (result.claferId != null)
-			if (result.claferId.replace(/c[0-9]{1,}_/, "") == this.qualities[j])
-				notQuality = false;
+		var notQuality = true;
+		for (j=0; j<this.qualities.length; j++){
+			if (result.claferId != null)
+				if (result.claferId.replace(/c[0-9]{1,}_/, "") == this.qualities[j])
+					notQuality = false;
+		}
+		
+		if (result.claferId != null && notQuality)
+			return result;
 	}
-	
-	if (result.claferId != null && notQuality)
-		return result;
+	else
+	{
+		if (result.claferId != null)
+			return result;		
+	}	
 	
 	return null;
 });
 
-ClaferProcessor.method("getAbstractClaferTree", function(xpathToIdSiblings, id) 
+ClaferProcessor.method("getAbstractClaferTree", function(xpathToIdSiblings, id, options) 
 {
 	try
 	{
@@ -168,7 +176,7 @@ ClaferProcessor.method("getAbstractClaferTree", function(xpathToIdSiblings, id)
 			if (clafers[i].childNodes[0].nodeValue == id) // attention! might be not strict equality
 			{
 				var root = clafers[i].parentNode; // declaration
-				root = this.getAbstractClaferSubTree(root);
+				root = this.getAbstractClaferSubTree(root, options);
 				return root;
 			}
 		}
