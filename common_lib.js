@@ -412,7 +412,7 @@ var handleControlRequest = function(req, res, settings){
             var fileAndPathReplacement = [
                     {
                         "needle": "$dirname$", 
-                        "replacement": __dirname + "/Backends"
+                        "replacement": ROOT + "/Backends"
                     },
                     {
                         "needle": "$filepath$", 
