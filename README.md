@@ -1,7 +1,7 @@
 ClaferToolsUICommonPlatform
 ===========================
 
-v0.3.5.15-01-2014
+v0.3.5.17-01-2014
 
 All common components to be shared within Clafer Tools UI
 Also, build the ace editor from the source before copying the entire platform.
