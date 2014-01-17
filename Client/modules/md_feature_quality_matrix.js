@@ -44,11 +44,41 @@ function FeatureQualityMatrix(host, settings)
 FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
     this.processor = new ClaferProcessor(data.claferXML, data.qualities);
+
+    this.abstractClaferTree = null;
+    var instanceCount = this.instanceProcessor.getInstanceCount();
+
+    if (instanceCount == 0) // instance data contains no instances
+    {
+        if (this.lastAbstractClaferTree)
+        {
+            this.abstractClaferTree = this.lastAbstractClaferTree;
+        }
+        else
+        {
+            return; // else we cannot do anything         
+        }
+    }
+    else
+    {
+        if (this.settings.useInstanceName)
+        {
+            var instanceName = this.instanceProcessor.getInstanceName();
+            this.abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceName, {"includeSupers": "true"});
+        }
+        else
+        {
+            var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
+            this.abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceSuperClafer, {"includeSupers": "false"});        
+        }
+
+        this.lastAbstractClaferTree = this.abstractClaferTree;
+    }
+    
     this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this);    
 //    this.clearFilters();
     this.abstractClaferOutput = "";    
-    this.toggled = false;
-    
+    this.toggled = false;    
     this.dataTable = this.getDataTable();    
     this.content = $('<div id="comparison" class="comparison"></div>').append(new TableVisualizer().getHTML(this.dataTable));
     $("#mdFeatureQualityMatrix .window-titleBar-content").text("Feature and Quality Matrix: " + this.dataTable.title);
@@ -238,20 +268,7 @@ FeatureQualityMatrix.method("onRendered", function()
     }
     //  Add collapse buttons for features with children
 
-    var abstractClaferTree = null;
-
-    if (this.settings.useInstanceName)
-    {
-        var instanceName = this.instanceProcessor.getInstanceName();
-        abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceName, {"includeSupers": "true"});
-    }
-    else
-    {
-        var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
-        abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceSuperClafer, {"includeSupers": "false"});        
-    }
-
-    var hasChild = this.processor.getFeaturesWithChildren(abstractClaferTree);
+    var hasChild = this.processor.getFeaturesWithChildren(this.abstractClaferTree);
     i = 1;
     row = $("#r" + i);
     var that = this;
@@ -386,23 +403,10 @@ FeatureQualityMatrix.method("getDataTable", function()
 {
     var instanceCount = this.instanceProcessor.getInstanceCount();
 
-    var abstractClaferTree = null;
-
-    if (this.settings.useInstanceName)
-    {
-        var instanceName = this.instanceProcessor.getInstanceName();
-        abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceName, {"includeSupers": "true"});
-    }
-    else
-    {
-        var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
-        abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceSuperClafer, {"includeSupers": "false"});        
-    }
-
-    var EMfeatures = this.processor.getEffectivelyMandatoryFeatures(abstractClaferTree);
+    var EMfeatures = this.processor.getEffectivelyMandatoryFeatures(this.abstractClaferTree);
     
     var parent = null;
-    var current = abstractClaferTree;
+    var current = this.abstractClaferTree;
     abstractClaferOutput = new Array();
 
     this.traverse(current, 0);
@@ -461,6 +465,11 @@ FeatureQualityMatrix.method("getDataTable", function()
     }
     return result;
 
+});
+
+FeatureQualityMatrix.method("clearCachedData", function(row, isOn)
+{
+    this.lastAbstractClaferTree = null;
 });
 
 //change row from tansparent to opaque or vice-versa
