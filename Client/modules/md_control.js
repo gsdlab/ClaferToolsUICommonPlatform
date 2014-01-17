@@ -476,11 +476,14 @@ Control.method("updateClaferList", function(jsonList){
 
     for (var i = 0; i < jsonList.length; i++)
     {
+        if (jsonList[i].lpqName == "")
+            continue;
+
         var hierarchy = "";
         if (jsonList[i].hierarchy)
             hierarchy = " [" + jsonList[i].hierarchy + "]";
 
-        options += '<option value="' + jsonList[i].lpqName + "|" + jsonList[i].scope + '">' + jsonList[i].lpqName + ": " + jsonList[i].scope + "" + hierarchy + '</option>';
+        options += '<option value="' + jsonList[i].lpqName + "|" + jsonList[i].scope + '">' + jsonList[i].lpqName + " [" + jsonList[i].scope + "]" + hierarchy + '</option>';
     }
 
     $("#ClaferListCont").html('<select id="ClaferList"></select>');
