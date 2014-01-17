@@ -366,7 +366,7 @@ var handleControlRequest = function(req, res, settings){
     {
         res.writeHead(400, { "Content-Type": "text/html"});
         res.end("process_not_found");               
-        return;
+        return false;
     }
 
     if (req.body.operation == "run") // "Run" operation
@@ -380,7 +380,7 @@ var handleControlRequest = function(req, res, settings){
             core.logSpecific("Error: Not compiled yet", req.body.windowKey);
             res.writeHead(400, { "Content-Type": "text/html"});
             res.end("Error: The mode is not IG: the compilation is still running");        
-            return;
+            return false;
         }
         else
         {
@@ -393,7 +393,7 @@ var handleControlRequest = function(req, res, settings){
                 core.logSpecific("Error: Backend was not found", req.body.windowKey);
                 res.writeHead(400, { "Content-Type": "text/html"});
                 res.end("Error: Could not find the backend by its submitted id.");
-                return;
+                return false;
             }
 
             // looking for a format
@@ -403,7 +403,7 @@ var handleControlRequest = function(req, res, settings){
                 core.logSpecific("Error: Required format was not found", req.body.windowKey);
                 resultMessage = "Error: Could not find the required file format.";
                 isError = true;
-                return;
+                return false;
             }
 
             core.logSpecific(backend.id + " ==> " + format.id, req.body.windowKey);
@@ -499,7 +499,7 @@ var handleControlRequest = function(req, res, settings){
             core.logSpecific("Error: Backend was not found", req.body.windowKey);
             res.writeHead(400, { "Content-Type": "text/html"});
             res.end("Error: Could not find the backend by its submitted id.");
-            return;
+            return false;
         }
 
         core.logSpecific(backend.id + " " + req.body.operation_arg1, req.body.windowKey);
@@ -538,7 +538,7 @@ var handleControlRequest = function(req, res, settings){
             core.logSpecific("Error: Backend was not found", req.body.windowKey);
             res.writeHead(400, { "Content-Type": "text/html"});
             res.end("Error: Could not find the backend by its submitted id.");
-            return;
+            return false;
         }
 
         core.logSpecific(backend.id + " " + req.body.operation_arg1, req.body.windowKey);
@@ -577,7 +577,7 @@ var handleControlRequest = function(req, res, settings){
             core.logSpecific("Error: Backend was not found", req.body.windowKey);
             res.writeHead(400, { "Content-Type": "text/html"});
             res.end("Error: Could not find the backend by its submitted id.");
-            return;
+            return false;
         }
 
         core.logSpecific(backend.id + " " + req.body.operation_arg1 + " " + req.body.operation_arg2, req.body.windowKey);
@@ -620,7 +620,7 @@ var handleControlRequest = function(req, res, settings){
             core.logSpecific("Error: Backend was not found", req.body.windowKey);
             res.writeHead(400, { "Content-Type": "text/html"});
             res.end("Error: Could not find the backend by its submitted id.");
-            return;
+            return false;
         }
 
         core.logSpecific(backend.id + " " + req.body.operation_arg1 + " " + req.body.operation_arg2, req.body.windowKey);
@@ -663,7 +663,7 @@ var handleControlRequest = function(req, res, settings){
             core.logSpecific("Error: Backend was not found", req.body.windowKey);
             res.writeHead(400, { "Content-Type": "text/html"});
             res.end("Error: Could not find the backend by its submitted id.");
-            return;
+            return false;
         }
 
         core.logSpecific(backend.id + " " + req.body.operation_arg1 + " " + req.body.operation_arg2, req.body.windowKey);
@@ -706,7 +706,7 @@ var handleControlRequest = function(req, res, settings){
             core.logSpecific("Error: Backend was not found", req.body.windowKey);
             res.writeHead(400, { "Content-Type": "text/html"});
             res.end("Error: Could not find the backend by its submitted id.");
-            return;
+            return false;
         }
 
         core.logSpecific(backend.id + " " + req.body.operation_arg1, req.body.windowKey);
@@ -742,7 +742,7 @@ var handleControlRequest = function(req, res, settings){
             core.logSpecific('Control: Command does not follow pattern "backend-opreration": "' + req.body.operation + '"', req.body.windowKey, req.body.windowKey);
             res.writeHead(400, { "Content-Type": "text/html"});
             res.end("Error: Command does not follow the 'backend-operation' pattern.");
-            return;
+            return false;
         }
 
         var backendId = parts[0]; // it does not matter how to get backendid.
@@ -758,7 +758,7 @@ var handleControlRequest = function(req, res, settings){
             core.logSpecific("Error: Backend was not found", req.body.windowKey);
             res.writeHead(400, { "Content-Type": "text/html"});
             res.end("Error: Could not find the backend by its submitted id.");
-            return;
+            return false;
         }
 
         // looking for the operation
@@ -779,7 +779,7 @@ var handleControlRequest = function(req, res, settings){
             core.logSpecific("Error: Required operation was not found", req.body.windowKey);
             res.writeHead(400, { "Content-Type": "text/html"});
             res.end("Error: Could not find the required operation.");
-            return;
+            return false;
         }
 
         core.logSpecific(backend.id + " ==> " + operation.id, req.body.windowKey);
@@ -789,6 +789,8 @@ var handleControlRequest = function(req, res, settings){
         res.writeHead(200, { "Content-Type": "text/html"});
         res.end("operation");
     }
+
+    return true;
 
 };
 
