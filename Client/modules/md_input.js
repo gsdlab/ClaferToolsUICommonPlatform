@@ -88,6 +88,12 @@ Input.method("onInitRendered", function()
 
     $('#myform').ajaxForm(options); 
 
+    if (this.settings.optimization_backend)
+    {
+       $("#optimizationBackend")[0].onchange = this.onBackendChange.bind(this);    
+    }
+
+
 //    var options = new Object();
 //    options.error = this.handleError.bind(this);
 //    options.timeout = this.requestTimeout;
@@ -366,12 +372,23 @@ Input.method("getInitContent", function()
 
     if (this.settings.optimization_backend)
     {
-        result += '<div id="input_bottom_container" style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-20px;">';
-        result += '<div style="height:2px; border-top: 2px groove threedface;"></div>';
+        result += '<div id="input_bottom_container" style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-20px; border: 2px groove threedface;">';
+//        result += '<div style="height:2px; border-top: 2px groove threedface;"></div>';
 
-        result += '<span id="input_backend_label">Optimization backend: </span><select id="optimizationBackend" style="width:180px" name="optimizationBackend" title=""></select>';
+        result += '<table width="100%" height="100%" cellspacing="0" cellpadding="0"><tr><td>';
+        result += '<span id="input_backend_label">Backend: </span><select id="optimizationBackend" style="width:180px" name="optimizationBackend" title=""></select>';
 
+        result += '</td><td>';
+
+        result += '<span id="optimizationIntScopeSettings">';
+        result += '<span style="padding-left:4px;padding-right:4px;">Max. Integers:</span>';
+        result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizationIntHighScopeValue" title="Enter the upper bound for unknown integers" name="intHighScopeValue"/>';
+        result += '</span>';
+        result += '</td>';        
+
+        result += '<td width="160">';
         result += '<input id="useCache" type="checkbox" name="useCache" checked="' + this.settings.input_default_cache + '">Use Cache</input>';
+        result += '</td></tr></table>';
 
         result += '</div>';
 
@@ -379,6 +396,7 @@ Input.method("getInitContent", function()
             function(data)
             {
                 var backends = data.backends;
+                context.backends = data.backends;                
                 var options = "";
 
                 var display = "block";
@@ -390,6 +408,7 @@ Input.method("getInitContent", function()
 
                 $("#optimizationBackend").html(options);
 
+                context.onBackendChange();
                 context.partLoaded();
             }
         ).error(function() 
@@ -471,3 +490,33 @@ function unescapeJSON(escaped)
         .replaceAll('\\r', '\r')
         .replaceAll('\\t', '\t');                  
 }
+
+Input.method("onBackendChange", function()
+{
+    var selectedId = $( "#optimizationBackend option:selected" ).val();
+    var found = false;
+
+    for (var i = 0; i < this.backends.length; i++)
+    {
+        if (this.backends[i].id == selectedId)
+        {
+            if (this.backends[i].scope_options.set_int_scope)
+            {
+                $("#optimizationIntScopeSettings").show();
+                if (this.backends[i].scope_options.set_int_scope.default_value)
+                {
+                    $("#optimizationIntHighScopeValue").val(this.backends[i].scope_options.set_int_scope.default_value);
+                }
+
+                found = true;
+            }
+            else
+            {
+                $("#optimizationIntScopeSettings").hide();                
+            }           
+        }
+    }
+
+    if (this.settings.onBackendChange) 
+        this.settings.onBackendChange(this, result);
+});
