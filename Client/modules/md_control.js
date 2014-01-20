@@ -104,7 +104,7 @@ Control.method("getInitContent", function(){
 
     ret += '<tr id="intScopeSettings">';
     ret += '<td style="padding-left:4px;padding-right:4px;" width="130">Maximum Integers:</td>';
-    ret += '<td><input type="text" class="scopeInput" size="2" value="127" id="intHighScopeValue" title="Enter the upper bound for unknown integers" name="intHighScopeValue"/>';
+    ret += '<td><input type="text" class="scopeInput" size="2" value="63" id="intHighScopeValue" title="Enter the upper bound for unknown integers" name="intHighScopeValue"/>';
     ret += '<button id="setIntScope" title="Set the selected scope for integers">Set</button></td>';
     ret += '</tr>';
 
@@ -596,6 +596,11 @@ Control.method("onBackendChange", function()
             if (this.backends[i].scope_options.set_int_scope)
             {
                 $("#intScopeSettings").show();
+                if (this.backends[i].scope_options.set_int_scope.default_value)
+                {
+                    $("#intHighScopeValue").val(this.backends[i].scope_options.set_int_scope.default_value);
+                }
+
                 found = true;
             }
             else
