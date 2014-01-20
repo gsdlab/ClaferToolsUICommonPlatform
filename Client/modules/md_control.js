@@ -523,10 +523,14 @@ Control.method("onBackendChange", function()
     $("#BackendId").val(selectedId);
     $("#backendButtons").children("#" + selectedId + "_buttons")[0].style.display = "block";
 
+    var result = null;
+
     for (var i = 0; i < this.backends.length; i++)
     {
         if (this.backends[i].id == selectedId)
         {
+            result = this.backends[i];
+
             if (this.backends[i].scope_options.set_int_scope)
             {
                 $("#intScopeSettings").show();
@@ -543,10 +547,12 @@ Control.method("onBackendChange", function()
             else
             {
                 $("#bitwidthSettings").hide();                
-            }            
+            }
+
+            break;            
         }
     }
 
     if (this.settings.onBackendChange) 
-        this.settings.onBackendChange(this, selectedId);
+        this.settings.onBackendChange(this, result);
 });
