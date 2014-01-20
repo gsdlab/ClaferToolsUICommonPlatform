@@ -382,7 +382,7 @@ Input.method("getInitContent", function()
 
         result += '<span id="optimizationIntScopeSettings">';
         result += '<span style="padding-left:4px;padding-right:4px;">Max. Integers:</span>';
-        result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizationIntHighScopeValue" title="Enter the upper bound for unknown integers" name="intHighScopeValue"/>';
+        result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizationIntHighScopeValue" title="Enter the upper bound for unknown integers" name="optimizationIntHighScopeValue"/>';
         result += '</span>';
         result += '</td>';        
 
