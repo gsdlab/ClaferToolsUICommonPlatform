@@ -32,7 +32,7 @@ The platform should be installed as a Git submodule into `Server/commons` folder
 Upgrading to the latest platform
 --------------------------------
 
-1. in `Server/commons` execute
+1. in your project folder, execute
 	* `git submodule foreach git pull`
 
 ### Important: Branches must correspond
