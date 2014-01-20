@@ -427,7 +427,22 @@ var handleControlRequest = function(req, res, settings){
                 args.push(process.ss);
             }
 
+            if (backend.scope_options && backend.scope_options.set_int_scope && backend.scope_options.set_int_scope.argument) 
+            {
+                var replacement = [
+                    {
+                        "needle": "$value$", 
+                        "replacement": req.body.intHighScopeValue
+                    }
+                ];
+
+                var intArg = core.replaceTemplate(backend.scope_options.set_int_scope.argument, replacement);
+
+                args.push(intArg);
+            }
+
             core.logSpecific(args, req.body.windowKey);
+            process.ig_args = args.join(" ").replace(process.file, "file");
             
             process.tool = spawn(core.replaceTemplate(backend.tool, fileAndPathReplacement), args);
 
@@ -666,16 +681,12 @@ var handleControlRequest = function(req, res, settings){
             return false;
         }
 
-        core.logSpecific(backend.id + " " + req.body.operation_arg1 + " " + req.body.operation_arg2, req.body.windowKey);
+        core.logSpecific(backend.id + " " + req.body.operation_arg1, req.body.windowKey);
 
         var replacements = [
                 {
-                    "needle": "$low$", 
+                    "needle": "$value$", 
                     "replacement": req.body.operation_arg1
-                },
-                {
-                    "needle": "$high$", 
-                    "replacement": req.body.operation_arg2
                 }
             ];
 
@@ -695,6 +706,7 @@ var handleControlRequest = function(req, res, settings){
         res.writeHead(200, { "Content-Type": "text/html"});
         res.end("int_scope_set");
     }
+/*
     else if (req.body.operation == "setBitwidth") // "Set Bitwidth" operation
     {
         core.logSpecific("Control: setBitwidth", req.body.windowKey);
@@ -734,6 +746,7 @@ var handleControlRequest = function(req, res, settings){
         res.writeHead(200, { "Content-Type": "text/html"});
         res.end("bitwidth_set");
     }
+*/
     else // else look for custom commands defined by backend config
     {
         var parts = req.body.operation.split("-");
