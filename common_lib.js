@@ -441,10 +441,12 @@ var handleControlRequest = function(req, res, settings){
                 args.push(intArg);
             }
 
+            var toolPath = core.replaceTemplate(backend.tool, fileAndPathReplacement);
+
             core.logSpecific(args, req.body.windowKey);
-            process.ig_args = args.join(" ").replace(process.file, "file");
+            process.ig_args = toolPath.replace(ROOT, "") + " " + args.join(" ").replace(process.file, "file").replace(ROOT, "");
             
-            process.tool = spawn(core.replaceTemplate(backend.tool, fileAndPathReplacement), args);
+            process.tool = spawn(toolPath, args);
 
             process.tool.on('error', function (err){
                 core.logSpecific('ERROR: Cannot run the chosen instance generator. Please check whether it is installed and accessible.', req.body.windowKey);
