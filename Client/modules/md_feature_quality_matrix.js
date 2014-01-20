@@ -89,6 +89,9 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
 
 FeatureQualityMatrix.method("onRendered", function()
 {
+    if (!this.filter)
+        return;
+    
     this.filter.onRendered();
     
     $.resizeWindow(this.id, this.width, $("#comparison").height() + 80); // resize the table to fit everything
