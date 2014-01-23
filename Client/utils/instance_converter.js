@@ -107,6 +107,8 @@ InstanceConverter.method("convertFromClaferIGOutputToClaferMoo", function(oldAbs
 	//convert double spacing to tab
 	instances = instances.replaceAll("  ", " ");
 
+/* commenting out fixes a bug with `Bluetooth
+
 	//make numbers the same
 	myregex = /[c][0-9]{1,}[_][^\n <>]{1,}/g;
 	var allFinds = instances.match(myregex);
@@ -136,7 +138,7 @@ InstanceConverter.method("convertFromClaferIGOutputToClaferMoo", function(oldAbs
 			}
 		}
 	}
-
+*/
 	return instances;
 });
 
