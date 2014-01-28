@@ -78,7 +78,7 @@ Control.method("getInitContent", function(){
     ret += '</table>';
     ret += '<table width="100%" border="0" cellspacing="0" cellpadding="0">'; 
     ret += '<tr id="claferScopeSettings1">';
-    ret += '<td style="padding: 0px 4px 0px 4px">Custom:</td>';
+    ret += '<td style="padding: 0px 4px 0px 4px" width="60">Custom:</td>';
     ret += '<td colspan="3">';
     ret += '<input type="text" id="individualClafer" class="fullwidth" placeholder="Clafer name(s)" title="Enter the clafer name, namespace, path or choose ones from a drop down, depending on the backend"></input>';
     ret += '</td>';
@@ -105,7 +105,7 @@ Control.method("getInitContent", function(){
     ret += '<table width="100%" border="0" cellspacing="0" cellpadding="0">'; 
 
     ret += '<tr id="intScopeSettings">';
-    ret += '<td style="padding-left:4px;padding-right:4px;" width="130">Maximum Integers:</td>';
+    ret += '<td style="padding-left:4px;padding-right:4px;" width="60">Max Int:</td>';
     ret += '<td><input type="text" class="scopeInput" size="2" value="63" id="intHighScopeValue" title="Enter the upper bound for unknown integers" name="intHighScopeValue"/>';
     ret += '<button id="setIntScope" title="Set the selected scope for integers">Set</button></td>';
     ret += '</tr>';
