@@ -81,7 +81,7 @@ Output.method("onInitRendered", function(){
     this.editor.getSession().setMode("ace/mode/console");
     this.editor.setShowPrintMargin(false);
 
-//    $("#clearOutput")[0].onclick = this.onClearClick.bind(this);
+    $("#clearOutput")[0].onclick = this.onClearClick.bind(this);
 
     this.editor.getSession().setUseWrapMode(false);   
     this.editor.setReadOnly(true); 
