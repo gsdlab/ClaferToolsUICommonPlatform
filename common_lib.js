@@ -360,7 +360,8 @@ var produceScopes = function(process, backend)
     {
         try
         {
-            process.tool.stdin.write(backend.scope_options.produce_scope_file.command);
+            if (process.tool && process.tool.stdin && !process.mode_completed)
+                process.tool.stdin.write(backend.scope_options.produce_scope_file.command);
         }
         catch(e)
         {
