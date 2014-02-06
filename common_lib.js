@@ -358,12 +358,32 @@ var produceScopes = function(process, backend)
 {
     if (backend.scope_options.produce_scope_file)
     {
-        process.tool.stdin.write(backend.scope_options.produce_scope_file.command);
+        try
+        {
+            process.tool.stdin.write(backend.scope_options.produce_scope_file.command);
+        }
+        catch(e)
+        {
+            console.logSpecific("Error: Could not write produceScopes command. Please report this error.", process.windowKey);
+        }
+        
         process.producedScopes = false;
     }
     else
     {
         process.producedScopes = true;
+    }
+};
+
+var writeCommand = function(process, command)
+{
+    try
+    {
+        process.tool.stdin.write(command);
+    }
+    catch(e)
+    {
+        console.logSpecific("Error: Could not write the command '" + command + "'. Please report this error.", process.windowKey);
     }
 };
 
@@ -530,7 +550,7 @@ var handleControlRequest = function(req, res, settings){
             ];
 
         var command = core.replaceTemplate(backend.scope_options.set_default_scope.command, replacements);
-        process.tool.stdin.write(command);
+        writeCommand(process, command);
         produceScopes(process, backend);
 
         res.writeHead(200, { "Content-Type": "text/html"});
@@ -560,7 +580,7 @@ var handleControlRequest = function(req, res, settings){
             ];
 
         var command = core.replaceTemplate(backend.scope_options.inc_all_scopes.command, replacements);
-        process.tool.stdin.write(command);
+        writeCommand(process, command);
         produceScopes(process, backend);
 
         res.writeHead(200, { "Content-Type": "text/html"});
@@ -594,7 +614,7 @@ var handleControlRequest = function(req, res, settings){
             ];
 
         var command = core.replaceTemplate(backend.scope_options.set_individual_scope.command, replacements);
-        process.tool.stdin.write(command);
+        writeCommand(process, command);
         produceScopes(process, backend);
 
         res.writeHead(200, { "Content-Type": "text/html"});
@@ -628,7 +648,7 @@ var handleControlRequest = function(req, res, settings){
             ];
 
         var command = core.replaceTemplate(backend.scope_options.inc_individual_scope.command, replacements);
-        process.tool.stdin.write(command);
+        writeCommand(process, command);
         produceScopes(process, backend);
 
         res.writeHead(200, { "Content-Type": "text/html"});
@@ -658,7 +678,7 @@ var handleControlRequest = function(req, res, settings){
             ];
 
         var command = core.replaceTemplate(backend.scope_options.set_int_scope.command, replacements);
-        process.tool.stdin.write(command);
+        writeCommand(process, command);
         produceScopes(process, backend);
 
         res.writeHead(200, { "Content-Type": "text/html"});
@@ -754,8 +774,7 @@ var handleControlRequest = function(req, res, settings){
         }
 
         core.logSpecific(backend.id + " ==> " + operation.id, req.body.windowKey);
-
-        process.tool.stdin.write(operation.command);
+        writeCommand(process, operation.command);
 
         res.writeHead(200, { "Content-Type": "text/html"});
         res.end("operation");
@@ -770,3 +789,4 @@ module.exports.getMainHTML = getMainHTML;
 module.exports.runClaferCompiler = runClaferCompiler;
 module.exports.handleControlRequest = handleControlRequest;
 module.exports.produceScopes = produceScopes;
+module.exports.writeCommand = writeCommand;
