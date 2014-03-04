@@ -43,6 +43,7 @@ function FeatureQualityMatrix(host, settings)
 
 FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
+    console.log(data);
     this.processor = new ClaferProcessor(data.claferXML, data.qualities);
 
     this.abstractClaferTree = null;
@@ -61,16 +62,18 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
     }
     else
     {
-        if (this.settings.useInstanceName)
-        {
+//        if (this.settings.useInstanceName)
+//        {
             var instanceName = this.instanceProcessor.getInstanceName();
+            alert(instanceName);
             this.abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceName, {"includeSupers": "true"});
-        }
-        else
-        {
-            var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
-            this.abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceSuperClafer, {"includeSupers": "false"});        
-        }
+//        }
+//        else
+//        {
+//            var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
+//            alert(instanceSuperClafer);
+//            this.abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceSuperClafer, {"includeSupers": "false"});        
+//        }
 
         this.lastAbstractClaferTree = this.abstractClaferTree;
     }

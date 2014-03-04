@@ -8,7 +8,7 @@ function InstanceConverter(source)
 // Converts ClaferMoo output (list of instances with unique clafer names represented as a structural text)
 // from the source to XML
 // returns: XML in plain text format
-
+/*
 InstanceConverter.method("convertFromClaferMooOutputToXML", function(){
 	myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ ]*\=?[ ]*([^ ]*)\b/;
 	var result = "";
@@ -92,7 +92,128 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(){
 		}
 	}	
 	
-	result += "</instance></instances>"
+	result += "</instance></instances>";
+
+	console.log(result);
+	alert(result);
+	
+	return result;
+});
+*/
+
+InstanceConverter.method("convertFromClaferMooOutputToXML", function(){
+	myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ ]*\=?[ ]*([^ ]*)\b/;
+	var result = "";
+	list = this.instances.split("\n");
+	
+	result = '<?xml version="1.0"?><instances><instance>';
+	var temp = "";
+	var oldpos = -1;
+	var pos = 0;
+	var empty = true;
+	
+	for (var i = 0; i < list.length; i++)
+	{
+		var s = list[i];
+
+		if (s == "" && (oldpos != 0 || i !=list.length-1))
+			continue;
+		else if( s == "" && oldpos == 0 && i == list.length-1 ){
+			result += "</subclafers></clafer>";
+			continue;
+		}
+	
+		empty = false;
+	
+		myMatch = myRegExp.exec(s);
+		if (myMatch == null)
+			continue;
+			
+		pos = myMatch.index;
+		
+		var indent = 0;
+		
+		if (oldpos != -1)
+		{					
+			if (pos == oldpos) // clearly NO children
+			{
+				result += "</subclafers></clafer>";
+			}
+
+			if (pos > oldpos) // nesting level increases
+			{
+				result += ""; // don't do anything, clafers will be nested after the loop
+			}
+			
+			if (pos < oldpos)
+			{
+				for (var j = 0; j < (oldpos - pos + 1); j++)
+				{
+					result += "</subclafers></clafer>";
+				}
+			}
+				
+			if (pos == 0) // new instance begins
+			{
+				result += "</instance><instance>";
+			}
+			
+			oldpos = pos;
+		}
+		else oldpos = 0;
+		
+		var claferParts = myMatch[1].split("#");
+		claferId = claferParts[0];
+
+		claferCounter = claferParts[1];
+			
+		var superClafer = myMatch[2].trim().replace("#clafer#", "");
+
+		value = myMatch[3]; // value can be numeric or another instance clafer, it does not matter
+		var valueId = "";
+		var valueCounter;
+
+		if (value == "")
+		{
+			valueId = "";
+			valueCounter = "";
+		}
+		else
+		{
+			var valueParts = value.split("#");
+
+			if (valueParts && valueParts.length == 2) // we have just value, not an instance reference
+			{
+				valueId = valueParts[0];
+				valueCounter = valueParts[1];
+			}
+			else
+			{
+				valueId = value;
+				valueCounter = "";
+			}
+		}
+
+		result += '<clafer id="' + claferId + '" counter="' + claferCounter + '">';
+		result += '<super>' + superClafer + '</super>';
+		result += '<value id="'  + valueId  + '" counter="' + valueCounter  + '"></value>';
+		result += '<subclafers>';
+	}
+	
+	if (empty)
+	{
+		return "";
+	}
+	
+	if (0 < oldpos)
+	{
+		for (var j = 0; j < (oldpos + 1); j++)
+		{
+			result += "</subclafers></clafer>";
+		}
+	}	
+	
+	result += "</instance></instances>";
 	
 	return result;
 });

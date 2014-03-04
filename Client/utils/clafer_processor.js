@@ -121,9 +121,9 @@ ClaferProcessor.method("getAbstractClaferSubTree", function(root, options)
 	for (var j = 0; j < root.childNodes.length; j++)
 	{
 		var current = root.childNodes[j];
-		if (current.tagName == "super")
-			result.claferSuper = current.firstChild.nodeValue;
-		else if (current.tagName == "value")
+//		if (current.tagName == "super")
+//			result.claferSuper = current.firstChild.nodeValue;
+		if (current.tagName == "value")
 			result.claferValue = current.firstChild.nodeValue;
 		else if (current.tagName == "uniqueid")
 			result.claferId = current.firstChild.nodeValue;
@@ -135,10 +135,13 @@ ClaferProcessor.method("getAbstractClaferSubTree", function(root, options)
 			if (nextSubtree != null)
 				result.subclafers[subLength++] = nextSubtree; 
 		} else if (current.tagName == "supers" && options.includeSupers == "true"){
-			var nextSubtree = this.getAbstractClaferTree(this.currentXpathToIdSiblings, $(current).find("id").text(), options);
-			if (nextSubtree != null)
-				for (var i = 0; i<nextSubtree.subclafers.length; i++)
-					result.subclafers[subLength++] = nextSubtree.subclafers[i];		 
+			if ($(current).find("isoverlapping").text() == "false") // if NOT a reference
+			{
+				var nextSubtree = this.getAbstractClaferTree(this.currentXpathToIdSiblings, $(current).find("id").text(), options);
+				if (nextSubtree != null)
+					for (var i = 0; i<nextSubtree.subclafers.length; i++)
+						result.subclafers[subLength++] = nextSubtree.subclafers[i];		 
+			}
 		}		
 	}
 	

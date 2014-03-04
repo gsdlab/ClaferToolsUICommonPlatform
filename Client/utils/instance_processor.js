@@ -65,10 +65,11 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, featureName,
 		if (clafers.length == 1)
 		{	
 			var result;
+
 			if (forceNumeric)
-				result = 1;
+				result = 0;
 			else
-				result = "yes";			
+				result = "yes";
 		
 			for (var i = 0; i < clafers[0].childNodes.length; i++)
 			{
@@ -76,25 +77,31 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, featureName,
 
 				if (current.tagName == "value")
 				{
-					if (current.firstChild)
-					{
-						result = current.firstChild.nodeValue;
-						if (forceNumeric)
-							result = parseInt(result);
-					}
-					
+//					alert("foundValue");
+					var id = current.getAttribute("id");
+					var counter = current.getAttribute("counter");
+//					alert(id + " | " + counter);
+
+					if (counter == "")
+						result = id;
+					else
+						result = id + "#" + counter;
+
 					break;
 				}
 			}
+
+			if (forceNumeric)
+				return parseInt(result);
 			
 			return result;
 		}
 		else
         {
+//        	alert(clafers.length + " " + instanceIndex + " " + featureName + " " + forceNumeric);
 			if (forceNumeric)
 				return 0;
-			else
-				return "-";			
+			return "-";
         }
 	}
 	catch(e)
