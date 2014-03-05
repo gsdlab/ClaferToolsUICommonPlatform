@@ -94,11 +94,12 @@ ClaferProcessor.method("getGoals", function()
 		var parts = builtExp.split(" ");
 		var operation = parts[0];
 		var rest = builtExp.replace(/[^ ]* /, "").replace(".ref", "");
-		rest = rest.replace(/[^.]*\./, "");
 		
 		var goal = new Object();
 		goal.operation = operation;
-		goal.arg = rest;
+		goal.arg = rest.replaceAll(".", "-"); // cause . confuses HTML ids
+//		alert(goal.arg);
+//		rest = rest.replace(/[^.]*\./, "");
 		goal.label = this.claferFilter(rest);
 		
 //		alert("|" + rest + "|");

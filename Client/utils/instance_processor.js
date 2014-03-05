@@ -54,26 +54,58 @@ InstanceProcessor.method("getInstanceSuperClafer", function()
 });
 
 
+InstanceProcessor.method("makeXMLPath", function(pathArray)
+{
+	var result = "";
+	for (var i = 0; i < pathArray.length; i++)
+	{
+		if (i > 0)
+		{
+			result += '/subclafers';
+		}
+
+		result += '/' + 'clafer[@id="' + pathArray[i] + '"]';
+	}
+
+	return result;
+});
+
+
+
+
 // returns feature value of featureName feature of an instance number instanceIndex
 // forceNumeric forces to return an integer
 
-InstanceProcessor.method("getFeatureValue", function(instanceIndex, featureName, forceNumeric) 
+InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, forceNumeric) 
 {
 	try
 	{
-        var clafers = this.xmlHelper.queryXML(this.source, 'instances/instance[' + instanceIndex + ']' + '//clafer[@id="' + featureName + '"]');
-		if (clafers.length == 1)
-		{	
-			var result;
+        var xPath = 'instances/instance[' + instanceIndex + ']' + this.makeXMLPath(claferPath);
+//        alert(xPath);
+        var clafers = this.xmlHelper.queryXML(this.source, xPath);
+		if (clafers.length == 0)
+		{
+//			alert("Feature value not found: '" + instanceIndex + " " + claferPath + "'");
 
+			if (forceNumeric)
+				return 0;
+
+			return "-";
+		}
+
+		var results = new Array();
+
+		for (var resultId = 0; resultId < clafers.length; resultId++)
+		{
+			var result;
 			if (forceNumeric)
 				result = 0;
 			else
 				result = "yes";
 		
-			for (var i = 0; i < clafers[0].childNodes.length; i++)
+			for (var i = 0; i < clafers[resultId].childNodes.length; i++)
 			{
-				var current = clafers[0].childNodes[i];
+				var current = clafers[resultId].childNodes[i];
 
 				if (current.tagName == "value")
 				{
@@ -92,21 +124,20 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, featureName,
 			}
 
 			if (forceNumeric)
-				return parseInt(result);
-			
-			return result;
+				results.push(parseInt(result));
+			else results.push(result);
+
 		}
-		else
-        {
-//        	alert(clafers.length + " " + instanceIndex + " " + featureName + " " + forceNumeric);
-			if (forceNumeric)
-				return 0;
-			return "-";
-        }
+
+		if (forceNumeric)
+		{
+			return results[0]; // cannot join integers!
+		}
+		return results.join("<br/>");
 	}
 	catch(e)
 	{
-		alert("Error while checking the feature specified by: '" + instanceIndex + " " + featureName + "'");
+		alert("Error while checking the feature specified by: '" + instanceIndex + " " + claferPath + "'");
 		return "";
 	}
 		

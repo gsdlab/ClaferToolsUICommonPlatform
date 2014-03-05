@@ -91,7 +91,7 @@ TableVisualizer.prototype.getHTML = function(data)
 		var row = $('<tr id="r' + (i + 1) +'"></tr>').addClass('bar');//
 		
 		var td = $('<' + tagName + '></' + tagName + '>').addClass('td_abstract');
-		td.html(data.features[i].replaceAll(' ', '&nbsp;&nbsp;'));
+		td.html(data.features[i].title.replaceAll(' ', '&nbsp;&nbsp;') + '<span class="path" style="display:none;">' + data.features[i].id + '</span>');
         
 		row.append(td);
 				

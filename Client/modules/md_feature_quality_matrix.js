@@ -62,19 +62,9 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
     }
     else
     {
-//        if (this.settings.useInstanceName)
-//        {
-            var instanceName = this.instanceProcessor.getInstanceName();
-            alert(instanceName);
-            this.abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceName, {"includeSupers": "true"});
-//        }
-//        else
-//        {
-//            var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
-//            alert(instanceSuperClafer);
-//            this.abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceSuperClafer, {"includeSupers": "false"});        
-//        }
-
+        var instanceName = this.instanceProcessor.getInstanceName();
+        alert(instanceName);
+        this.abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceName, {"includeSupers": "true"});
         this.lastAbstractClaferTree = this.abstractClaferTree;
     }
     
@@ -377,11 +367,12 @@ FeatureQualityMatrix.method("getContent", function()
 
 //input: node in clafer tree, level in tree
 //output: object with unique clafer id, id for display and, display id with indentation
-FeatureQualityMatrix.method("collector", function(clafer, spaceCount)
+FeatureQualityMatrix.method("collector", function(clafer, spaceCount, path)
 {
     var unit = new Object();
     unit.claferId = clafer.claferId;
     unit.displayId = clafer.displayId;
+    unit.claferPath = path.slice(0); // cloning an array
 
     unit.displayWithMargins = unit.displayId;
     
@@ -392,16 +383,19 @@ FeatureQualityMatrix.method("collector", function(clafer, spaceCount)
 });
 
 //Traverses clafer tree to and runs collector on every node
-FeatureQualityMatrix.method("traverse", function(clafer, level)
+FeatureQualityMatrix.method("traverse", function(clafer, level, path)
 {
-    this.collector (clafer, level);
+    path.push(clafer.claferId);
+    this.collector (clafer, level, path);
 
     if (clafer.subclafers != null){
         for (var i = 0; i < clafer.subclafers.length; i++)
         {
-            this.traverse(clafer.subclafers[i], level + 1);
+            this.traverse(clafer.subclafers[i], level + 1, path);
         }
     }
+
+    path.pop();
 });
 
 //generate data table
@@ -415,7 +409,7 @@ FeatureQualityMatrix.method("getDataTable", function()
     var current = this.abstractClaferTree;
     abstractClaferOutput = new Array();
 
-    this.traverse(current, 0);
+    this.traverse(current, 0, []);
     output = abstractClaferOutput;
     
     var goalNames = this.processor.getGoals();
@@ -432,7 +426,10 @@ FeatureQualityMatrix.method("getDataTable", function()
         var currentMatrixRow = new Array();
         var currentContextRow = new Array();
         if (i > 0){ // do not push the parent clafer
-            result.features.push(output[i].displayWithMargins + " " + this.processor.getIfMandatory(output[i].claferId));
+            feature = new Object();
+            feature.title = output[i].displayWithMargins + " " + this.processor.getIfMandatory(output[i].claferId);
+            feature.id = output[i].claferPath.join(".");
+            result.features.push(feature);
             currentContextRow.push(output[i].displayWithMargins + " " + this.processor.getIfMandatory(output[i].claferId));
             var featureIsEM = (EMfeatures.indexOf(output[i].displayId) != -1);
         }
@@ -449,7 +446,8 @@ FeatureQualityMatrix.method("getDataTable", function()
             }
             else
             {
-                sVal = this.instanceProcessor.getFeatureValue(j, output[i].claferId, false);
+                sVal = this.instanceProcessor.getFeatureValue(j, output[i].claferPath, false);
+//                alert(output[i].claferId + " " + sVal);
                 currentMatrixRow.push(sVal);
                 if (sVal == "yes")
                     currentContextRow.push("X");

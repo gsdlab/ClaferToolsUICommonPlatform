@@ -84,15 +84,16 @@ Goals.method("getContent", function()
 	
 	for (var i = 0; i < this.goals.length; i++)
 	{
+        var filteredTitle = this.goals[i].label.replaceAll(".", "-");
         //optimization direction
 		var row = $('<tr></tr>').addClass('bar');
-		td = $('<td id="operation_' + this.goals[i].operation + '" name="' + this.goals[i].label + '"></td>').addClass('td_operation');
+		td = $('<td id="operation_' + this.goals[i].operation + '" name="' + filteredTitle + '"></td>').addClass('td_operation');
 		td.html(this.goals[i].operation);
 		row.append(td);
 		
         //goal title/draggable
 		td = $('<td></td>').addClass('td_argument');
-		var span = $('<a href="#" draggable="true" id="' + this.goals[i].arg + '" class="' + this.goals[i].label + '"></a>');
+		var span = $('<a href="#" draggable="true" id="' + this.goals[i].arg + '" class="' + filteredTitle + '"></a>');
         span.html(this.goals[i].label);
 		td.append(span);
         row.append(td);
@@ -100,7 +101,7 @@ Goals.method("getContent", function()
         //range input
         td = $('<td></td>').addClass('td_argument');
         //(2nd input added to keep form from submitting on hitting enter)
-        var input = $('<input type="text" class="text_input" id="' + this.goals[i].label + 'min" placeholder="min" style="width: 40px">..<input type="text" class="text_input" id="' + this.goals[i].label + 'max" placeholder="max" style="width: 40px">');
+        var input = $('<input type="text" class="text_input" id="' + this.goals[i].arg + 'min" placeholder="min" style="width: 40px">..<input type="text" class="text_input" id="' + this.goals[i].arg + 'max" placeholder="max" style="width: 40px">');
 		td.append(input);
         row.append(td);
 
@@ -108,7 +109,7 @@ Goals.method("getContent", function()
 		$(table).append(row);
 
         this.ranges.push({
-            goal: this.goals[i].label,
+            goal: this.goals[i].arg,
             //placeholder values
             min: -10000000,
             max: 10000000
@@ -121,6 +122,7 @@ Goals.method("getContent", function()
 //get ranges to set landing zone else get minimum/maximum values for the ranges. After that filter
 Goals.method("filterByGoals", function(input)
 {
+    alert(input);
     for (var x = 0; x<=this.ranges.length; x++){
         if (input == this.ranges[x].goal){
             break;
