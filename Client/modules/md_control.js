@@ -72,11 +72,10 @@ Control.method("getInitContent", function(){
 
     ret += '</tr>';
 
-    ret += '<tr><td colspan="4"><div style="border-bottom: 2px groove threedface; height:6px;"></div></td>';
-    ret += '</tr>';
-
     ret += '</table>';
     ret += '<table width="100%" border="0" cellspacing="0" cellpadding="0" id="individualScopeSettings">'; 
+    ret += '<tr><td colspan="4"><div style="border-bottom: 2px groove threedface; height:6px;"></div></td>';
+    ret += '</tr>';
     ret += '<tr id="claferScopeSettings1">';
     ret += '<td style="padding: 0px 4px 0px 4px" width="60">Custom:</td>';
     ret += '<td colspan="3">';
