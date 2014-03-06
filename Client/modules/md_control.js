@@ -64,10 +64,10 @@ Control.method("getInitContent", function(){
 
     ret += '<tr id="defaultScopeSettings">';
 
-    ret += '<td style="padding: 0px 4px 0px 4px">All:</td>';
+    ret += '<td style="padding: 0px 4px 0px 4px" id="defaultScopeSettingsIncLabel">All:</td>';
     ret += '<td><input type="text" class="scopeInput" title="Enter the delta by which increase scopes" size="2" value="1" id="allScopesDelta"/><button id="incAllScopes" title="Increase all the scopes by the specified value">Inc</button></td>';
 
-    ret += '<td style="padding: 0px 4px 0px 12px; border-left: 2px groove threedface;">Default:</td>';
+    ret += '<td style="padding: 0px 4px 0px 12px; border-left: 2px groove threedface;" id="defaultScopeSettingsSetLabel">Default:</td>';
     ret += '<td ><input type="text" class="scopeInput" title="Enter the scope (an integer from 0 up to a number the backend can handle)" size="2" value="1" id="defaultScopeValue"/><button id="setDefaultScope" title="Set the default scope">Set</button></td>';
 
     ret += '</tr>';
@@ -76,7 +76,7 @@ Control.method("getInitContent", function(){
     ret += '</tr>';
 
     ret += '</table>';
-    ret += '<table width="100%" border="0" cellspacing="0" cellpadding="0">'; 
+    ret += '<table width="100%" border="0" cellspacing="0" cellpadding="0" id="individualScopeSettings">'; 
     ret += '<tr id="claferScopeSettings1">';
     ret += '<td style="padding: 0px 4px 0px 4px" width="60">Custom:</td>';
     ret += '<td colspan="3">';
@@ -337,7 +337,7 @@ Control.method("disableRuntimeControls", function(){
     {
         if (this.backends[i].id == selectedId)
         {
-            if (this.backends[i].scope_options.set_int_scope.argument)
+            if (this.backends[i].scope_options.set_int_scope && this.backends[i].scope_options.set_int_scope.argument)
             {
                 $("#intHighScopeValue").removeAttr("disabled");   
             }
@@ -609,6 +609,31 @@ Control.method("onBackendChange", function()
             {
                 $("#intScopeSettings").hide();                
             }
+
+            if (this.backends[i].scope_options.set_individual_scope)
+            {
+                $("#individualScopeSettings").show();
+            }
+            else
+            {
+                $("#individualScopeSettings").hide();                
+            }
+
+            var label = "All:";
+            if (this.backends[i].scope_options.inc_all_scopes && this.backends[i].scope_options.inc_all_scopes.label)
+            {
+                label = this.backends[i].scope_options.inc_all_scopes.label;
+            }
+            $("#defaultScopeSettingsIncLabel").html(label);
+
+            var label = "Default:";
+
+            if (this.backends[i].scope_options.set_default_scope && this.backends[i].scope_options.set_default_scope.label)
+            {
+                label = this.backends[i].scope_options.set_default_scope.label;
+            }
+
+            $("#defaultScopeSettingsSetLabel").html(label);
 
 //            if (this.backends[i].scope_options.set_bitwidth)
 //            {
