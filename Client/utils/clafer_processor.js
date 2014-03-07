@@ -111,19 +111,24 @@ ClaferProcessor.method("getGoals", function()
 });
 
 
-ClaferProcessor.method("getAbstractClaferSubTree", function(root, options)
+ClaferProcessor.method("getClaferTree", function(root)
 {
 	var subLength = 0;
 	var result = new Object();
 	result.subclafers = new Array();
-	result.claferId = null;
-	result.displayId = null;
+	result.claferId = "root";
+	result.displayId = "root";
+	result.claferValue = "";
+
+	if (root.tagName != 'module' && root.getAttribute("type") != "IClafer")
+	{
+		return null;
+	}
 
 	for (var j = 0; j < root.childNodes.length; j++)
 	{
 		var current = root.childNodes[j];
-//		if (current.tagName == "super")
-//			result.claferSuper = current.firstChild.nodeValue;
+
 		if (current.tagName == "value")
 			result.claferValue = current.firstChild.nodeValue;
 		else if (current.tagName == "uniqueid")
@@ -132,13 +137,13 @@ ClaferProcessor.method("getAbstractClaferSubTree", function(root, options)
 			result.displayId = current.firstChild.nodeValue;
 		else if (current.tagName == "declaration")
 		{
-			var nextSubtree = this.getAbstractClaferSubTree(current, options);
+			var nextSubtree = this.getClaferTree(current);
 			if (nextSubtree != null)
 				result.subclafers[subLength++] = nextSubtree; 
-		} else if (current.tagName == "supers" && options.includeSupers == "true"){
+		} else if (current.tagName == "supers"){
 			if ($(current).find("isoverlapping").text() == "false") // if NOT a reference
 			{
-				var nextSubtree = this.getAbstractClaferTree(this.currentXpathToIdSiblings, $(current).find("id").text(), options);
+				var nextSubtree = this.getTopClaferTree($(current).find("id").text());
 				if (nextSubtree != null)
 					for (var i = 0; i<nextSubtree.subclafers.length; i++)
 						result.subclafers[subLength++] = nextSubtree.subclafers[i];		 
@@ -146,53 +151,50 @@ ClaferProcessor.method("getAbstractClaferSubTree", function(root, options)
 		}		
 	}
 	
-	if (this.qualities && this.qualities.length > 0)
-	{
-
-		var notQuality = true;
-		for (j=0; j<this.qualities.length; j++){
-			if (result.claferId != null)
-				if (result.claferId.replace(/c[0-9]{1,}_/, "") == this.qualities[j])
-					notQuality = false;
-		}
-		
-		if (result.claferId != null && notQuality)
-			return result;
-	}
-	else
-	{
-		if (result.claferId != null)
-			return result;		
-	}	
-	
-	return null;
+	return result;
 });
-
-ClaferProcessor.method("getAbstractClaferTree", function(xpathToIdSiblings, id, options) 
+//
+ClaferProcessor.method("getTopClaferTree", function(id) // id can be either 'root' or a top clafer required
 {
 	try
 	{
-		this.currentXpathToIdSiblings = xpathToIdSiblings;
-		var clafers = this.xmlHelper.queryXML(this.source, xpathToIdSiblings); // IE8 cannot handle the entire path (with checking text value)
-		
-		for (var i = 0; i < clafers.length; i++)
+		var node = null;
+		if (id == 'integer' || id == 'clafer') // a primitive type, will not be in the IR
 		{
-			if (clafers[i].childNodes[0].nodeValue == id) // attention! might be not strict equality
+			return null;
+		}
+
+		if (id == 'root') // if we request the entire tree from the root
+		{
+			var declarations = this.xmlHelper.queryXML(this.source, '/module'); // IE8 cannot handle the entire path (with checking text value)
+			node = declarations[0];
+		}
+		else
+		{
+			var uniqueIds = this.xmlHelper.queryXML(this.source, "/module/declaration/uniqueid"); // IE8 cannot handle the entire path (with checking text value)
+			
+			for (var i = 0; i < uniqueIds.length; i++)
 			{
-				var root = clafers[i].parentNode; // declaration
-				root = this.getAbstractClaferSubTree(root, options);
-				return root;
+				if (uniqueIds[i].childNodes[0].nodeValue == id) // attention! might be not strict equality
+				{
+					node = uniqueIds[i].parentNode;
+					break;
+				}
 			}
 		}
-		
-		if (id != "clafer" && id != "integer") //overflows the console without this
-			console.log("Not found a super clafer specified by the xpath: '" + xpathToIdSiblings + "' " + id);
-		return null;
+
+		if (node == null)
+		{
+			// clafer not found
+			console.log("The requested top clafer not found: " + id);			
+			return null;
+		}
+
+		return this.getClaferTree(node);
 	}
 	catch(e)
 	{
-		if (id != "clafer" && id != "integer")
-			console.log("Could not get a super clafer specified by the xpath: '" + xpathToIdSiblings + "' " + id);
+		console.log("Exception while searching for the top clafer: " + id);			
 		return "";
 	}
 		

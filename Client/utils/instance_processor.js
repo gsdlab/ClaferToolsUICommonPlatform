@@ -32,7 +32,7 @@ InstanceProcessor.method("getInstanceCount", function()
 	var elements = this.source.getElementsByTagName("instance");
 	if (elements == null)
 		return 0;
-		
+
 	return elements.length;
 });
 
@@ -117,7 +117,7 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
 					if (counter == "")
 						result = id;
 					else
-						result = id + "#" + counter;
+						result = id + "$" + counter;
 
 					break;
 				}
@@ -131,7 +131,7 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
 
 		if (forceNumeric)
 		{
-			return results[0]; // cannot join integers!
+			return parseInt(results[0]); // cannot join integers!
 		}
 		return results.join("<br/>");
 	}

@@ -63,8 +63,8 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
     else
     {
         var instanceName = this.instanceProcessor.getInstanceName();
-        alert(instanceName);
-        this.abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceName, {"includeSupers": "true"});
+//        alert(instanceName);
+        this.abstractClaferTree = this.processor.getTopClaferTree(instanceName);
         this.lastAbstractClaferTree = this.abstractClaferTree;
     }
     

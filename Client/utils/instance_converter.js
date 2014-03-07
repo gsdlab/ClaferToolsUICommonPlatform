@@ -101,119 +101,220 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(){
 });
 */
 
-InstanceConverter.method("convertFromClaferMooOutputToXML", function(){
-	myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ ]*\=?[ ]*([^ ]*)\b/;
-	var result = "";
-	list = this.instances.split("\n");
+InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClaferID){
+	var myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ ]*\=?[ ]*([^ ]*)\b/;
+	var instanceRegExp = /^=== Instance ([0-9]*) ===$/gm;
+//	var topClaferExp = /\^([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ ]*\=?[ ]*([^ ]*)\b/;
+
+	var result = '<?xml version="1.0"?><instances>';
+	var instanceTextArray = new Array();
 	
-	result = '<?xml version="1.0"?><instances><instance>';
-	var temp = "";
-	var oldpos = -1;
-	var pos = 0;
-	var empty = true;
-	
-	for (var i = 0; i < list.length; i++)
+
+	var match = instanceRegExp.exec(this.instances);
+
+	var mPos1 = 0;
+	var mPos2 = match.index;
+
+	while (match = instanceRegExp.exec(this.instances)) 
 	{
-		var s = list[i];
+		mPos1 = mPos2;
+		mPos2 = match.index;
+	    instanceTextArray.push(this.instances.substring(mPos1, mPos2));
+	}
 
-		if (s == "" && (oldpos != 0 || i !=list.length-1))
-			continue;
-		else if( s == "" && oldpos == 0 && i == list.length-1 ){
-			result += "</subclafers></clafer>";
-			continue;
+	instanceTextArray.push(this.instances.substring(mPos2, this.instances.length));
+
+	for (var instanceID = 0; instanceID < instanceTextArray.length; instanceID++)
+	{
+		result += '\n<instance>';
+
+		if (targetClaferID == null)
+		{
+			result += '\n<clafer id="' + 'root' + '" counter="' + '0' + '">';
+			result += '<super>' + 'clafer' + '</super>';
+			result += '<value></value>';
+			result += '<subclafers>';			
 		}
+
+		var temp = "";
+		var oldpos = -1;
+		var pos = 0;
+
+//		alert(instanceTextArray[instanceID]);
+
+		var lines = instanceTextArray[instanceID].split("\n");
+//		lines.pop(); // remove the last line with --- instance ends
+//		lines.pop(); // remove the last line with --- instance ends
+//		lines.pop(); // remove the last line with --- instance ends
 	
-		empty = false;
-	
-		myMatch = myRegExp.exec(s);
-		if (myMatch == null)
-			continue;
-			
-		pos = myMatch.index;
-		
-		var indent = 0;
-		
-		if (oldpos != -1)
-		{					
-			if (pos == oldpos) // clearly NO children
+		var line = 0; // we skip the instance label
+
+		while (line < lines.length) // loop through all the lines in the instance
+		{
+			var s = lines[line];
+
+			if (s.trim().length == 0)
 			{
-				result += "</subclafers></clafer>";
+				line++;
+				continue;
 			}
 
-			if (pos > oldpos) // nesting level increases
+			if (s.charAt(0) == "=" || s.charAt(0) == "-")
 			{
-				result += ""; // don't do anything, clafers will be nested after the loop
+				line++;
+				continue;
 			}
-			
-			if (pos < oldpos)
+
+			var topClaferMatch = myRegExp.exec(lines[line]); // checking whether we are at the top clafer declaration
+			if (topClaferMatch != null && (topClaferMatch.index == 0)) // if we are at the line with a top clafer
 			{
-				for (var j = 0; j < (oldpos - pos + 1); j++)
+//				alert("top clafer" + lines[line]);
+
+				// we should skip the top clafers we don't need
+				while (line < lines.length)
+				{
+					var topClaferMatch = myRegExp.exec(lines[line]);
+					line++;
+					if (topClaferMatch == null)
+						continue;
+
+					var claferParts = topClaferMatch[1].split("$");
+					var claferId = claferParts[0];
+
+					if (claferId == targetClaferID)
+					{
+						break;
+					}
+				}
+
+				if (0 < oldpos)
+				{
+					for (var j = 0; j < (oldpos + 1); j++)
+					{
+						result += "</subclafers></clafer>";
+					}
+				}	
+
+				if (line >= lines.length)
+					break;
+
+				s = lines[line - 1];
+
+				oldpos = -1;
+			}
+			else
+				line++;
+
+			if (s.trim().length == 0)
+			{
+				line++;
+				continue;
+			}
+
+			if (s.charAt(0) == "=" || s.charAt(0) == "-")
+			{
+				line++;
+				continue;
+			}
+		
+			var lineMatch = myRegExp.exec(s);
+			if (lineMatch == null)
+				continue;
+				
+			pos = lineMatch.index;
+			
+			var indent = 0;
+			
+			if (oldpos != -1)
+			{					
+				if (pos == oldpos) // clearly NO children
 				{
 					result += "</subclafers></clafer>";
 				}
-			}
+
+				if (pos > oldpos) // nesting level increases
+				{
+					result += ""; // don't do anything, clafers will be nested after the loop
+				}
 				
-			if (pos == 0) // new instance begins
-			{
-				result += "</instance><instance>";
+				if (pos < oldpos)
+				{
+					for (var j = 0; j < (oldpos - pos + 1); j++)
+					{
+						result += "</subclafers></clafer>";
+					}
+				}
+					
+//				if (pos == 0) // new instance begins
+//				{
+//					result += "</instance><instance>";
+//				}
+				
+				oldpos = pos;
 			}
+			else oldpos = 0;
 			
-			oldpos = pos;
-		}
-		else oldpos = 0;
-		
-		var claferParts = myMatch[1].split("#");
-		claferId = claferParts[0];
+			var claferParts = lineMatch[1].split("$");
+			var claferId = claferParts[0];
+			var claferCounter = claferParts[1];
+				
+			var superClafer = lineMatch[2].trim();
+			if (superClafer == "clafer")
+				superClafer = "";
 
-		claferCounter = claferParts[1];
-			
-		var superClafer = myMatch[2].trim().replace("#clafer#", "");
+			value = lineMatch[3]; // value can be numeric or another instance clafer, it does not matter
+			var valueId = "";
+			var valueCounter;
 
-		value = myMatch[3]; // value can be numeric or another instance clafer, it does not matter
-		var valueId = "";
-		var valueCounter;
-
-		if (value == "")
-		{
-			valueId = "";
-			valueCounter = "";
-		}
-		else
-		{
-			var valueParts = value.split("#");
-
-			if (valueParts && valueParts.length == 2) // we have just value, not an instance reference
+			if (value == "")
 			{
-				valueId = valueParts[0];
-				valueCounter = valueParts[1];
+				valueId = "";
+				valueCounter = "";
 			}
 			else
 			{
-				valueId = value;
-				valueCounter = "";
+				var valueParts = value.split("$");
+
+				if (valueParts && valueParts.length == 2) // we have just value, not an instance reference
+				{
+					valueId = valueParts[0];
+					valueCounter = valueParts[1];
+				}
+				else
+				{
+					valueId = value;
+					valueCounter = "";
+				}
 			}
+
+			result += '\n<clafer id="' + claferId + '" counter="' + claferCounter + '">';
+			result += '<super>' + superClafer + '</super>';
+			result += '<value id="'  + valueId  + '" counter="' + valueCounter  + '"></value>';
+			result += '<subclafers>';
 		}
 
-		result += '<clafer id="' + claferId + '" counter="' + claferCounter + '">';
-		result += '<super>' + superClafer + '</super>';
-		result += '<value id="'  + valueId  + '" counter="' + valueCounter  + '"></value>';
-		result += '<subclafers>';
-	}
-	
-	if (empty)
-	{
-		return "";
-	}
-	
-	if (0 < oldpos)
-	{
-		for (var j = 0; j < (oldpos + 1); j++)
+		if (0 < oldpos)
 		{
-			result += "</subclafers></clafer>";
-		}
-	}	
+			for (var j = 0; j < (oldpos + 1); j++)
+			{
+				result += "</subclafers></clafer>";
+			}
+		}	
 	
-	result += "</instance></instances>";
+		if (targetClaferID == null)
+		{
+			result += "</subclafers>";
+		}
+
+		result += "</instance>";
+	}
+
+	result += '</instances>';
+
+//	var obj = {};
+//	obj.a = result;
+//	console.log(obj);
+//	console.log(obj.a);
 	
 	return result;
 });

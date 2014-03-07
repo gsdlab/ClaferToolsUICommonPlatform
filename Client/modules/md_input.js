@@ -387,7 +387,14 @@ Input.method("getInitContent", function()
         result += '</td>';        
 
         result += '<td width="160">';
-        result += '<input id="useCache" type="checkbox" name="useCache" checked="' + this.settings.input_default_cache + '">Use Cache</input>';
+
+
+        var checked = "";
+
+        if (this.settings.input_default_cache)
+            checked = ' checked = "checked"';
+
+        result += '<input id="useCache" type="checkbox" name="useCache"' + checked + '>Use Cache</input>';
         result += '</td></tr></table>';
 
         result += '</div>';
