@@ -40,8 +40,6 @@ InstanceProcessor.method("makeXMLPath", function(pathArray)
 {
 	var result = "";
 
-	alert(pathArray);
-
 	for (var i = 0; i < pathArray.length; i++)
 	{
 		if (i > 0)
@@ -66,11 +64,10 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
 	try
 	{
         var xPath = 'instances/instance[' + instanceIndex + ']' + this.makeXMLPath(claferPath);
-        alert(xPath);
         var clafers = this.xmlHelper.queryXML(this.source, xPath);
 		if (clafers.length == 0)
 		{
-//			alert("Feature value not found: '" + instanceIndex + " " + claferPath + "'");
+			alert("Feature value not found: '" + instanceIndex + " " + claferPath + "'");
 
 			if (forceNumeric)
 				return 0;

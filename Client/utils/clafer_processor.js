@@ -97,7 +97,7 @@ ClaferProcessor.method("getGoals", function()
 		
 		var goal = new Object();
 		goal.operation = operation;
-		goal.arg = rest.replaceAll(".", "-"); // cause . confuses HTML ids
+		goal.arg = ("root." + rest).replaceAll(".", "-"); // cause . confuses HTML ids
 //		alert(goal.arg);
 //		rest = rest.replace(/[^.]*\./, "");
 		goal.label = this.claferFilter(rest);
