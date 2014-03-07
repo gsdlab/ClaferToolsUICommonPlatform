@@ -111,7 +111,7 @@ ClaferProcessor.method("getGoals", function()
 });
 
 
-ClaferProcessor.method("getClaferTree", function(root)
+ClaferProcessor.method("getClaferTree", function(root, options)
 {
 	var subLength = 0;
 	var result = new Object();
@@ -137,13 +137,21 @@ ClaferProcessor.method("getClaferTree", function(root)
 			result.displayId = current.firstChild.nodeValue;
 		else if (current.tagName == "declaration")
 		{
-			var nextSubtree = this.getClaferTree(current);
+			if ((options.omitAbstracts == true) && ($($(current).find("isabstract")[0]).text() == "true"))
+			{
+				continue;
+			}
+
+			var nextSubtree = this.getClaferTree(current, {});
+
 			if (nextSubtree != null)
 				result.subclafers[subLength++] = nextSubtree; 
-		} else if (current.tagName == "supers"){
-			if ($(current).find("isoverlapping").text() == "false") // if NOT a reference
+		} 
+		else if (current.tagName == "supers")
+		{
+			if ($($(current).find("isoverlapping")[0]).text() == "false") // if NOT a reference
 			{
-				var nextSubtree = this.getTopClaferTree($(current).find("id").text());
+				var nextSubtree = this.getTopClaferTree($(current).find("id").text(), {});
 				if (nextSubtree != null)
 					for (var i = 0; i<nextSubtree.subclafers.length; i++)
 						result.subclafers[subLength++] = nextSubtree.subclafers[i];		 
@@ -159,6 +167,8 @@ ClaferProcessor.method("getTopClaferTree", function(id) // id can be either 'roo
 	try
 	{
 		var node = null;
+		var omitAbstracts = false;
+		
 		if (id == 'integer' || id == 'clafer') // a primitive type, will not be in the IR
 		{
 			return null;
@@ -168,6 +178,7 @@ ClaferProcessor.method("getTopClaferTree", function(id) // id can be either 'roo
 		{
 			var declarations = this.xmlHelper.queryXML(this.source, '/module'); // IE8 cannot handle the entire path (with checking text value)
 			node = declarations[0];
+			omitAbstracts = true;
 		}
 		else
 		{
@@ -175,7 +186,7 @@ ClaferProcessor.method("getTopClaferTree", function(id) // id can be either 'roo
 			
 			for (var i = 0; i < uniqueIds.length; i++)
 			{
-				if (uniqueIds[i].childNodes[0].nodeValue == id) // attention! might be not strict equality
+				if (uniqueIds[i].firstChild.nodeValue == id)
 				{
 					node = uniqueIds[i].parentNode;
 					break;
@@ -190,7 +201,7 @@ ClaferProcessor.method("getTopClaferTree", function(id) // id can be either 'roo
 			return null;
 		}
 
-		return this.getClaferTree(node);
+		return this.getClaferTree(node, {"omitAbstracts" : omitAbstracts});
 	}
 	catch(e)
 	{
