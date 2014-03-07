@@ -36,27 +36,12 @@ InstanceProcessor.method("getInstanceCount", function()
 	return elements.length;
 });
 
-// returns the base abstract clafer of all instances (they should have the same base abstract clafer)
-
-InstanceProcessor.method("getInstanceSuperClafer", function() 
-{
-	try
-	{
-		var rootClafer = this.xmlHelper.queryXML(this.source, "/instances/instance/clafer/super[1]")[0].firstChild.nodeValue;
-	}
-	catch(e)
-	{
-		alert("Could not get a super clafer of the instance root");
-		return "";
-	}
-	
-	return rootClafer;
-});
-
-
 InstanceProcessor.method("makeXMLPath", function(pathArray)
 {
 	var result = "";
+
+	alert(pathArray);
+
 	for (var i = 0; i < pathArray.length; i++)
 	{
 		if (i > 0)
@@ -81,7 +66,7 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
 	try
 	{
         var xPath = 'instances/instance[' + instanceIndex + ']' + this.makeXMLPath(claferPath);
-//        alert(xPath);
+        alert(xPath);
         var clafers = this.xmlHelper.queryXML(this.source, xPath);
 		if (clafers.length == 0)
 		{

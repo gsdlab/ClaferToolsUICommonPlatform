@@ -138,7 +138,7 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 		{
 			result += '\n<clafer id="' + 'root' + '" counter="' + '0' + '">';
 			result += '<super>' + 'clafer' + '</super>';
-			result += '<value></value>';
+			result += '<value id="" counter=""></value>';
 			result += '<subclafers>';			
 		}
 
@@ -171,42 +171,48 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 				continue;
 			}
 
-			var topClaferMatch = myRegExp.exec(lines[line]); // checking whether we are at the top clafer declaration
-			if (topClaferMatch != null && (topClaferMatch.index == 0)) // if we are at the line with a top clafer
+			if (targetClaferID != null)
 			{
-//				alert("top clafer" + lines[line]);
 
-				// we should skip the top clafers we don't need
-				while (line < lines.length)
+				var topClaferMatch = myRegExp.exec(lines[line]); // checking whether we are at the top clafer declaration
+				if (topClaferMatch != null && (topClaferMatch.index == 0)) // if we are at the line with a top clafer
 				{
-					var topClaferMatch = myRegExp.exec(lines[line]);
-					line++;
-					if (topClaferMatch == null)
-						continue;
+	//				alert("top clafer" + lines[line]);
 
-					var claferParts = topClaferMatch[1].split("$");
-					var claferId = claferParts[0];
-
-					if (claferId == targetClaferID)
+					// we should skip the top clafers we don't need
+					while (line < lines.length)
 					{
+						var topClaferMatch = myRegExp.exec(lines[line]);
+						line++;
+						if (topClaferMatch == null)
+							continue;
+
+						var claferParts = topClaferMatch[1].split("$");
+						var claferId = claferParts[0];
+
+						if (claferId == targetClaferID)
+						{
+							break;
+						}
+					}
+
+					if (0 < oldpos)
+					{
+						for (var j = 0; j < (oldpos + 1); j++)
+						{
+							result += "</subclafers></clafer>";
+						}
+					}	
+
+					if (line >= lines.length)
 						break;
-					}
+
+					s = lines[line - 1];
+
+					oldpos = -1;
 				}
-
-				if (0 < oldpos)
-				{
-					for (var j = 0; j < (oldpos + 1); j++)
-					{
-						result += "</subclafers></clafer>";
-					}
-				}	
-
-				if (line >= lines.length)
-					break;
-
-				s = lines[line - 1];
-
-				oldpos = -1;
+				else
+					line++;
 			}
 			else
 				line++;
@@ -309,7 +315,7 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 	
 		if (targetClaferID == null)
 		{
-			result += "</subclafers>";
+			result += "</subclafers></clafer>";
 		}
 
 		result += "</instance>";
