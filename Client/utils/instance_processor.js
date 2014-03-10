@@ -59,7 +59,7 @@ InstanceProcessor.method("makeXMLPath", function(pathArray)
 // returns feature value of featureName feature of an instance number instanceIndex
 // forceNumeric forces to return an integer
 
-InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, forceNumeric) 
+InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, type) 
 {
 	try
 	{
@@ -67,24 +67,28 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
         var clafers = this.xmlHelper.queryXML(this.source, xPath);
 		if (clafers.length == 0)
 		{
-			alert("Feature value not found: '" + instanceIndex + " " + claferPath + "'");
+//			alert("Feature value not found: '" + instanceIndex + " " + claferPath + "'");
 
-			if (forceNumeric)
+			if (type == 'int')
 				return 0;
 
-			return "-";
+			if (type == 'bool')
+				return "-";
+
+			return "none";
 		}
 
 		var results = new Array();
 
+		if (type == 'bool')
+		{
+			return "yes";			
+		}
+
 		for (var resultId = 0; resultId < clafers.length; resultId++)
 		{
 			var result;
-			if (forceNumeric)
-				result = 0;
-			else
-				result = "yes";
-		
+
 			for (var i = 0; i < clafers[resultId].childNodes.length; i++)
 			{
 				var current = clafers[resultId].childNodes[i];
@@ -105,16 +109,20 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
 				}
 			}
 
-			if (forceNumeric)
+			if (type == 'int')
 				results.push(parseInt(result));
 			else results.push(result);
 
 		}
 
-		if (forceNumeric)
+		if (results.length == 1)
 		{
-			return parseInt(results[0]); // cannot join integers!
+			if (type == 'int')
+				return parseInt(results[0]); // cannot join integers!
+			else
+				return results[0];
 		}
+
 		return results.join("<br/>");
 	}
 	catch(e)
@@ -124,7 +132,7 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
 	}
 		
 });
-
+/*
 InstanceProcessor.method("getInstanceName", function(){
 	try {
 		var ClaferId = this.xmlHelper.queryXML(this.source, "/instances/instance/clafer/@id");
@@ -135,3 +143,4 @@ InstanceProcessor.method("getInstanceName", function(){
 	
 	return ClaferId[0].nodeValue;
 });
+*/

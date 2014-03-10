@@ -25,7 +25,7 @@ function TableVisualizer ()
 //	this.data = data;
 }
 
-TableVisualizer.method("mapValue", function(sVal, isEM)
+TableVisualizer.method("mapValue", function(sVal, type)
 {
 	var result = new Object();
 	result.tdStyle = "";
@@ -37,11 +37,11 @@ TableVisualizer.method("mapValue", function(sVal, isEM)
 		result.tdStyle = 'tick';
 	}
 
-	if (isEM)
-	{
-		result.html = ''
-		result.tdStyle = 'EffectMan';
-	}
+//	if (isEM)
+//	{
+//		result.html = ''
+//		result.tdStyle = 'EffectMan';
+//	}
 	
 	if (sVal == "-")
 	{
@@ -99,7 +99,7 @@ TableVisualizer.prototype.getHTML = function(data)
 		{
 			var td = $('<' + tagName + ' id="' + tagName + i + "_" + (j + 1) + '"></' + tagName + '>').addClass('td_instance');
 			
-            mappedValue = this.mapValue(data.matrix[i][j], data.EMcontext[i+1]);
+            mappedValue = this.mapValue(data.matrix[i][j], data.features[i].type);
             td.html(mappedValue.html);
             td.addClass(mappedValue.tdStyle);
 

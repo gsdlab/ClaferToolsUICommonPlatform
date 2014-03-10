@@ -110,6 +110,19 @@ ClaferProcessor.method("getGoals", function()
 	return result;
 });
 
+ClaferProcessor.method("calcClaferType", function(clafer)
+{
+	if (clafer.superClafer == 'integer')
+		return 'int';
+
+	if (clafer.claferCardMin == 0 && clafer.claferCardMax == 1 && clafer.superClafer == 'clafer')
+	{
+		return 'bool';
+	}
+
+	return 'clafer';
+
+});
 
 ClaferProcessor.method("getClaferTree", function(root, options)
 {
@@ -135,6 +148,11 @@ ClaferProcessor.method("getClaferTree", function(root, options)
 			result.claferId = current.firstChild.nodeValue;
 		else if (current.tagName == "id")
 			result.displayId = current.firstChild.nodeValue;
+		else if (current.tagName == "card") // cardinality
+		{
+			result.claferCardMin = $($($(current).find("min")[0]).find("intliteral")[0]).text();
+			result.claferCardMax = $($($(current).find("max")[0]).find("intliteral")[0]).text();
+		}
 		else if (current.tagName == "declaration")
 		{
 			if ((options.omitAbstracts == true) && ($($(current).find("isabstract")[0]).text() == "true"))
@@ -151,7 +169,8 @@ ClaferProcessor.method("getClaferTree", function(root, options)
 		{
 			if ($($(current).find("isoverlapping")[0]).text() == "false") // if NOT a reference
 			{
-				var nextSubtree = this.getTopClaferTree($(current).find("id").text(), {});
+				result.superClafer = $(current).find("id").text();
+				var nextSubtree = this.getTopClaferTree(result.superClafer, {});
 				if (nextSubtree != null)
 					for (var i = 0; i<nextSubtree.subclafers.length; i++)
 						result.subclafers[subLength++] = nextSubtree.subclafers[i];		 
@@ -159,6 +178,7 @@ ClaferProcessor.method("getClaferTree", function(root, options)
 		}		
 	}
 	
+	result.type = this.calcClaferType(result);
 	return result;
 });
 //
@@ -209,40 +229,6 @@ ClaferProcessor.method("getTopClaferTree", function(id) // id can be either 'roo
 		return "";
 	}
 		
-});
-
-
-ClaferProcessor.method("getIfMandatory", function(claferID){
-	var min = this.xmlHelper.queryXML(this.source, "//declaration[@type='IClafer'][uniqueid='" + claferID + "']/card/min[intliteral=1]");
-	if (min.length != 0)
-		return "";
-	else 
-		return "<b>?</b>";
-
-});
-
-ClaferProcessor.method("getEffectivelyMandatoryFeatures", function(tree){
-	if(tree.subclafers != null){
-		var list = [];
-		for (var i = 0; i<tree.subclafers.length; i++){
-			list = list.concat(this.recursiveEMcheck(tree.subclafers[i]));
-		}
-	//	console.log(list);
-		return list;
-	} else {
-		return [];
-	}
-});
-
-ClaferProcessor.method("recursiveEMcheck", function(root){
-	var list = []
-	if (this.getIfMandatory(root.claferId) == ""){
-		list.push(root.displayId);
-		for (var i = 0; i<root.subclafers.length; i++){
-			list = list.concat(this.recursiveEMcheck(root.subclafers[i]));
-		}
-	}
-	return list;
 });
 
 ClaferProcessor.method("getFeaturesWithChildren", function(tree){

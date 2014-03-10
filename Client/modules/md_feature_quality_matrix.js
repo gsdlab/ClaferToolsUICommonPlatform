@@ -62,7 +62,7 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
     }
     else
     {
-        var instanceName = this.instanceProcessor.getInstanceName();
+        var instanceName = 'root';
 //        alert(instanceName);
         this.abstractClaferTree = this.processor.getTopClaferTree(instanceName);
         this.lastAbstractClaferTree = this.abstractClaferTree;
@@ -74,9 +74,8 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.toggled = false;    
     this.dataTable = this.getDataTable();    
     this.content = $('<div id="comparison" class="comparison"></div>').append(new TableVisualizer().getHTML(this.dataTable));
-    $("#mdFeatureQualityMatrix .window-titleBar-content").text("Feature and Quality Matrix: " + this.dataTable.title);
     this.currentRow = 1;
-    this.EMfeatures = [];
+//    this.EMfeatures = [];
 
 });
 
@@ -373,6 +372,7 @@ FeatureQualityMatrix.method("collector", function(clafer, spaceCount, path)
     unit.claferId = clafer.claferId;
     unit.displayId = clafer.displayId;
     unit.claferPath = path.slice(0); // cloning an array
+    unit.type = clafer.type;
 
     unit.displayWithMargins = unit.displayId;
     
@@ -403,8 +403,6 @@ FeatureQualityMatrix.method("getDataTable", function()
 {
     var instanceCount = this.instanceProcessor.getInstanceCount();
 
-    var EMfeatures = this.processor.getEffectivelyMandatoryFeatures(this.abstractClaferTree);
-    
     var parent = null;
     var current = this.abstractClaferTree;
     abstractClaferOutput = new Array();
@@ -427,11 +425,11 @@ FeatureQualityMatrix.method("getDataTable", function()
         var currentContextRow = new Array();
         if (i > 0){ // do not push the parent clafer
             feature = new Object();
-            feature.title = output[i].displayWithMargins + " " + this.processor.getIfMandatory(output[i].claferId);
+            feature.title = output[i].displayWithMargins;
             feature.id = output[i].claferPath.join(".");
+            feature.type = output[i].type;
             result.features.push(feature);
-            currentContextRow.push(output[i].displayWithMargins + " " + this.processor.getIfMandatory(output[i].claferId));
-            var featureIsEM = (EMfeatures.indexOf(output[i].displayId) != -1);
+            currentContextRow.push(output[i].displayWithMargins);
         }
         else 
             currentContextRow.push(output[i].displayWithMargins);
@@ -446,7 +444,7 @@ FeatureQualityMatrix.method("getDataTable", function()
             }
             else
             {
-                sVal = this.instanceProcessor.getFeatureValue(j, output[i].claferPath, false);
+                sVal = this.instanceProcessor.getFeatureValue(j, output[i].claferPath, output[i].type);
 //                alert(output[i].claferId + " " + sVal);
                 currentMatrixRow.push(sVal);
                 if (sVal == "yes")
@@ -463,9 +461,7 @@ FeatureQualityMatrix.method("getDataTable", function()
             
         if (!denyAddContextRow)
             result.formalContext.push(currentContextRow);
-            result.EMcontext.push(featureIsEM);
-
-
+        
     }
     return result;
 
