@@ -25,34 +25,36 @@ function TableVisualizer ()
 //	this.data = data;
 }
 
+TableVisualizer.method("filterClaferValue", function(s){
+	return s.replace(/c[0-9]*_/g, "");
+});
+
 TableVisualizer.method("mapValue", function(sVal, type)
 {
 	var result = new Object();
-	result.tdStyle = "";
-	result.html = sVal;
 	
-	if (sVal == "yes")
+	if (type == "bool")
 	{
-		result.html = '<img class="tick" src="commons/Client/images/tick.png"/>';
-		result.tdStyle = 'tick';
+		if (sVal == "yes")
+		{
+			result.html = '<img class="tick" src="commons/Client/images/tick.png"/>';
+			result.tdStyle = 'bool tick';
+		}
+		else
+		{
+			result.html = '<img class="no" src="commons/Client/images/no.png"/>';
+			result.tdStyle = 'bool no';
+		}
 	}
-
-//	if (isEM)
-//	{
-//		result.html = ''
-//		result.tdStyle = 'EffectMan';
-//	}
-	
-	if (sVal == "-")
-	{
-		result.html = '<img class="no" src="commons/Client/images/no.png"/>';
-		result.tdStyle = 'no';
-	}
-
-	if (isNumeric(sVal))
+	else if (type == "int")
 	{
 		result.tdStyle = 'numeric';
-		result.html = '<span class="number">' + sVal + '</span>'
+		result.html = '<span class="number">' + sVal + '</span>';
+	}
+	else // just clafer of a non-primitive type
+	{
+		result.tdStyle = 'clafer';
+		result.html = '<span class="clafer">' + this.filterClaferValue(sVal) + '</span>';
 	}
 		
 	return result;
@@ -88,10 +90,22 @@ TableVisualizer.prototype.getHTML = function(data)
     for (var i = 0; i < data.features.length; i++)
 	{
 			
-		var row = $('<tr id="r' + (i + 1) +'"></tr>').addClass('bar');//
+		var row = $('<tr id="r' + (i + 1) +'"></tr>').addClass(data.features[i].type);
 		
 		var td = $('<' + tagName + '></' + tagName + '>').addClass('td_abstract');
-		td.html(data.features[i].title.replaceAll(' ', '&nbsp;&nbsp;') + '<span class="path" style="display:none;">' + data.features[i].id + '</span>');
+
+		var html = data.features[i].title.replaceAll(' ', '&nbsp;&nbsp;');
+		html += '<span class="path" style="display:none;">' + data.features[i].path + '</span>';
+		html += '<span class="id" style="display:none;">' + data.features[i].id + '</span>';
+		
+		var space;
+		if (data.features[i].card != "")
+			space = "&nbsp;";
+		else
+			space = "";
+
+		html += space + '<span class="card">' + data.features[i].card + '</span>';
+		$(td).html(html);
         
 		row.append(td);
 				

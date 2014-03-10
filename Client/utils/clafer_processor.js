@@ -30,9 +30,8 @@ function ClaferProcessor (sourceXML, qualities) {
 //returns claferid without the cXX_ extension
 ClaferProcessor.method("claferFilter", function(s)
 {
-	return s.replace(/c[^_]*_/g, "")
+	return s.replace(/c[^_]*_/g, "");
 });
-
 
 ClaferProcessor.method("operationFilter", function(s)
 {
@@ -245,7 +244,7 @@ ClaferProcessor.method("getFeaturesWithChildren", function(tree){
 ClaferProcessor.method("recursiveHasChildrenCheck", function(root){
 	var list = []
 	if (root.subclafers.length > 0){
-		list.push(root.displayId);
+		list.push(root.claferId);
 		for (var i = 0; i<root.subclafers.length; i++){
 			list = list.concat(this.recursiveHasChildrenCheck(root.subclafers[i]));
 		}

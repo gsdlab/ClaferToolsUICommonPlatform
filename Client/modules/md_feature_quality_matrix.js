@@ -233,7 +233,10 @@ FeatureQualityMatrix.method("onRendered", function()
     while (row.length != 0){
         // setting the default filtering status to each row - none
         $(row).attr("FilterStatus", "none");
-        if (!row.find(".numeric").length && !row.find(".EffectMan").length){
+
+        if (row.hasClass("bool"))
+        {
+/*
             $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_empty.bmp">');
             $("#r" + i + "box").click(function(){
                 if ($(this).parent().parent().attr("FilterStatus") == "none"){
@@ -253,10 +256,7 @@ FeatureQualityMatrix.method("onRendered", function()
                     that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 0);                    
                 }
             }).css("cursor", "pointer");
-        }
-//  Add Greyed out checkboxes to denote effectively mandatory features
-        else if (!row.find(".numeric").length && row.find(".EffectMan").length){
-            $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_ticked_greyed.png">');
+*/            
         }
         i++;
         row = $("#r" + i);
@@ -268,58 +268,65 @@ FeatureQualityMatrix.method("onRendered", function()
     row = $("#r" + i);
     var that = this;
     while (row.length != 0){
-        if (!row.find(".numeric").length){
-            var feature = $("#r" + i + " .td_abstract").text().replaceAll(/[\s?]{1,}/g, '');
-            if (hasChild.indexOf(feature) != -1){
-                $("#r" + i + " .td_abstract").append('<text id="r' + i + 'collapse" status="false">   \u21B4<text>')
-                $("#r" + i + "collapse").click(function(){
-                    if ($(this).attr("status") === "false"){
-                        that.onFeatureCollapsed($(this).parent().text().replaceAll(/[^A-z]/g, ''));
-                        $(this).attr("status", "true")
-                        $(this).text("   \u2192")
-                    } else {
-                        that.onFeatureExpanded($(this).parent().text().replaceAll(/[^A-z]/g, ''));
-                        $(this).attr("status", "false")
-                        $(this).text("   \u21B4")
-                    }
-                }).css("cursor", "pointer");
-            }
-        }
 //  Add sorting to quality attributes
-        else {
+        if (row.hasClass("int")) {
             $("#r" + i + " .td_abstract").append('<div id=sortText style="display:inline"></div>');
             $("#r" + i + " .td_abstract").addClass('noSort');
             $("#r" + i + " .td_abstract").click(function(){
                 if($(this).hasClass("sortAsc")){
                     $(this).toggleClass("sortAsc sortDesc");
-                    $(this).find("#sortText").text(" \u25B6");
+                    $(this).find("#sortText").html("&nbsp;\u25B6");
                 } else if ($(this).hasClass("sortDesc")){
                     $(this).toggleClass("sortDesc sortAsc");
-                    $(this).find("#sortText").text(" \u25C0");
+                    $(this).find("#sortText").html("&nbsp;\u25C0");
                 } else if ($(this).hasClass("noSort")){
                     $(this).toggleClass("noSort sortAsc");
-                    $(this).find("#sortText").text(" \u25C0");
+                    $(this).find("#sortText").html("&nbsp;\u25C0");
                 }
                 that.rowSort($(this).text());
             }).css("cursor", "pointer");
         }
+        else 
+        { 
+            // collapse / expand features
+
+            var feature = $($("#r" + i + " .td_abstract").find(".id")).text();
+
+            if (hasChild.indexOf(feature) != -1){
+                $("#r" + i + " .td_abstract").append('<text id="r' + i + 'collapse" status="false">&nbsp;\u21B4<text>')
+                $("#r" + i + "collapse").click(function(){
+                    if ($(this).attr("status") === "false")
+                    {
+                        that.onFeatureCollapsed($($($(this).parent()).find(".path")).text());
+                        $(this).attr("status", "true");
+                        $(this).html("&nbsp;\u2192");
+                    } else {
+                        that.onFeatureExpanded($($($(this).parent()).find(".path")).text());
+                        $(this).attr("status", "false");
+                        $(this).html("&nbsp;\u21B4");
+                    }
+                }).css("cursor", "pointer");
+            }
+        }        
             
         i++;
         row = $("#r" + i);
     }
-//  Add sorting by instance names (default);
-    $("#r" + 0 + " .td_abstract").append('<div id=sortText style="display:inline"> \u25C0</div>');
+
+//  Add sorting by instance names (default), the top row
+
+    $("#r" + 0 + " .td_abstract").append('<div id=sortText style="display:inline">&nbsp;\u25C0</div>');
     $("#r" + 0 + " .td_abstract").addClass('sortAsc');
     $("#r" + 0 + " .td_abstract").click(function(){
         if($(this).hasClass("sortAsc")){
             $(this).toggleClass("sortAsc sortDesc");
-            $(this).find("#sortText").text(" \u25B6");
+            $(this).find("#sortText").html("&nbsp;\u25B6");
         } else if ($(this).hasClass("sortDesc")){
             $(this).toggleClass("sortDesc sortAsc");
-            $(this).find("#sortText").text(" \u25C0");
+            $(this).find("#sortText").html("&nbsp;\u25C0");
         } else if ($(this).hasClass("noSort")){
             $(this).toggleClass("noSort sortAsc");
-            $(this).find("#sortText").text(" \u25C0");
+            $(this).find("#sortText").html("&nbsp;\u25C0");
         }
         that.rowSort($(this).text());
     }).css("cursor", "pointer");
@@ -372,7 +379,34 @@ FeatureQualityMatrix.method("collector", function(clafer, spaceCount, path)
     unit.claferId = clafer.claferId;
     unit.displayId = clafer.displayId;
     unit.claferPath = path.slice(0); // cloning an array
+    clafer.path = unit.claferPath; // NOT GOOD assignmend. TODO: make it better
     unit.type = clafer.type;
+
+    var cardMin;
+    var cardMax;
+
+    if (clafer.claferCardMin == "-1")
+        cardMin = "*";
+    else
+        cardMin = clafer.claferCardMin;
+
+    if (clafer.claferCardMax == "-1")
+        cardMax = "*";
+    else
+        cardMax = clafer.claferCardMax;
+
+    var card;
+
+    if (cardMin == cardMax)
+        card = cardMin;
+    else card = cardMin + ".." + cardMax;
+    
+    if (card == "0..1")
+        card = "?";
+    else if (card == "1")
+        card = "";
+
+    unit.card = card;
 
     unit.displayWithMargins = unit.displayId;
     
@@ -426,8 +460,10 @@ FeatureQualityMatrix.method("getDataTable", function()
         if (i > 0){ // do not push the parent clafer
             feature = new Object();
             feature.title = output[i].displayWithMargins;
-            feature.id = output[i].claferPath.join(".");
+            feature.path = output[i].claferPath.join(".");
+            feature.id = output[i].claferId;
             feature.type = output[i].type;
+            feature.card = output[i].card;
             result.features.push(feature);
             currentContextRow.push(output[i].displayWithMargins);
         }
@@ -649,9 +685,9 @@ FeatureQualityMatrix.method("getInitContent", function()
     return '';     
 });
 
-FeatureQualityMatrix.method("featureChecked", function (feature, state){
+FeatureQualityMatrix.method("featureChecked", function (featurePath, state){
     this.filter.filterContent(); // filter after changing the feature status
-    this.settings.onFeatureCheckedStateChange(this, feature, state);
+    this.settings.onFeatureCheckedStateChange(this, featurePath, state);
 });
 
 FeatureQualityMatrix.method("removeInstance", function(instanceNum){
@@ -659,12 +695,12 @@ FeatureQualityMatrix.method("removeInstance", function(instanceNum){
     this.settings.onInstanceRemove(this, instanceNum);
 });
 
-FeatureQualityMatrix.method("onFeatureCollapsed", function(feature){
-    this.filter.closeFeature(feature);
-    this.settings.onFeatureCollapsed(this, feature);
+FeatureQualityMatrix.method("onFeatureCollapsed", function(featurePath){
+    this.filter.closeFeature(featurePath);
+    this.settings.onFeatureCollapsed(this, featurePath);
 });
 
-FeatureQualityMatrix.method("onFeatureExpanded", function(feature){
-    this.filter.openFeature(feature);
-    this.settings.onFeatureExpanded(this, feature);
+FeatureQualityMatrix.method("onFeatureExpanded", function(featurePath){
+    this.filter.openFeature(featurePath);
+    this.settings.onFeatureExpanded(this, featurePath);
 });

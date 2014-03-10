@@ -86,54 +86,69 @@ tableFilter.method("showAll", function (){
 		$(this.hidden.pop()).show();
 });
 
-tableFilter.method("hideRowByName", function (name){
-	for (var i=0;i<this.rows.length;i++){
+tableFilter.method("hideRowByClaferPath", function (pathArray)
+{
+	var path = pathArray.join(".");
+	for (var i = 1; i < this.rows.length; i++)
+	{
 		var curRow = this.rows[i];
-		var hideThis = $($(curRow).find(':contains("' + name + '")')).parent();
-		if (hideThis.length != 0){
-			$(hideThis).hide();
-			this.hidden.push(hideThis);
+		var currentPath = $($(curRow).find(".path")).first();
+		if ($(currentPath).text() == path)
+		{
+			$(curRow).hide();
+			this.hidden.push(curRow);
 		}
 	}
 });
 
-tableFilter.method("closeFeature", function (feature){
-    var root = this.abstractClaferTree;	
-
-	root = this.findNodeInTree(root, feature)
-
-	this.hideChildren(root);
-	if (this.closedFeatures.indexOf(feature) == -1)
-		this.closedFeatures.push(feature)
-	this.host.scrollToSearch($("#search").val());
-});
-
-tableFilter.method("hideChildren", function (node){
- 	for (var i=0;i<node.subclafers.length;i++){
- 		this.hideChildren(node.subclafers[i]);
- 		this.hideRowByName(node.subclafers[i].displayId);
- 	}
-});
-
-tableFilter.method("findNodeInTree", function (root, feature){
-	if (root.displayId === feature)
-		return root;
-	else if (root.subclafers.length < 1)
-		return null;
-	else{
-		for (var i=0; i<root.subclafers.length; i++){
-			var ret = this.findNodeInTree(root.subclafers[i], feature);
-			if (ret != null)
-				return ret;
-		}
-	}
-});	
-
-tableFilter.method("openFeature", function (feature){
-	var index = this.closedFeatures.indexOf(feature);
+tableFilter.method("openFeature", function (featurePath){
+	var index = this.closedFeatures.indexOf(featurePath);
 	this.closedFeatures.splice(index, 1);
 	this.filterContent();
 });
+
+tableFilter.method("closeFeature", function (featurePath){
+
+    var node = this.findNodeInTree(this.abstractClaferTree, featurePath.split("."), 0);
+
+	this.hideChildren(node);
+	
+	if (this.closedFeatures.indexOf(featurePath) == -1)
+		this.closedFeatures.push(featurePath);
+
+	this.host.scrollToSearch($("#search").val());
+});
+
+tableFilter.method("hideChildren", function (node)
+{
+ 	for (var i = 0; i < node.subclafers.length; i++)
+ 	{
+ 		this.hideChildren(node.subclafers[i]);
+ 		this.hideRowByClaferPath(node.subclafers[i].path);
+ 	}
+});
+
+tableFilter.method("findNodeInTree", function (root, featurePath, index)
+{
+	if (index == featurePath.length - 1)
+		return root;
+
+	if (root.claferId !== featurePath[index])
+		return null;
+
+	if (root.subclafers.length < 1)
+		return null;
+	
+	index++;
+
+	for (var i = 0; i < root.subclafers.length; i++)
+	{
+		if (root.subclafers[i].claferId == featurePath[index])
+		{
+			return this.findNodeInTree(root.subclafers[i], featurePath, index);
+		}
+	}
+});	
 
 /*
 tableFilter.method("resetFilters", function (filters, permahidden){
