@@ -394,7 +394,7 @@ Input.method("getInitContent", function()
         result += '</span>';
         result += '</td>';                
 
-        result += '<td width="160">';
+        result += '<td>';
 
 
         var checked = "";
