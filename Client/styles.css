@@ -31,7 +31,6 @@ textarea.child {height:100%;}
 .comparison table td, .comparison table th{
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
-    padding:0px 0px 0px 0px;
 }
 
 .comparison table #r0{
@@ -134,4 +133,37 @@ td.tick, td.no
      box-sizing: border-box;
      -webkit-box-sizing:border-box;
      -moz-box-sizing: border-box;
+}
+
+.td_abstract .typelabel{
+    float: right;
+    display: inline-block;
+    width: 16px;
+    height:16px;
+}
+
+.td_abstract .int{
+    background: url("images/types/int.png");
+}
+
+.td_abstract .clafer{
+}
+
+.td_abstract .bool{
+}
+
+.td_abstract .filter_normal{
+    background: url("images/types/bool_normal.png");
+}
+
+.td_abstract .filter_checked{
+    background: url("images/types/bool_checked.png");
+}
+
+.td_abstract .filter_unchecked{
+    background: url("images/types/bool_unchecked.png");
+}
+
+.td_instance{
+    padding:3px;
 }

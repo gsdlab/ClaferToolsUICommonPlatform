@@ -179,8 +179,8 @@ FeatureQualityMatrix.method("onRendered", function()
 // obtain minimum widths
     var i;
 
-    $("#tHead .td_abstract").width("40%");
-    $("#tBody .td_abstract").width("40%");
+    $("#tHead .td_abstract").width("500");
+    $("#tBody .td_abstract").width("500");
 
     i = 0;
     var row = $("#r" + i);
@@ -194,6 +194,7 @@ FeatureQualityMatrix.method("onRendered", function()
         i++;
         row = $("#r" + i);
     }
+
 
     var minAbstractWidth = $("#tBody .td_abstract").width();
 
@@ -222,6 +223,7 @@ FeatureQualityMatrix.method("onRendered", function()
     $("#tBodyContainer").css("width", "100%")
     $("#tHeadContainer").css("width", "100%")
 
+
 // Mostly done formatting table. adding interactive features now.
 
 // Add tristate checkboxes for filtering features
@@ -232,31 +234,34 @@ FeatureQualityMatrix.method("onRendered", function()
     var that = this;
     while (row.length != 0){
         // setting the default filtering status to each row - none
-        $(row).attr("FilterStatus", "none");
-
         if (row.hasClass("bool"))
         {
-/*
-            $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_empty.bmp">');
-            $("#r" + i + "box").click(function(){
+            $(row).attr("FilterStatus", "none");
+            $("#r" + i + " .td_abstract .typelabel").addClass("filter_normal");
+
+            $("#r" + i + " .td_abstract .typelabel").click(function()
+            {
                 if ($(this).parent().parent().attr("FilterStatus") == "none"){
-                    this.src = "commons/Client/images/checkbox_ticked.bmp";
-//                    this.className = "wanted";
+                    $(this).removeClass("filter_normal");
+                    $(this).removeClass("filter_unchecked");
+                    $(this).addClass("filter_checked");
                     $(this).parent().parent().attr("FilterStatus", "require");
-                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 1);
+                    that.featureChecked($(this).parent().find(".path").text(), 1);
                 } else if ($(this).parent().parent().attr("FilterStatus") == "require"){
-                    this.src = "commons/Client/images/checkbox_x.bmp";
-//                    this.className = "unwanted";
+                    $(this).removeClass("filter_normal");
+                    $(this).addClass("filter_unchecked");
+                    $(this).removeClass("filter_checked");
                     $(this).parent().parent().attr("FilterStatus", "exclude");
-                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), -1);
+                    that.featureChecked($(this).parent().find(".path").text(), -1);
                 } else {
-                    this.src = "commons/Client/images/checkbox_empty.bmp";
-//                    this.className = "maybe";
+                    $(this).addClass("filter_normal");
+                    $(this).removeClass("filter_unchecked");
+                    $(this).removeClass("filter_checked");
                     $(this).parent().parent().attr("FilterStatus", "none");
-                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 0);                    
+                    that.featureChecked($(this).parent().find(".path").text(), 0);                    
                 }
             }).css("cursor", "pointer");
-*/            
+            
         }
         i++;
         row = $("#r" + i);
@@ -268,6 +273,11 @@ FeatureQualityMatrix.method("onRendered", function()
     row = $("#r" + i);
     var that = this;
     while (row.length != 0){
+
+//        adding tooltips
+
+        $("#r" + i + " .td_abstract").tipsy({fade: true, gravity: 'w', html: true});
+
 //  Add sorting to quality attributes
         if (row.hasClass("int")) {
             $("#r" + i + " .td_abstract").append('<div id=sortText style="display:inline"></div>');

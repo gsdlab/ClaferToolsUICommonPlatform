@@ -92,11 +92,16 @@ TableVisualizer.prototype.getHTML = function(data)
 			
 		var row = $('<tr id="r' + (i + 1) +'"></tr>').addClass(data.features[i].type);
 		
-		var td = $('<' + tagName + '></' + tagName + '>').addClass('td_abstract');
+		var td = $('<' + tagName + '></' + tagName + '>').addClass('td_abstract').addClass(data.features[i].type);
+
+		var tooltip = data.features[i].path.replaceAll(".", "::");
+
+		$(td).attr("title", tooltip);	
 
 		var html = data.features[i].title.replaceAll(' ', '&nbsp;&nbsp;');
 		html += '<span class="path" style="display:none;">' + data.features[i].path + '</span>';
 		html += '<span class="id" style="display:none;">' + data.features[i].id + '</span>';
+		html += '<span class="typelabel ' + data.features[i].type + '"></span>';
 		
 		var space;
 		if (data.features[i].card != "")
