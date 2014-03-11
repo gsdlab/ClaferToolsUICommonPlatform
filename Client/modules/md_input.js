@@ -509,26 +509,37 @@ function unescapeJSON(escaped)
 Input.method("onBackendChange", function()
 {
     var selectedId = $( "#optimizationBackend option:selected" ).val();
-    var found = false;
 
     for (var i = 0; i < this.backends.length; i++)
     {
         if (this.backends[i].id == selectedId)
         {
-            if (this.backends[i].scope_options.set_int_scope)
+            if (this.backends[i].scope_options.set_int_scope && this.backends[i].scope_options.set_int_scope.argument)
             {
-                $("#optimizationIntScopeSettings").show();
+                $("#optimizerMaxInt").show();
                 if (this.backends[i].scope_options.set_int_scope.default_value)
                 {
-                    $("#optimizationIntHighScopeValue").val(this.backends[i].scope_options.set_int_scope.default_value);
+                    $("#optimizerMaxInt").val(this.backends[i].scope_options.set_int_scope.default_value);
                 }
-
-                found = true;
             }
             else
             {
-                $("#optimizationIntScopeSettings").hide();                
+                $("#optimizerMaxInt").hide();                
             }           
+
+            if (this.backends[i].scope_options.set_default_scope && this.backends[i].scope_options.set_default_scope.argument)
+            {
+                $("#optimizerScope").show();
+                if (this.backends[i].scope_options.set_default_scope.default_value)
+                {
+                    $("#optimizerScope").val(this.backends[i].scope_options.set_default_scope.default_value);
+                }
+            }
+            else
+            {
+                $("#optimizerScope").hide();                
+            }           
+
         }
     }
 
