@@ -102,7 +102,7 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(){
 */
 
 InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClaferID){
-	var myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ ]*\=?[ ]*([^ ]*)\b/;
+	var myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ \t]*\=?[ \t]*([^ ]*)\b/;
 	var instanceRegExp = /^=== Instance ([0-9]*) ===$/gm;
 //	var topClaferExp = /\^([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ ]*\=?[ ]*([^ ]*)\b/;
 
@@ -149,7 +149,7 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 
 //		alert(instanceTextArray[instanceID]);
 
-		var lines = instanceTextArray[instanceID].split("\n");
+		var lines = instanceTextArray[instanceID].replaceAll("  ", "\t").split("\n");
 //		lines.pop(); // remove the last line with --- instance ends
 //		lines.pop(); // remove the last line with --- instance ends
 //		lines.pop(); // remove the last line with --- instance ends
