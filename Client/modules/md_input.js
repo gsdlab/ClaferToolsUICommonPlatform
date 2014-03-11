@@ -380,7 +380,7 @@ Input.method("getInitContent", function()
 
         result += '</td><td>';
 
-        result += '<span id="optimizerScope">';
+        result += '<span id="optimizerScopeSettings">';
         result += '<span id="optimizerScopeLabel" style="padding-left:4px;padding-right:4px;">Scope:</span>';
         result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerScope" title="Enter the scope for optimization" name="optimizerScope"/>';
         result += '</span>';
@@ -388,7 +388,7 @@ Input.method("getInitContent", function()
 
         result += '</td><td>';
 
-        result += '<span id="optimizerMaxInt">';
+        result += '<span id="optimizerMaxIntSettings">';
         result += '<span id="optimizerMaxIntLabel" style="padding-left:4px;padding-right:4px;">MaxInt:</span>';
         result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerMaxInt" title="Enter the highest integer for optimization" name="optimizerMaxInt"/>';
         result += '</span>';
@@ -516,7 +516,7 @@ Input.method("onBackendChange", function()
         {
             if (this.backends[i].scope_options.set_int_scope && this.backends[i].scope_options.set_int_scope.argument)
             {
-                $("#optimizerMaxInt").show();
+                $("#optimizerMaxIntSettings").show();
                 if (this.backends[i].scope_options.set_int_scope.default_value)
                 {
                     $("#optimizerMaxInt").val(this.backends[i].scope_options.set_int_scope.default_value);
@@ -524,12 +524,12 @@ Input.method("onBackendChange", function()
             }
             else
             {
-                $("#optimizerMaxInt").hide();                
+                $("#optimizerMaxIntSettings").hide();                
             }           
 
             if (this.backends[i].scope_options.set_default_scope && this.backends[i].scope_options.set_default_scope.argument)
             {
-                $("#optimizerScope").show();
+                $("#optimizerScopeSettings").show();
                 if (this.backends[i].scope_options.set_default_scope.default_value)
                 {
                     $("#optimizerScope").val(this.backends[i].scope_options.set_default_scope.default_value);
@@ -537,7 +537,7 @@ Input.method("onBackendChange", function()
             }
             else
             {
-                $("#optimizerScope").hide();                
+                $("#optimizerScopeSettings").hide();                
             }           
 
         }
