@@ -380,11 +380,19 @@ Input.method("getInitContent", function()
 
         result += '</td><td>';
 
-        result += '<span id="optimizationIntScopeSettings">';
-        result += '<span style="padding-left:4px;padding-right:4px;">Max. Integers:</span>';
-        result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizationIntHighScopeValue" title="Enter the upper bound for unknown integers" name="optimizationIntHighScopeValue"/>';
+        result += '<span id="optimizerScope">';
+        result += '<span id="optimizerScopeLabel" style="padding-left:4px;padding-right:4px;">Max. Integers:</span>';
+        result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerScope" title="Enter the scope for optimization" name="optimizerScope"/>';
         result += '</span>';
         result += '</td>';        
+
+        result += '</td><td>';
+
+        result += '<span id="optimizerMaxInt">';
+        result += '<span id="optimizerMaxIntLabel" style="padding-left:4px;padding-right:4px;">Max. Integers:</span>';
+        result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerMaxInt" title="Enter the highest integer for optimization" name="optimizerMaxInt"/>';
+        result += '</span>';
+        result += '</td>';                
 
         result += '<td width="160">';
 
