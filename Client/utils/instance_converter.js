@@ -109,6 +109,7 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 	var result = '<?xml version="1.0"?><instances>';
 	var instanceTextArray = new Array();
 	
+	console.log(this.instances);
 
 	var match = instanceRegExp.exec(this.instances);
 
