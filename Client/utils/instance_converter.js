@@ -149,7 +149,7 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 
 //		alert(instanceTextArray[instanceID]);
 
-		var lines = instanceTextArray[instanceID].replaceAll("  ", "\t").split("\n");
+		var lines = instanceTextArray[instanceID].split("\n");
 //		lines.pop(); // remove the last line with --- instance ends
 //		lines.pop(); // remove the last line with --- instance ends
 //		lines.pop(); // remove the last line with --- instance ends
