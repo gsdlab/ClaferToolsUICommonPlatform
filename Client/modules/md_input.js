@@ -80,6 +80,14 @@ Input.method("onInitRendered", function()
     $("#loadExampleInEditor").change(this.exampleChange.bind(this));
 //    $("#saveSourceButton").click(this.saveSourceCall.bind(this));
 
+    $("#optimizerScopeOverride").change(function(){
+        $("#optimizerScope").prop("disabled", !$("#optimizerScopeOverride").is(":checked"));
+    });
+
+    $("#optimizerMaxIntOverride").change(function(){
+        $("#optimizerMaxInt").prop("disabled", !$("#optimizerMaxIntOverride").is(":checked"));
+    });
+
     var options = new Object();
     options.beforeSubmit = this.beginQuery.bind(this);
     options.success = this.fileSent.bind(this);
@@ -380,7 +388,13 @@ Input.method("getInitContent", function()
 
         result += '</td><td>';
 
+        var checked = "";
+
+        if (this.settings.input_default_optimizer_scope)
+            checked = ' checked = "checked"';
+
         result += '<span id="optimizerScopeSettings">';
+        result += '<input id="optimizerScopeOverride" type="checkbox" name="optimizerScopeOverride" title="Override the global scope computed during the compilation process"' + checked + '></input>';
         result += '<span id="optimizerScopeLabel" style="padding-left:4px;padding-right:4px;">Scope:</span>';
         result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerScope" title="Enter the scope for optimization" name="optimizerScope"/>';
         result += '</span>';
@@ -388,7 +402,13 @@ Input.method("getInitContent", function()
 
         result += '</td><td>';
 
+        var checked = "";
+
+        if (this.settings.input_default_optimizer_maxint)
+            checked = ' checked = "checked"';
+
         result += '<span id="optimizerMaxIntSettings">';
+        result += '<input id="optimizerMaxIntOverride" type="checkbox" name="optimizerMaxIntOverride" title="Override the maximum integer value computed during the compilation process"' + checked + '></input>';
         result += '<span id="optimizerMaxIntLabel" style="padding-left:4px;padding-right:4px;">MaxInt:</span>';
         result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerMaxInt" title="Enter the highest integer for optimization" name="optimizerMaxInt"/>';
         result += '</span>';
@@ -521,10 +541,16 @@ Input.method("onBackendChange", function()
                 {
                     $("#optimizerMaxInt").val(this.backends[i].scope_options.set_int_scope.default_value);
                 }
+                if (this.backends[i].scope_options.set_int_scope.label)
+                {
+                    $("#optimizerMaxIntLabel").html(this.backends[i].scope_options.set_int_scope.label);
+                }
+                $("#optimizerMaxIntOverride").change();
             }
             else
             {
-                $("#optimizerMaxIntSettings").hide();                
+                $("#optimizerMaxIntSettings").hide();        
+                $("#optimizerMaxInt").prop("disabled", true);
             }           
 
             if (this.backends[i].scope_options.set_default_scope && this.backends[i].scope_options.set_default_scope.argument)
@@ -534,11 +560,19 @@ Input.method("onBackendChange", function()
                 {
                     $("#optimizerScope").val(this.backends[i].scope_options.set_default_scope.default_value);
                 }
+                if (this.backends[i].scope_options.set_default_scope.label)
+                {
+                    $("#optimizerScopeLabel").html(this.backends[i].scope_options.set_default_scope.label);
+                }
+                $("#optimizerScopeOverride").change();
             }
             else
             {
                 $("#optimizerScopeSettings").hide();                
+                $("#optimizerScope").prop("disabled", true);
             }           
+
+            break;
 
         }
     }
