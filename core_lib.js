@@ -443,6 +443,8 @@ var buildArg = function (args, config, value)
             args.push(curArg);
             return args;
         }
+        else
+            return args;
 
     };
 
