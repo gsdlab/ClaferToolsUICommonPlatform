@@ -80,14 +80,6 @@ Input.method("onInitRendered", function()
     $("#loadExampleInEditor").change(this.exampleChange.bind(this));
 //    $("#saveSourceButton").click(this.saveSourceCall.bind(this));
 
-    $("#optimizerScopeOverride").change(function(){
-        $("#optimizerScope").prop("disabled", !$("#optimizerScopeOverride").is(":checked"));
-    });
-
-    $("#optimizerMaxIntOverride").change(function(){
-        $("#optimizerMaxInt").prop("disabled", !$("#optimizerMaxIntOverride").is(":checked"));
-    });
-
     var options = new Object();
     options.beforeSubmit = this.beginQuery.bind(this);
     options.success = this.fileSent.bind(this);
@@ -581,45 +573,12 @@ Input.method("onBackendChange", function()
 
     for (var i = 0; i < this.backends.length; i++)
     {
-        if (this.backends[i].id == selectedId)
+        if (this.backends[i].id == selectedId && this.backends[i].optimization_options)
         {
-            if (this.backends[i].scope_options.set_int_scope && this.backends[i].scope_options.set_int_scope.argument)
-            {
-                $("#optimizerMaxIntSettings").show();
-                if (this.backends[i].scope_options.set_int_scope.default_value)
-                {
-                    $("#optimizerMaxInt").val(this.backends[i].scope_options.set_int_scope.default_value);
-                }
-                if (this.backends[i].scope_options.set_int_scope.label)
-                {
-                    $("#optimizerMaxIntLabel").html(this.backends[i].scope_options.set_int_scope.label);
-                }
-                $("#optimizerMaxIntOverride").change();
-            }
-            else
-            {
-                $("#optimizerMaxIntSettings").hide();        
-                $("#optimizerMaxInt").prop("disabled", true);
-            }           
-
-            if (this.backends[i].scope_options.set_default_scope && this.backends[i].scope_options.set_default_scope.argument)
-            {
-                $("#optimizerScopeSettings").show();
-                if (this.backends[i].scope_options.set_default_scope.default_value)
-                {
-                    $("#optimizerScope").val(this.backends[i].scope_options.set_default_scope.default_value);
-                }
-                if (this.backends[i].scope_options.set_default_scope.label)
-                {
-                    $("#optimizerScopeLabel").html(this.backends[i].scope_options.set_default_scope.label);
-                }
-                $("#optimizerScopeOverride").change();
-            }
-            else
-            {
-                $("#optimizerScopeSettings").hide();                
-                $("#optimizerScope").prop("disabled", true);
-            }           
+            this.updateOptimizationSettings(this.backends[i].optimization_options.set_int_scope, "MaxInt");
+            this.updateOptimizationSettings(this.backends[i].optimization_options.set_default_scope, "Scope");
+            this.updateOptimizationSettings(this.backends[i].optimization_options.cores, "Cores");
+            this.updateOptimizationSettings(this.backends[i].optimization_options.limit, "Limit");
 
             break;
 
@@ -628,4 +587,33 @@ Input.method("onBackendChange", function()
 
     if (this.settings.onBackendChange) 
         this.settings.onBackendChange(this, result);
+});
+
+Input.method("updateOptimizationSettings", function(config, id)
+{
+    $("#optimizer" + id + "Override").unbind("change");
+
+    $("#optimizer" + id + "Override").change(function(){
+        $("#optimizer" + id).prop("disabled", !$("#optimizer" + id + "Override").is(":checked"));
+    });
+
+    if (config && config.argument)
+    {
+        $("#optimizer" + id + "Settings").show();
+        if (config.default_value)
+        {
+            $("#optimizer" + id).val(config.default_value);
+        }
+        if (config.label)
+        {
+            $("#optimizer" + id + "Label").html(config.label);
+        }
+
+        $("#optimizer" + id + "Override").change();
+    }
+    else
+    {
+        $("#optimizer" + id + "Settings").hide();        
+        $("#optimizer" + id).prop("disabled", true);
+    }           
 });

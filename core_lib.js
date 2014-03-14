@@ -416,7 +416,36 @@ var getVersion = function()
 var getTitle = function()
     {
         return packageConfig.name;
-    };                            
+    };                         
+
+
+var buildArg = function (args, config, value)
+    {
+        if (config && config.argument) 
+        {
+            var finalValue;
+
+            if (value)
+                finalValue = value;
+            else if (config.off_value)
+                finalValue = config.off_value;
+            else
+                return args;
+
+            var replacement = [
+                {
+                    "needle": "$value$", 
+                    "replacement": finalValue
+                }
+            ];
+
+            var curArg = replaceTemplate(config.argument, replacement);
+            args.push(curArg);
+            return args;
+        }
+
+    };
+
 
 module.exports.addProcess = addProcess;
 module.exports.getProcess = getProcess;
@@ -445,3 +474,4 @@ module.exports.filterArgs = filterArgs;
 module.exports.getTitle = getTitle;
 module.exports.getVersion = getVersion;
 module.exports.getDependencyVersionsText = getDependencyVersionsText;
+module.exports.buildArg = buildArg;
