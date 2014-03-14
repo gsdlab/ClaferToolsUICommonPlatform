@@ -346,7 +346,21 @@ Input.method("getInitContent", function()
     
     result += '</select></div></td>';
     result += '<td><input id="submitExample" type="submit" value="' + this.settings.file_extensions[0].button_example_caption + '" title="' + this.settings.file_extensions[0].button_example_tooltip + '"></input></td>';
-    result += '<td></td>';
+
+
+    if (this.settings.optimization_backend)
+    {
+        result += '<td>';
+        var checked = "";
+
+        if (this.settings.input_default_cache)
+            checked = ' checked = "checked"';
+
+        result += '<input id="useCache" type="checkbox" name="useCache"' + checked + '>Use cached results</input>';
+        result += '</td>';                
+    }
+
+//    result += '<td></td>';
 
     result += '</tr>'
     result += '<tr height="1em">';
@@ -354,11 +368,11 @@ Input.method("getInitContent", function()
     result += '<span id="input_editor_caption">Or enter your model:</span></td>';
     result += '<td style="border-top: 2px groove threedface; "><input id="submitText" type="submit" value="' + this.settings.file_extensions[0].button_editor_caption + '" title="' + this.settings.file_extensions[0].button_editor_tooltip + '"/></td>';
 
-    result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface"><div id="input_scopes">Scopes: <select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using finite scope reasoners">';
+    result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface"><div id="input_scopes"><select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using finite scope reasoners">';
 
-    result += '<option value="none" title="Disable scope computing strategy. All scopes are to be set to 1">Disabled</option>';
-    result += '<option value="simple" selected="selected" title="Fast computation. Scopes are not precise, but this strategy works in most cases">Fast</option>';
-    result += '<option value="full" title="Full computation. This method is very slow, but for small models works relatively fast">Full</option>';
+    result += '<option value="none" title="Disable scope computing strategy. All scopes are to be set to 1">Disable scope computing</option>';
+    result += '<option value="simple" selected="selected" title="Fast computation. Scopes are not precise, but this strategy works in most cases">Use fast scope computing</option>';
+    result += '<option value="full" title="Full computation. This method is very slow, but for small models works relatively fast">Use full scope computing</option>';
 
     result += '</select></div></td>';
 
@@ -367,7 +381,7 @@ Input.method("getInitContent", function()
     var padding = "";
     if (this.settings.optimization_backend)
     {
-        padding = 'padding-bottom:35px;';
+        padding = 'padding-bottom:60px;';
     }
 
     result += '</tr><tr height="100%"><td style="height:100%;border-top: 2px groove threedface;' + padding + '" colspan = "3"><div id="clafer_editor" style="height:100%">';
@@ -380,13 +394,15 @@ Input.method("getInitContent", function()
 
     if (this.settings.optimization_backend)
     {
-        result += '<div id="input_bottom_container" style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-20px; border: 2px groove threedface;">';
+        result += '<div id="input_bottom_container" style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-22px; border: 2px groove threedface;">';
 //        result += '<div style="height:2px; border-top: 2px groove threedface;"></div>';
 
-        result += '<table width="100%" height="100%" cellspacing="0" cellpadding="0"><tr><td>';
-        result += '<span id="input_backend_label">Backend: </span><select id="optimizationBackend" style="width:180px" name="optimizationBackend" title=""></select>';
+        result += '<table width="100%" height="100%" cellspacing="0" cellpadding="0"><tr><td style="border-right: 2px groove threedface">';
+        result += '<span id="input_backend_label">Optimization backend: </span>';
 
-        result += '</td><td>';
+        result += '</td>';
+
+        result += '<td>';
 
         var checked = "";
 
@@ -412,19 +428,52 @@ Input.method("getInitContent", function()
         result += '<span id="optimizerMaxIntLabel" style="padding-left:4px;padding-right:4px;">MaxInt:</span>';
         result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerMaxInt" title="Enter the highest integer for optimization" name="optimizerMaxInt"/>';
         result += '</span>';
-        result += '</td>';                
+        result += '</td>';
+
+
+
+
+
+        result += '</tr>';
+
+        // second row
+
+        result += '<tr><td style="border-right: 2px groove threedface">';
+        result += '<select id="optimizationBackend" name="optimizationBackend" title=""></select>';
+        result += '</td>';
+
+
+
+
+
 
         result += '<td>';
-
-
         var checked = "";
-
-        if (this.settings.input_default_cache)
+        if (this.settings.input_default_optimizer_limit)
             checked = ' checked = "checked"';
 
-        result += '<input id="useCache" type="checkbox" name="useCache"' + checked + '>Use Cache</input>';
-        result += '</td></tr></table>';
+        result += '<span id="optimizerLimitSettings">';
+        result += '<input id="optimizerLimitOverride" type="checkbox" name="optimizerLimitOverride" title="Limit the maximum number of instances produced"' + checked + '></input>';
+        result += '<span id="optimizerLimitLabel" style="padding-left:4px;padding-right:4px;">Limit instances:</span>';
+        result += '<input type="text" class="scopeInput" size="2" value="100" id="optimizerLimit" title="Enter the limit of instances for optimization" name="optimizerLimit"/>';
+        result += '</span>';
+        result += '</td>';  
 
+
+        result += '<td>';
+        var checked = "";
+
+        if (this.settings.input_default_optimizer_cores)
+            checked = ' checked = "checked"';
+
+        result += '<span id="optimizerCoresSettings">';
+        result += '<input id="optimizerCoresOverride" type="checkbox" name="optimizerCoresOverride" title="Use parallel optimization with the specified number of cores"' + checked + '></input>';
+        result += '<span id="optimizerCoresLabel" style="padding-left:4px;padding-right:4px;">Number of cores:</span>';
+        result += '<input type="text" class="scopeInput" size="2" value="16" id="optimizerCores" title="Enter the number of cores to use for optimization" name="optimizerCores"/>';
+        result += '</span>';
+        result += '</td>';
+
+        result += '</tr></table>';
         result += '</div>';
 
         $.getJSON('/Backends/backends.json', 
