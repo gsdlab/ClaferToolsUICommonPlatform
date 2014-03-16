@@ -81,6 +81,17 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
 
 });
 
+FeatureQualityMatrix.method("synchronizeWidths", function()
+{
+    for(var i = 1; i < $("#tHead #r0").children().length; i++)
+    {
+        var width = $("#tBody #td0_" + i).innerWidth() - 6; // 6 = padding-left + padding-right
+        $("#tHead #th0_" + i).width(width);
+        $("#tHead #th0_" + i).css("min-width", width);
+    }
+});
+
+
 FeatureQualityMatrix.method("onRendered", function()
 {
     if (!this.filter)
@@ -173,13 +184,7 @@ FeatureQualityMatrix.method("onRendered", function()
 
 /* Synchronize the width of head and body tables */
 
-    for(var i = 1; i < $("#tHead #r0").children().length; i++)
-    {
-        var width = $("#tBody #td0_" + i).innerWidth() - 6; // 6 = padding-left + padding-right
-        $("#tHead #th0_" + i).width(width);
-        $("#tHead #th0_" + i).css("min-width", width);
-    }
-
+    this.synchronizeWidths();
 
 // Add tristate checkboxes for filtering features
     i = 1;
@@ -230,7 +235,7 @@ FeatureQualityMatrix.method("onRendered", function()
 
 //        adding tooltips
 
-        $("#r" + i + " .td_abstract").tipsy({fade: true, gravity: 'w', html: true});
+        $("#r" + i + " .td_abstract").tipsy({fade: true, gravity: 'n', html: true});
         $("#r" + i + " .td_instance [title]").tipsy({fade: true, gravity: 'w', html: true});
 
 //  Add sorting to quality attributes
@@ -647,6 +652,8 @@ FeatureQualityMatrix.method("rowSort", function(rowText){
         i++;
         row = $("#comparison #r" + i);
     }
+
+    this.synchronizeWidths();
 });
 
 FeatureQualityMatrix.method("getInitContent", function()
@@ -657,6 +664,7 @@ FeatureQualityMatrix.method("getInitContent", function()
 FeatureQualityMatrix.method("featureChecked", function (featurePath, state){
     this.filter.filterContent(); // filter after changing the feature status
     this.settings.onFeatureCheckedStateChange(this, featurePath, state);
+    this.synchronizeWidths();
 });
 
 FeatureQualityMatrix.method("removeInstance", function(instanceNum){
