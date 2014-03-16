@@ -603,17 +603,20 @@ FeatureQualityMatrix.method("rowSort", function(rowText){
             if ($(current).text() == rowText){
                 //gets cells of row and pairs them with their values
                 var instances = row.find(".td_instance");
+                var extra_td = row.find(".td_extra")[0];
                 var sortableArray = [];
                 for(var j=0; j<instances.length; j++){
                     sortableArray.push({ instance: $(instances[j]).attr("id"), value: $(instances[j]).text()} );
                 }
                 //checks what kind of sort is applied
                 if($(current).hasClass("sortDesc")){ //sort instances by descending value
+                    sortableArray.push({ instance: $(extra_td).attr("id"), value: -1000000000} );
                     sortableArray.sort(function(a,b){
                         return a.value - b.value;
                     });
                 }
                 else if($(current).hasClass("sortAsc")){
+                    sortableArray.push({ instance: $(extra_td).attr("id"), value: 1000000000} );
                     sortableArray.sort(function(a,b){ //sort instances by ascending value
                         return b.value - a.value
                     });
