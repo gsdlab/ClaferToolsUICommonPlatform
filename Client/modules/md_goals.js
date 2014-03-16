@@ -65,10 +65,10 @@ Goals.method("onRendered", function()
             
             //add handler for range box 
             var that = this;
-            $('#' + this.goals[i].label + 'max').keyup(function(){
+            $('#' + this.goals[i].arg + 'max').keyup(function(){
                 that.filterByGoals($(this).attr("id").substring(0, $(this).attr("id").length - 3));
             });  
-            $('#' + this.goals[i].label + 'min').keyup(function(){
+            $('#' + this.goals[i].arg + 'min').keyup(function(){
                 that.filterByGoals($(this).attr("id").substring(0, $(this).attr("id").length - 3));
             });
         }
@@ -122,7 +122,6 @@ Goals.method("getContent", function()
 //get ranges to set landing zone else get minimum/maximum values for the ranges. After that filter
 Goals.method("filterByGoals", function(input)
 {
-    alert(input);
     for (var x = 0; x<=this.ranges.length; x++){
         if (input == this.ranges[x].goal){
             break;
@@ -130,6 +129,7 @@ Goals.method("filterByGoals", function(input)
             return;
         }
     }  
+
     var min = $("#" + input + "min").val();
     var max = $("#" + input + "max").val();
     if (jQuery.isNumeric( min ))
