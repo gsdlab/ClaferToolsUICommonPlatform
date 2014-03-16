@@ -514,7 +514,11 @@ FeatureQualityMatrix.method("toggleDistinct", function()
             var instanceTds = row.find(".td_instance");
 
             var allAreTheSame = true;
-            var last = "";
+
+            if (instanceTds.length == 0)
+                continue;
+
+            var first = null;
 
 /*  loop iterates through cells until it has crossed an entire row without finding 
     a difference (non-distinct) or it finds a difference (distinct). It will also 
@@ -525,22 +529,19 @@ FeatureQualityMatrix.method("toggleDistinct", function()
                 if ($(instanceTds[j]).css("display") == "none"){ //case for filtered out elements that are hidden
                     //do nothing
                 }
-                else if ($(instanceTds[j]).hasClass("tick"))
+                else
                 {
-                    if (last == "" || last == "tick")
-                        last = "tick";
-                    else {allAreTheSame = false; break;}
-                }   
-                else if ($(instanceTds[j]).hasClass("no"))
-                {
-                    if (last == "" || last == "no")
-                        last = "no";
-                    else {allAreTheSame = false; break;}
+                    var html = $(instanceTds[j]).html();
+
+                    if (!first)
+                        first = html;
+                    else
+                        if (first != html)
+                        {
+                            allAreTheSame = false;
+                            break;
+                        }
                 }
-                else if ($(instanceTds[j]).hasClass("EffectMan")){
-                    allAreTheSame = true; break;
-                }
-                else {allAreTheSame = false; break;}
             }
             
 //  toggles based on outcome of loop
