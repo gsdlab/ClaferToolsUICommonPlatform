@@ -33,6 +33,15 @@ TableVisualizer.method("prettifyClaferSet", function(s){
 	return s.replace("{", "{<br/>").replace("}", "<br/>}").replaceAll(";", "<br/>");
 });
 
+TableVisualizer.method("trimValue", function(s)
+{
+	var maxLength = 25;
+
+	if (s.length <= maxLength)
+		return s;
+
+	return s.substring(0, maxLength) +  "&hellip;";
+});
 
 TableVisualizer.method("mapValue", function(feature, sVal, type)
 {
@@ -61,7 +70,7 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 		else
 		{
 			result.tdStyle = 'bool tick clafer';
-			result.html = '<img title="' + feature + ' is present as ' + this.filterClaferValue(sVal) + '" class="tick" src="commons/Client/images/tick.png"/>';
+			result.html = '<img title="' + feature + ' is present as ' + this.trimValue(this.filterClaferValue(sVal)) + '" class="tick" src="commons/Client/images/tick.png"/>';
 		}
 	}
 	else if (type == "int")
@@ -72,7 +81,7 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 	else // just clafer of a non-primitive type
 	{
 		result.tdStyle = 'clafer';
-		result.html = '<span title="' + feature + ' = ' + this.prettifyClaferSet(sVal) + '" class="clafer">' + this.filterClaferValue(sVal) + '</span>';
+		result.html = '<span title="' + feature + ' = ' + this.prettifyClaferSet(sVal) + '" class="clafer">' + this.trimValue(this.filterClaferValue(sVal)) + '</span>';
 	}
 		
 	return result;
@@ -80,7 +89,7 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 
 // The Main Content Generator
 
-TableVisualizer.prototype.getHTML = function(data) 
+TableVisualizer.prototype.getHTML = function(data, colWidth) 
 {
 	var instanceCount = data.products.length;    
 	var table = $('<table  id="tBody" width="100%" cellspacing="0" cellspadding="0"></table>').addClass('foo');
@@ -88,7 +97,7 @@ TableVisualizer.prototype.getHTML = function(data)
     // first row - headers
     var row = $('<tr id="r' + 0 +'"></tr>').addClass('bar');//
 	var tagName = "th"; // to make headers
-	var td = $('<' + tagName + '></' + tagName + '>').addClass('td_abstract').addClass('table_title');
+	var td = $('<' + tagName + ' width="' + colWidth + '" style="min-width:' + colWidth + 'px"></' + tagName + '>').addClass('td_abstract').addClass('table_title');
 	td.html(data.title);
 	row.append(td);
     
@@ -110,7 +119,7 @@ TableVisualizer.prototype.getHTML = function(data)
 			
 		var row = $('<tr id="r' + (i + 1) +'"></tr>').addClass(data.features[i].type);
 		
-		var td = $('<' + tagName + '></' + tagName + '>').addClass('td_abstract').addClass(data.features[i].type);
+		var td = $('<' + tagName + ' width="' + colWidth + '" style="min-width:' + colWidth + 'px"></' + tagName + '>').addClass('td_abstract').addClass(data.features[i].type);
 
 		var tooltip = data.features[i].path.replaceAll(".", "::");
 

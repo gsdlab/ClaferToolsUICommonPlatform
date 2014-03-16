@@ -34,7 +34,9 @@ function FeatureQualityMatrix(host, settings)
     this.normalColor = "#000"
 
     this.fadeOpacity = "0.7";
-    this.normalOpacity = "1.0"
+    this.normalOpacity = "1.0";
+
+    this.colWidth = 250;
 
     this.host = host;
     this.host.loaded();
@@ -73,7 +75,7 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.abstractClaferOutput = "";    
     this.toggled = false;    
     this.dataTable = this.getDataTable();    
-    this.content = $('<div id="comparison" class="comparison"></div>').append(new TableVisualizer().getHTML(this.dataTable));
+    this.content = $('<div id="comparison" class="comparison"></div>').append(new TableVisualizer().getHTML(this.dataTable, this.colWidth));
     this.currentRow = 1;
 //    this.EMfeatures = [];
 
@@ -169,67 +171,19 @@ FeatureQualityMatrix.method("onRendered", function()
     $("#tBodyContainer").prepend($("#comparison #tBody"));
     
 
+/* Synchronize the width of head and body tables */
 
-
-// fix formatting for new headers
-// shrink table to obtain minimum widths
-    $("#tBodyContainer").css("width", "10%")
-    $("#tHeadContainer").css("width", "10%")
-
-// obtain minimum widths
-    var i;
-
-    $("#tHead .td_abstract").width("500");
-    $("#tBody .td_abstract").width("500");
-
-    i = 0;
-    var row = $("#r" + i);
-    var minWidth = 0;
-    while ($(row).children().length != 0){
-        for (var x = 1; x<=$(row).children().length; x++){
-            var current = $(row).children()[x];
-            if ($(current).width() > minWidth)
-                minWidth = $(current).width();
-        }
-        i++;
-        row = $("#r" + i);
+    for(var i = 1; i < $("#tHead #r0").children().length; i++)
+    {
+        var width = $("#tBody #td0_" + i).innerWidth() - 6;
+        $("#tHead #th0_" + i).width(width);
+        $("#tHead #th0_" + i).css("min-width", width);
     }
 
-
-    var minAbstractWidth = $("#tBody .td_abstract").width();
-
-// Set new widths and minimum widths (important to do both for cross browser functionality)
-    for(i=1; i<$("#tHead #r0").children().length; i++){
-        $("#tHead #th0_" + i).width(minWidth);
-        $("#tBody #td0_" + i).width(minWidth);
-        $("#tHead #th0_" + i).css("min-width", minWidth);
-        $("#tBody #td0_" + i).css("min-width", minWidth);
-        var x = 1;
-        row = $("#r" + x);
-        while ($(row).children().length != 0){
-            $("#tBody #td" + x + "_" + i).width(minWidth);
-            $("#tBody #td" + x + "_" + i).css("min-width", minWidth);
-            x++;
-            row = $("#r" + x);
-        }
-    }
-
-    $("#tHead .td_abstract").width(minAbstractWidth);
-    $("#tBody .td_abstract").width(minAbstractWidth);
-    $("#tHead .td_abstract").css("min-width", minAbstractWidth);
-    $("#tBody .td_abstract").css("min-width", minAbstractWidth);
-
-// reset table widths to 100%
-    $("#tBodyContainer").css("width", "100%")
-    $("#tHeadContainer").css("width", "100%")
-
-
-// Mostly done formatting table. adding interactive features now.
 
 // Add tristate checkboxes for filtering features
     i = 1;
-    row = $("#r" + i);
-    
+    row = $("#r" + i);    
         
     var that = this;
     while (row.length != 0){
