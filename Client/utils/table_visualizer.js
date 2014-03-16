@@ -107,7 +107,10 @@ TableVisualizer.prototype.getHTML = function(data, colWidth)
         td.html(data.products[j]);
 		row.append(td);
     }
-		
+
+	var td = $('<' + tagName + ' id="' + tagName + i + "_" + (instanceCount + 1) + '"></' + tagName + '>');
+	row.append(td);
+
     table.append(row);
     
     // next rows
@@ -151,6 +154,12 @@ TableVisualizer.prototype.getHTML = function(data, colWidth)
 
 			row.append(td);
 		}
+
+		// adding a dummy column, so that the table will always have at least to columns, so that
+		// the table will be formatted properly even if there are no instances after filtering
+
+		var td = $('<' + tagName + ' id="' + tagName + i + "_" + (instanceCount + 1) + '"></' + tagName + '>');
+		row.append(td);
 
         table.append(row);
 	}

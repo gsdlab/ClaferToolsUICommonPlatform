@@ -88,7 +88,7 @@ FeatureQualityMatrix.method("onRendered", function()
     
     this.filter.onRendered();
     
-    $.resizeWindow(this.id, this.width, $("#comparison").height() + 80); // resize the table to fit everything
+    $.resizeWindow(this.id, this.width, $("#comparison").outerHeight() + 20); // resize the table to fit everything
 
 // Add search bar 
     var td = $('#comparison .table_title')[0];
@@ -175,7 +175,7 @@ FeatureQualityMatrix.method("onRendered", function()
 
     for(var i = 1; i < $("#tHead #r0").children().length; i++)
     {
-        var width = $("#tBody #td0_" + i).innerWidth() - 6;
+        var width = $("#tBody #td0_" + i).innerWidth() - 6; // 6 = padding-left + padding-right
         $("#tHead #th0_" + i).width(width);
         $("#tHead #th0_" + i).css("min-width", width);
     }
