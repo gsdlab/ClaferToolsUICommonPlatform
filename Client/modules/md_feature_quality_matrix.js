@@ -46,7 +46,7 @@ function FeatureQualityMatrix(host, settings)
 FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
     console.log(data);
-    this.processor = new ClaferProcessor(data.claferXML, data.qualities);
+    this.processor = new ClaferProcessor(data.claferXML);
 
     this.abstractClaferTree = null;
     var instanceCount = this.instanceProcessor.getInstanceCount();
