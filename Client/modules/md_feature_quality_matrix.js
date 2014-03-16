@@ -234,7 +234,7 @@ FeatureQualityMatrix.method("onRendered", function()
     var that = this;
     while (row.length != 0){
         // setting the default filtering status to each row - none
-        if (row.hasClass("bool"))
+        if (row.hasClass("bool") || row.hasClass("boolclafer"))
         {
             $(row).attr("FilterStatus", "none");
             $("#r" + i + " .td_abstract .typelabel").addClass("filter_normal");

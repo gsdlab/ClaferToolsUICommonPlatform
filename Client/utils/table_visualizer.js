@@ -29,7 +29,12 @@ TableVisualizer.method("filterClaferValue", function(s){
 	return s.replace(/c[0-9]*_/g, "");
 });
 
-TableVisualizer.method("mapValue", function(sVal, type)
+TableVisualizer.method("prettifyClaferSet", function(s){
+	return s.replace("{", "{<br/>").replace("}", "<br/>}").replaceAll(";", "<br/>");
+});
+
+
+TableVisualizer.method("mapValue", function(feature, sVal, type)
 {
 	var result = new Object();
 	
@@ -37,24 +42,37 @@ TableVisualizer.method("mapValue", function(sVal, type)
 	{
 		if (sVal == "yes")
 		{
-			result.html = '<img class="tick" src="commons/Client/images/tick.png"/>';
+			result.html = '<img title="' + feature + ' is present" class="tick" src="commons/Client/images/tick.png"/>';
 			result.tdStyle = 'bool tick';
 		}
 		else
 		{
-			result.html = '<img class="no" src="commons/Client/images/no.png"/>';
+			result.html = '<img title = "' + feature + ' is not present" class="no" src="commons/Client/images/no.png"/>';
 			result.tdStyle = 'bool no';
+		}
+	}
+	else if (type == "boolclafer")
+	{
+		if (sVal == "none")
+		{
+			result.html = '<img title = "' + feature + ' is not present" class="no" src="commons/Client/images/no.png"/>';
+			result.tdStyle = 'bool no';
+		}
+		else
+		{
+			result.tdStyle = 'bool tick clafer';
+			result.html = '<img title="' + feature + ' is present as ' + this.filterClaferValue(sVal) + '" class="tick" src="commons/Client/images/tick.png"/>';
 		}
 	}
 	else if (type == "int")
 	{
 		result.tdStyle = 'numeric';
-		result.html = '<span class="number">' + sVal + '</span>';
+		result.html = '<span title="' + feature + ' = ' + sVal + '" class="number">' + sVal + '</span>';
 	}
 	else // just clafer of a non-primitive type
 	{
 		result.tdStyle = 'clafer';
-		result.html = '<span class="clafer">' + this.filterClaferValue(sVal) + '</span>';
+		result.html = '<span title="' + feature + ' = ' + this.prettifyClaferSet(sVal) + '" class="clafer">' + this.filterClaferValue(sVal) + '</span>';
 	}
 		
 	return result;
@@ -118,7 +136,7 @@ TableVisualizer.prototype.getHTML = function(data)
 		{
 			var td = $('<' + tagName + ' id="' + tagName + i + "_" + (j + 1) + '"></' + tagName + '>').addClass('td_instance');
 			
-            mappedValue = this.mapValue(data.matrix[i][j], data.features[i].type);
+            mappedValue = this.mapValue(data.features[i].id, data.matrix[i][j], data.features[i].type);
             td.html(mappedValue.html);
             td.addClass(mappedValue.tdStyle);
 

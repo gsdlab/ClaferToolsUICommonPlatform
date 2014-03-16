@@ -105,15 +105,21 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
 					else
 						result = id + "$" + counter;
 
-					break;
+//					break;
 				}
 			}
+
+			if (result == "")
+				result = clafers[resultId].getAttribute("id") + "$" + clafers[resultId].getAttribute("counter");
 
 			if (type == 'int')
 				results.push(parseInt(result));
 			else results.push(result);
 
 		}
+
+		if (type == 'boolclafer')
+			alert(claferPath + "|" + results[0]);
 
 		if (results.length == 1)
 		{
@@ -123,7 +129,7 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
 				return results[0];
 		}
 
-		return results.join("<br/>");
+		return "{" + results.join(";") + "}";
 	}
 	catch(e)
 	{

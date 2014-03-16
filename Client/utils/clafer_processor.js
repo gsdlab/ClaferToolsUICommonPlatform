@@ -114,9 +114,13 @@ ClaferProcessor.method("calcClaferType", function(clafer)
 	if (clafer.superClafer == 'integer')
 		return 'int';
 
-	if (clafer.claferCardMin == 0 && clafer.claferCardMax == 1 && clafer.superClafer == 'clafer')
+	if (clafer.claferCardMin == 0 && clafer.claferCardMax == 1)
 	{
-		return 'bool';
+		if (clafer.superClafer == 'clafer')
+		{
+			return 'bool';
+		}
+		return 'boolclafer';
 	}
 
 	return 'clafer';
