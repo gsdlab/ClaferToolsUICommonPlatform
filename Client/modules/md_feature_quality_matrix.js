@@ -231,6 +231,7 @@ FeatureQualityMatrix.method("onRendered", function()
 //        adding tooltips
 
         $("#r" + i + " .td_abstract").tipsy({fade: true, gravity: 'w', html: true});
+        $("#r" + i + " .td_instance [title]").tipsy({fade: true, gravity: 'w', html: true});
 
 //  Add sorting to quality attributes
         if (row.hasClass("int")) {
