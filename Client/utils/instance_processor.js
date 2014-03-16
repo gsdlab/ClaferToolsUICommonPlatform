@@ -118,8 +118,8 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
 
 		}
 
-		if (type == 'boolclafer')
-			alert(claferPath + "|" + results[0]);
+//		if (type == 'boolclafer')
+//			alert(claferPath + "|" + results[0]);
 
 		if (results.length == 1)
 		{
