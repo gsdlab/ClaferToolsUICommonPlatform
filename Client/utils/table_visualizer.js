@@ -81,7 +81,14 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 	else // just clafer of a non-primitive type
 	{
 		result.tdStyle = 'clafer';
-		result.html = '<span title="' + feature + ' = ' + this.prettifyClaferSet(sVal) + '" class="clafer">' + this.trimValue(this.filterClaferValue(sVal)) + '</span>';
+		if (sVal == "none")
+		{
+			result.html = '<span title="no ' + feature + '" class="clafer">' + '&nbsp;' + '</span>';
+		}
+		else
+		{
+			result.html = '<span title="' + feature + ' = ' + this.prettifyClaferSet(sVal) + '" class="clafer">' + this.trimValue(this.filterClaferValue(sVal)) + '</span>';
+		}
 	}
 		
 	return result;
