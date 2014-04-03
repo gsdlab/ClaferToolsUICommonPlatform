@@ -3,6 +3,7 @@
 function InstanceConverter(source)
 {
 	this.instances = source;
+	this.residualText = "";
 }
 
 // Converts ClaferMoo output (list of instances with unique clafer names represented as a structural text)
@@ -103,7 +104,8 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(){
 
 InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClaferID){
 	var myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ \t]*\=?[ \t]*([^ ]*)\b/;
-	var instanceRegExp = /^=== Instance ([0-9]*) ===$/gm;
+	var instanceRegExp = /^=== Instance ([0-9]*) Begin ===$/gm;
+	var instanceEndRegExp = /^[-][-][-] Instance ([0-9]*) End [-][-][-]$/m;
 //	var topClaferExp = /\^([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ ]*\=?[ ]*([^ ]*)\b/;
 
 	var result = '<?xml version="1.0"?><instances>';
@@ -130,9 +132,28 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 	}
 
 	instanceTextArray.push(this.instances.substring(mPos2, this.instances.length));
+	this.residualExtraText = ""; // this is anything left after the processing: some debug text, etc.
+	this.residualInstanceText = ""; // this is anything left after the processing: some debug text, etc.
 
 	for (var instanceID = 0; instanceID < instanceTextArray.length; instanceID++)
 	{
+		var instanceText = instanceTextArray[instanceID];
+
+		var match = instanceEndRegExp.exec(instanceText);
+
+		if (!match)
+		{
+			// likely, we either have a formatting problem, or the instance data is not fully received
+			this.residualInstanceText = instanceText;
+			break; 
+		}
+
+		this.residualExtraText = this.residualExtraText + instanceText.substring(match.index + match[0].length, match.index + match[0].length + instanceText.length).trim(); 
+		// handling a case when something is printed between instances, then it goes to the residualExtraText
+		
+		instanceText = instanceText.substring(0, match.index); // removing this unnecessary things
+		match = null;
+
 		result += '\n<instance>';
 
 		if (targetClaferID == null)
@@ -146,13 +167,9 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 		var temp = "";
 		var oldpos = -1;
 		var pos = 0;
+		var tabSize = 1;
 
-//		alert(instanceTextArray[instanceID]);
-
-		var lines = instanceTextArray[instanceID].split("\n");
-//		lines.pop(); // remove the last line with --- instance ends
-//		lines.pop(); // remove the last line with --- instance ends
-//		lines.pop(); // remove the last line with --- instance ends
+		var lines = instanceText.split("\n");
 	
 		var line = 0; // we skip the instance label
 
@@ -199,7 +216,7 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 
 					if (0 < oldpos)
 					{
-						for (var j = 0; j < (oldpos + 1); j++)
+						for (var j = 0; j < (oldpos) / tabSize + 1; j++)
 						{
 							result += "</subclafers></clafer>";
 						}
@@ -248,11 +265,12 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 				if (pos > oldpos) // nesting level increases
 				{
 					result += ""; // don't do anything, clafers will be nested after the loop
+					tabSize = pos - oldpos;
 				}
 				
 				if (pos < oldpos)
 				{
-					for (var j = 0; j < (oldpos - pos + 1); j++)
+					for (var j = 0; j < (oldpos - pos) / tabSize + 1; j++)
 					{
 						result += "</subclafers></clafer>";
 					}
@@ -308,7 +326,7 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 
 		if (0 < oldpos)
 		{
-			for (var j = 0; j < (oldpos + 1); j++)
+			for (var j = 0; j < (oldpos) / tabSize + 1; j++)
 			{
 				result += "</subclafers></clafer>";
 			}
@@ -324,61 +342,11 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 
 	result += '</instances>';
 
-//	var obj = {};
-//	obj.a = result;
-//	console.log(obj);
-//	console.log(obj.a);
-	
 	return result;
 });
 
-//function that can change an instance given by claferIG to match the output of ClaferMoo
-InstanceConverter.method("convertFromClaferIGOutputToClaferMoo", function(oldAbstractXML){
-	var instances = this.instances;
-	//remove $x
-	var myregex = /\x24[0-9]{1,}[ ]/g;
-	instances = instances.replace(myregex, " ");
-
-	//convert double spacing to tab
-	instances = instances.replaceAll("  ", " ");
-
-/* commenting out fixes a bug with `Bluetooth
-
-	//make numbers the same
-	myregex = /[c][0-9]{1,}[_][^\n <>]{1,}/g;
-	var allFinds = instances.match(myregex);
-	var uniqueFinds = [];
-	if (allFinds === null){
-		return "";
-	}
-	for (var i=0; i<allFinds.length; i++){
-		if ($.inArray(allFinds[i], uniqueFinds) === -1){
-			uniqueFinds.push(allFinds[i]);
-		}
-	}
-
-	var allOldFinds = oldAbstractXML.match(myregex);
-	var uniqueOldFinds = [];
-	for (var i=0; i<allOldFinds.length; i++){
-		if ($.inArray(allOldFinds[i], uniqueOldFinds) === -1){
-			uniqueOldFinds.push(allOldFinds[i]);
-		}
-	}
-
-	for (var i=0; i<uniqueFinds.length; i++){
-		current = uniqueFinds[i].replace(/[c][0-9]{1,}[_]/, "");
-		for (var y=0; y<uniqueOldFinds.length; y++){
-			if (uniqueOldFinds[y].replace(/[c][0-9]{1,}[_]/, "") == current){
-				instances = instances.replaceAll(uniqueFinds[i], uniqueOldFinds[y]);
-			}
-		}
-	}
-*/
-	return instances;
-});
-
 //returns the data for a single instance
-InstanceConverter.method("getInstanceData", function(pid){
+InstanceConverter.method("getInstanceData", function(pid){ // todo: update this function
 	var instances = this.instances;
 	var lines = instances.match(/^.*([\n\r]+|$)/gm);
 	var supertype = lines[1].replace(/[c][0-9]{1,}[_]/, "");
