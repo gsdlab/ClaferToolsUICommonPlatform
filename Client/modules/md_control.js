@@ -373,7 +373,7 @@ Control.method("disableAll", function(){
     $("#allScopesDelta").attr("disabled", "disabled"); 
 
 //    $("#intLowScopeValue").attr("disabled", "disabled");    
-/*
+
     var selectedId = $("#BackendId").val();
     
     for (var i = 0; i < this.backends.length; i++)
@@ -392,7 +392,7 @@ Control.method("disableAll", function(){
             break;
         }
     }
-*/
+
     $("#intHighScopeValue").attr("disabled", "disabled");   
     $("#setIntScope").attr("disabled", "disabled");   
 
@@ -601,6 +601,15 @@ Control.method("onBackendChange", function()
                 {
                     $("#intHighScopeValue").val(this.backends[i].scope_options.set_int_scope.default_value);
                 }
+
+                if (this.backends[i].scope_options.set_int_scope.argument)
+                {
+                    $("#intHighScopeValue").removeAttr("disabled");   
+                }
+                else 
+                {
+                    $("#intHighScopeValue").attr("disabled", "disabled");   
+                }                
 
                 found = true;
             }
