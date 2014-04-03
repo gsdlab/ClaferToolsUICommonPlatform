@@ -121,8 +121,18 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 		return result;		
 	}
 
+	this.residualExtraText = ""; // this is anything left after the processing: some debug text, etc.
+	this.residualInstanceText = ""; // this contains incomplete instances (without "Instance End" marker)
+
 	var mPos1 = 0;
 	var mPos2 = match.index;
+
+	var text = this.instances.substring(0, match.index).trim();
+
+	if (text.length > 0)
+		text += "\n";
+
+	this.residualExtraText = text;
 
 	while (match = instanceRegExp.exec(this.instances)) 
 	{
@@ -132,8 +142,6 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 	}
 
 	instanceTextArray.push(this.instances.substring(mPos2, this.instances.length));
-	this.residualExtraText = ""; // this is anything left after the processing: some debug text, etc.
-	this.residualInstanceText = ""; // this is anything left after the processing: some debug text, etc.
 
 	for (var instanceID = 0; instanceID < instanceTextArray.length; instanceID++)
 	{
@@ -148,7 +156,11 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 			break; 
 		}
 
-		this.residualExtraText = this.residualExtraText + instanceText.substring(match.index + match[0].length, match.index + match[0].length + instanceText.length).trim(); 
+		var text = instanceText.substring(match.index + match[0].length, match.index + match[0].length + instanceText.length).trim();
+		if (text.length > 0)
+			text += "\n";
+
+		this.residualExtraText = this.residualExtraText + text; 
 		// handling a case when something is printed between instances, then it goes to the residualExtraText
 		
 		instanceText = instanceText.substring(0, match.index); // removing this unnecessary things
