@@ -565,8 +565,8 @@ Control.method("updateClaferList", function(jsonList){
     var left = this.posx + "px";
     var top = 0 + "px";
 
-    var height = this.host.findModule("mdCompiledFormats").height + "px";
-    var width = this.host.findModule("mdCompiledFormats").width + "px";
+    var height = "300" + "px";
+    var width = "300" + "px";
 
     $("#ClaferListCont .chosen-drop")[0].style.left = left;    
     $("#ClaferListCont .chosen-drop")[0].style.top = top;    
