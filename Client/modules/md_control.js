@@ -380,7 +380,7 @@ Control.method("disableAll", function(){
     {
         if (this.backends[i].id == selectedId)
         {
-            if (this.backends[i].scope_options.set_int_scope.argument)
+            if (this.backends[i].scope_options && this.backends[i].scope_options.set_int_scope && this.backends[i].scope_options.set_int_scope.argument)
             {
                 $("#intHighScopeValue").removeAttr("disabled");   
             }
