@@ -461,7 +461,7 @@ Input.method("getInitContent", function()
         result += '<span id="optimizerCoresSettings">';
         result += '<input id="optimizerCoresOverride" type="checkbox" name="optimizerCoresOverride" title="Use parallel optimization with the specified number of cores"' + checked + '></input>';
         result += '<span id="optimizerCoresLabel" style="padding-left:4px;padding-right:4px;">Number of cores:</span>';
-        result += '<input type="text" class="scopeInput" size="2" value="16" id="optimizerCores" title="Enter the number of cores to use for optimization" name="optimizerCores"/>';
+        result += '<input type="text" class="scopeInput" size="2" value="4" id="optimizerCores" title="Enter the number of cores to use for optimization" name="optimizerCores"/>';
         result += '</span>';
         result += '</td>';
 
