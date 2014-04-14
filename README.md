@@ -35,7 +35,7 @@ Upgrading to the latest platform
 
 The changes will be pulled and merged into your local repository.
 
-Pushing changes made to the platform locally into the online repository
+Commiting changes made to the platform
 --------------------------------
 
 If you make changes to the files in `Server/commons` folder, you can save them into the platform.
