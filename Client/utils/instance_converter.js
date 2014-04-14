@@ -115,14 +115,15 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 
 	var match = instanceRegExp.exec(this.instances);
 
+	this.residualExtraText = ""; // this is anything left after the processing: some debug text, etc.
+	this.residualInstanceText = ""; // this contains incomplete instances (without "Instance End" marker)
+
 	if (match == null) // meaning no instances
 	{
+		this.residualExtraText = this.instances;
 		result += '</instances>';
 		return result;		
 	}
-
-	this.residualExtraText = ""; // this is anything left after the processing: some debug text, etc.
-	this.residualInstanceText = ""; // this contains incomplete instances (without "Instance End" marker)
 
 	var mPos1 = 0;
 	var mPos2 = match.index;
