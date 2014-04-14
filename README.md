@@ -1,9 +1,9 @@
 ClaferToolsUICommonPlatform
 ===========================
 
-v0.3.5.17-01-2014
+v0.3.6.15-04-2014
 
-All common components to be shared within Clafer Tools UI.
+A superset platform used as a submodule by all the three Clafer Web Tools: [ClaferIDE](https://github.com/gsdlab/ClaferIDE), [ClaferMooVisualizer](https://github.com/gsdlab/ClaferMooVisalizer) and [ClaferConfigurator](https://github.com/gsdlab/ClaferConfigurator).
 
 Contributors
 ------------
@@ -13,21 +13,19 @@ Contributors
 Getting Clafer Tools
 --------------------
 
-Binary distributions of the release 0.3.5 of Clafer Tools for Windows, Mac, and Linux, 
+Binary distributions of the release 0.3.6 of Clafer Tools for Windows, Mac, and Linux, 
 can be downloaded from [Clafer Tools - Binary Distributions](http://http://gsd.uwaterloo.ca/clafer-tools-binary-distributions). 
-Clafer Wiki requires Haskell Platform and MinGW to run on Windows. 
-
-In case these binaries do not work on your particular machine configuration, the tools can be built from source code, as described below.
 
 Installation
 ------------
 
-The platform should be installed as a Git submodule into `Server/commons` folder of ClaferIDE, ClaferConfigurator, and ClaferMooVisualizer.
+The platform should be installed as a Git submodule into `Server/commons` folder of [ClaferIDE](https://github.com/gsdlab/ClaferIDE), [ClaferMooVisualizer](https://github.com/gsdlab/ClaferMooVisalizer) and [ClaferConfigurator](https://github.com/gsdlab/ClaferConfigurator).
 
-1. in `Server/commons` execute
+1. in the root folder of the host project, execute
 	* `git submodule init`
 	* `git submodule update`
-2. configure the relevant options in `Server/Client/configuration.js`
+
+2. in the host project's source files, you can use the capabilities, components and functions of the platform. See files named `Server/Client/configuration.js` of the three listed projects as examples.
 
 Upgrading to the latest platform
 --------------------------------
