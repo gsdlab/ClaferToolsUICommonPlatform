@@ -52,7 +52,7 @@ After that, your chagnes to the platform will be saved online. Then, you can pro
 All related projects are following the *simultaneous release model*. 
 The branch `master` contains releases, whereas the branch `develop` contains code under development. 
 When building the tools, the branches should match.
-Releases from branches 'master` are guaranteed to work well together.
+Releases from branches `master` are guaranteed to work well together.
 Development versions from branches `develop` should work well together but this might not always be the case.
 
 Need help?
