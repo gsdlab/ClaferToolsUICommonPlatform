@@ -33,6 +33,20 @@ Upgrading to the latest platform
 1. in your project folder, execute
 	* `git submodule foreach git pull`
 
+The changes will be pulled and merged into your local repository.
+
+Pushing changes made to the platform locally into the online repository
+--------------------------------
+
+If you make changes to the files in `Server/commons` folder, you can save them into the platform.
+
+1. in your project folder, execute
+	* `git submodule foreach add .`
+	* `git submodule foreach commit` and write a commit message
+	* `git submodule foreach push`
+
+After that, your chagnes to the platform will be saved online. Then, you can propagate changes to the rest of the tools by following the `Upgrading to the latest platform` steps described above.
+
 ### Important: Branches must correspond
 
 All related projects are following the *simultaneous release model*. 
