@@ -360,11 +360,11 @@ Input.method("getInitContent", function()
     result += '<span id="input_editor_caption">Or enter your model:</span></td>';
     result += '<td style="border-top: 2px groove threedface; "><input id="submitText" type="submit" value="' + this.settings.file_extensions[0].button_editor_caption + '" title="' + this.settings.file_extensions[0].button_editor_tooltip + '"/></td>';
 
-    result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface"><div id="input_scopes"><select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using finite scope reasoners">';
+    result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface"><div id="input_scopes">Scope computing:<select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using finite scope reasoners">';
 
-    result += '<option value="none" title="Disable scope computing strategy. All scopes are to be set to 1">Disable scope computing</option>';
-    result += '<option value="simple" selected="selected" title="Fast computation. Scopes are not precise, but this strategy works in most cases">Use fast scope computing</option>';
-    result += '<option value="full" title="Full computation. This method is very slow, but for small models works relatively fast">Use full scope computing</option>';
+    result += '<option value="none" title="Disable scope computing strategy. All scopes are to be set to 1">Disable</option>';
+    result += '<option value="simple" selected="selected" title="Fast computation. Scopes are not precise, but this strategy works in most cases">Fast</option>';
+    result += '<option value="full" title="Full computation. This method is very slow, but for small models works relatively fast">Full</option>';
 
     result += '</select></div></td>';
 

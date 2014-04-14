@@ -286,7 +286,7 @@ Control.method("setIntScopeClick", function(){
 
 Control.method("enableRuntimeControls", function(){
     $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button").removeAttr("disabled");
-    $("#RunStop").val("Stop");
+    $("#RunStop").val("Kill");
     $("#RunStop").attr("title", "Force the running backend to stop");
 
     $("#setIndividualScope").removeAttr("disabled");
