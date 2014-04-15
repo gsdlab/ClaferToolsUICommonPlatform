@@ -65,10 +65,10 @@ Control.method("getInitContent", function(){
     ret += '<tr id="defaultScopeSettings">';
 
     ret += '<td style="padding: 0px 4px 0px 4px" id="defaultScopeSettingsIncLabel">All:</td>';
-    ret += '<td><input type="text" class="scopeInput" title="Enter the delta by which increase scopes" size="2" value="1" id="allScopesDelta"/><button id="incAllScopes" title="Increase all the scopes by the specified value">Inc</button></td>';
+    ret += '<td><input type="text" class="scopeInput" title="Enter the delta by which increase scopes" size="2" value="1" id="allScopesDelta" name="allScopesDelta"/><button id="incAllScopes" title="Increase all the scopes by the specified value">Inc</button></td>';
 
     ret += '<td style="padding: 0px 4px 0px 12px; border-left: 2px groove threedface;" id="defaultScopeSettingsSetLabel">Default:</td>';
-    ret += '<td ><input type="text" class="scopeInput" title="Enter the scope (an integer from 0 up to a number the backend can handle)" size="2" value="1" id="defaultScopeValue"/><button id="setDefaultScope" title="Set the default scope">Set</button></td>';
+    ret += '<td ><input type="text" class="scopeInput" title="Enter the scope (an integer from 0 up to a number the backend can handle)" size="2" value="1" id="defaultScopeValue" name="defaultScopeValue"/><button id="setDefaultScope" title="Set the default scope">Set</button></td>';
 
     ret += '</tr>';
 
@@ -203,25 +203,7 @@ Control.method("resetControls", function(){
     $("#RunStop").val("Run");
     $("#RunStop").attr("title", "Run the chosen instance generator");
 
-
-    var selectedId = $("#BackendId").val();
-    
-    for (var i = 0; i < this.backends.length; i++)
-    {
-        if (this.backends[i].id == selectedId)
-        {
-            if (this.backends[i].scope_options.set_int_scope && this.backends[i].scope_options.set_int_scope.argument)
-            {
-                $("#intHighScopeValue").removeAttr("disabled");   
-            }
-            else 
-            {
-                $("#intHighScopeValue").attr("disabled", "disabled");   
-            }
-
-            break;
-        }
-    }
+    this.adjustBackendArgumentSettings();
     
 });
 
@@ -327,34 +309,9 @@ Control.method("disableRuntimeControls", function(){
     $("#incAllScopes").attr("disabled", "disabled");
     $("#allScopesDelta").attr("disabled", "disabled");
 
-//    $("#intLowScopeValue").attr("disabled", "disabled");    
-
-
-    var selectedId = $("#BackendId").val();
-    
-    for (var i = 0; i < this.backends.length; i++)
-    {
-        if (this.backends[i].id == selectedId)
-        {
-            if (this.backends[i].scope_options.set_int_scope && this.backends[i].scope_options.set_int_scope.argument)
-            {
-                $("#intHighScopeValue").removeAttr("disabled");   
-            }
-            else 
-            {
-                $("#intHighScopeValue").attr("disabled", "disabled");   
-            }
-
-            break;
-        }
-    }
-
-    $("#setIntScope").attr("disabled", "disabled");   
-
-//    $("#bitwidthValue").attr("disabled", "disabled");   
-//    $("#setBitwidth").attr("disabled", "disabled"); 
-
     $("#backend").removeAttr("disabled");
+
+    this.adjustBackendArgumentSettings();
 });
 
 Control.method("disableAll", function(){
@@ -372,32 +329,10 @@ Control.method("disableAll", function(){
     $("#incAllScopes").attr("disabled", "disabled"); 
     $("#allScopesDelta").attr("disabled", "disabled"); 
 
-//    $("#intLowScopeValue").attr("disabled", "disabled");    
-
-    var selectedId = $("#BackendId").val();
-    
-    for (var i = 0; i < this.backends.length; i++)
-    {
-        if (this.backends[i].id == selectedId)
-        {
-            if (this.backends[i].scope_options && this.backends[i].scope_options.set_int_scope && this.backends[i].scope_options.set_int_scope.argument)
-            {
-                $("#intHighScopeValue").removeAttr("disabled");   
-            }
-            else 
-            {
-                $("#intHighScopeValue").attr("disabled", "disabled");   
-            }
-
-            break;
-        }
-    }
-
     $("#intHighScopeValue").attr("disabled", "disabled");   
     $("#setIntScope").attr("disabled", "disabled");   
 
-//    $("#bitwidthValue").attr("disabled", "disabled");   
-//    $("#setBitwidth").attr("disabled", "disabled"); 
+//    this.adjustBackendArgumentSettings();
 
     $("#backend").removeAttr("disabled");    
 });
@@ -575,6 +510,146 @@ Control.method("updateClaferList", function(jsonList){
 
 });
 
+
+Control.method("adjustBackendSettings", function(backend)
+{
+    var hasIntScopeSettings = false;
+
+    if (backend.scope_options.set_int_scope)
+    {
+        $("#intScopeSettings").show();
+        if (backend.scope_options.set_int_scope.default_value)
+        {
+            $("#intHighScopeValue").val(backend.scope_options.set_int_scope.default_value);
+        }
+
+        if (backend.scope_options.set_int_scope.argument)
+        {
+            $("#intHighScopeValue").removeAttr("disabled");   
+        }
+        else 
+        {
+            $("#intHighScopeValue").attr("disabled", "disabled");   
+        }                
+
+        hasIntScopeSettings = true;
+    }
+    else
+    {
+        $("#intScopeSettings").hide();                
+    }
+
+    if (backend.scope_options.set_individual_scope)
+    {
+        $("#individualScopeSettings").show();
+    }
+    else
+    {
+        $("#individualScopeSettings").hide();                
+    }
+
+    if (backend.scope_options.inc_all_scopes)
+    {
+        var label = "All:";
+        if (backend.scope_options.inc_all_scopes.label)
+        {
+            label = backend.scope_options.inc_all_scopes.label;
+        }
+        $("#defaultScopeSettingsIncLabel").html(label);
+
+        if (backend.scope_options.inc_all_scopes.argument)
+        {
+            $("#allScopesDelta").removeAttr("disabled");   
+        }
+        else 
+        {
+            $("#allScopesDelta").attr("disabled", "disabled");   
+        }                
+
+        if (backend.scope_options.inc_all_scopes.default_value)
+        {
+            $("#allScopesDelta").val(backend.scope_options.inc_all_scopes.default_value);
+        }
+    }
+
+    if (backend.scope_options.set_default_scope)
+    {
+
+        var label = "Default:";
+        if (backend.scope_options.set_default_scope.label)
+        {
+            label = backend.scope_options.set_default_scope.label;
+        }
+
+        $("#defaultScopeSettingsSetLabel").html(label);
+
+        if (backend.scope_options.set_default_scope.argument)
+        {
+            $("#defaultScopeValue").removeAttr("disabled");   
+        }
+        else 
+        {
+            $("#defaultScopeValue").attr("disabled", "disabled");   
+        }                
+
+        if (backend.scope_options.set_default_scope.default_value)
+        {
+            $("#defaultScopeValue").val(backend.scope_options.set_default_scope.default_value);
+        }
+    }
+
+
+    if (hasIntScopeSettings)
+    {
+        $("#intControl").show();        
+    }
+    else
+    {
+        $("#intControl").hide();        
+    }
+
+});
+
+Control.method("adjustBackendArgumentSettings", function()
+{
+    var selectedId = $("#BackendId").val();
+    
+    for (var i = 0; i < this.backends.length; i++)
+    {
+        if (this.backends[i].id == selectedId)
+        {
+            if (this.backends[i].scope_options && this.backends[i].scope_options.set_int_scope && this.backends[i].scope_options.set_int_scope.argument)
+            {
+                $("#intHighScopeValue").removeAttr("disabled");   
+            }
+            else 
+            {
+                $("#intHighScopeValue").attr("disabled", "disabled");   
+            }
+
+            if (this.backends[i].scope_options && this.backends[i].scope_options.set_default_scope && this.backends[i].scope_options.set_default_scope.argument)
+            {
+                $("#defaultScopeValue").removeAttr("disabled");   
+            }
+            else 
+            {
+                $("#defaultScopeValue").attr("disabled", "disabled");   
+            }            
+
+            if (this.backends[i].scope_options && this.backends[i].scope_options.inc_all_scopes && this.backends[i].scope_options.inc_all_scopes.argument)
+            {
+                $("#allScopesDelta").removeAttr("disabled");   
+            }
+            else 
+            {
+                $("#allScopesDelta").attr("disabled", "disabled");   
+            }            
+
+            break;
+        }
+    }
+});
+
 Control.method("onBackendChange", function()
 {
     $("#backendButtons").children().each(function(){
@@ -586,83 +661,15 @@ Control.method("onBackendChange", function()
     $("#backendButtons").children("#" + selectedId + "_buttons")[0].style.display = "block";
 
     var result = null;
-    var found = false;
 
     for (var i = 0; i < this.backends.length; i++)
     {
         if (this.backends[i].id == selectedId)
         {
             result = this.backends[i];
-
-            if (this.backends[i].scope_options.set_int_scope)
-            {
-                $("#intScopeSettings").show();
-                if (this.backends[i].scope_options.set_int_scope.default_value)
-                {
-                    $("#intHighScopeValue").val(this.backends[i].scope_options.set_int_scope.default_value);
-                }
-
-                if (this.backends[i].scope_options.set_int_scope.argument)
-                {
-                    $("#intHighScopeValue").removeAttr("disabled");   
-                }
-                else 
-                {
-                    $("#intHighScopeValue").attr("disabled", "disabled");   
-                }                
-
-                found = true;
-            }
-            else
-            {
-                $("#intScopeSettings").hide();                
-            }
-
-            if (this.backends[i].scope_options.set_individual_scope)
-            {
-                $("#individualScopeSettings").show();
-            }
-            else
-            {
-                $("#individualScopeSettings").hide();                
-            }
-
-            var label = "All:";
-            if (this.backends[i].scope_options.inc_all_scopes && this.backends[i].scope_options.inc_all_scopes.label)
-            {
-                label = this.backends[i].scope_options.inc_all_scopes.label;
-            }
-            $("#defaultScopeSettingsIncLabel").html(label);
-
-            var label = "Default:";
-
-            if (this.backends[i].scope_options.set_default_scope && this.backends[i].scope_options.set_default_scope.label)
-            {
-                label = this.backends[i].scope_options.set_default_scope.label;
-            }
-
-            $("#defaultScopeSettingsSetLabel").html(label);
-
-//            if (this.backends[i].scope_options.set_bitwidth)
-//            {
-//                $("#bitwidthSettings").show();
-//            }
-//            else
-//            {
-//                $("#bitwidthSettings").hide();                
-//            }
-//
-//            break;            
+            this.adjustBackendSettings(result);
+            break;
         }
-    }
-
-    if (found)
-    {
-        $("#intControl").show();        
-    }
-    else
-    {
-        $("#intControl").hide();        
     }
 
     if (this.settings.onBackendChange) 

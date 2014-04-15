@@ -475,6 +475,35 @@ var handleControlRequest = function(req, res, settings){
                 args.push(intArg);
             }
 
+            if (backend.scope_options && backend.scope_options.set_default_scope && backend.scope_options.set_default_scope.argument) 
+            {
+                var replacement = [
+                    {
+                        "needle": "$value$", 
+                        "replacement": req.body.defaultScopeValue
+                    }
+                ];
+
+                var intArg = core.replaceTemplate(backend.scope_options.set_default_scope.argument, replacement);
+
+                args.push(intArg);
+            }
+
+            if (backend.scope_options && backend.scope_options.inc_all_scopes && backend.scope_options.inc_all_scopes.argument) 
+            {
+                var replacement = [
+                    {
+                        "needle": "$value$", 
+                        "replacement": req.body.allScopesDelta
+                    }
+                ];
+
+                var intArg = core.replaceTemplate(backend.scope_options.inc_all_scopes.argument, replacement);
+
+                args.push(intArg);
+            }
+
+
             var toolPath = core.replaceTemplate(backend.tool, fileAndPathReplacement);
 
             core.logSpecific(args, req.body.windowKey);
