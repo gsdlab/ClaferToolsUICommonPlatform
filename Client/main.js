@@ -98,7 +98,7 @@ function Host(modules, settings)
         
         if (this.modules[i].resize)
         {
-            resize = this.modules[i].resize;
+            resize = this.modules[i].resize.bind(this.modules[i]);
         }
 
         var windowType = "normal";
