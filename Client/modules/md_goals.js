@@ -142,7 +142,7 @@ Goals.method("filterByGoals", function(input)
     else
         this.ranges[x].max = parseInt($("#" + input + "max").attr("placeholder"));
 
-    this.settings.onFilterByGoals(this);
+    this.settings.onFilterByGoals(this, this.ranges[x].goal, this.ranges[x].min, this.ranges[x].max);
 });
 
 Goals.method("getInitContent", function()
