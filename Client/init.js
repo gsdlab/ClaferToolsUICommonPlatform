@@ -94,7 +94,7 @@ function getPID(input){
 }
 
 function parsePID(PID){
-    return PID.replace("V", "");
+    return parseInt(PID.replace("V", ""));
 }
 
 Array.prototype.diff = function(other) {
