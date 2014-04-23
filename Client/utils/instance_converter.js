@@ -6,102 +6,6 @@ function InstanceConverter(source)
 	this.residualText = "";
 }
 
-// Converts ClaferMoo output (list of instances with unique clafer names represented as a structural text)
-// from the source to XML
-// returns: XML in plain text format
-/*
-InstanceConverter.method("convertFromClaferMooOutputToXML", function(){
-	myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ ]*\=?[ ]*([^ ]*)\b/;
-	var result = "";
-	list = this.instances.split("\n");
-	
-	result = '<?xml version="1.0"?><instances><instance>';
-	var temp = "";
-	var oldpos = -1;
-	var pos = 0;
-	var empty = true;
-	
-	for (var i = 0; i < list.length; i++)
-	{
-		var s = list[i];
-
-		if (s == "" && (oldpos != 0 || i !=list.length-1))
-			continue;
-		else if( s == "" && oldpos == 0 && i == list.length-1 ){
-			result += "</subclafers></clafer>";
-			continue;
-		}
-	
-		empty = false;
-	
-		myMatch = myRegExp.exec(s);
-		if (myMatch == null)
-			continue;
-			
-		pos = myMatch.index;
-		
-		var indent = 0;
-		
-		if (oldpos != -1)
-		{		
-			if (pos > oldpos) // nesting level increases, only by one!!!
-			{
-				result += "";
-			}
-			
-			if (pos < oldpos)
-			{
-				for (var j = 0; j < (oldpos - pos + 1); j++)
-				{
-					result += "</subclafers></clafer>";
-				}
-			}
-			
-			if (pos == oldpos) // clearly NO children
-			{
-				result += "</subclafers></clafer>";
-			}
-				
-			if (pos == 0) // new instance begins
-			{
-				result += "</instance><instance>";
-			}
-			
-			oldpos = pos;
-		}
-		else oldpos = 0;
-		
-		clafer = myMatch[1];
-//		if (clafer == "c7_connectivity") alert("yes!");
-			
-		super_clafer = myMatch[2];
-		value = myMatch[3];
-		result += '<clafer id="' + clafer + '"><super>' + super_clafer + '</super><value>' + value + '</value><subclafers>';
-
-	}
-	
-	if (empty)
-	{
-		return "";
-	}
-	
-	if (0 < oldpos)
-	{
-		for (var j = 0; j < (oldpos + 1); j++)
-		{
-			result += "</subclafers></clafer>";
-		}
-	}	
-	
-	result += "</instance></instances>";
-
-	console.log(result);
-	alert(result);
-	
-	return result;
-});
-*/
-
 InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClaferID){
 	var myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ \t]*\=?[ \t]*([^ ]*)\b/;
 	var instanceRegExp = /^=== Instance ([0-9]*) Begin ===$/gm;
@@ -110,8 +14,6 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 
 	var result = '<?xml version="1.0"?><instances>';
 	var instanceTextArray = new Array();
-	
-	console.log(this.instances);
 
 	var match = instanceRegExp.exec(this.instances);
 
@@ -359,12 +261,40 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 });
 
 //returns the data for a single instance
-InstanceConverter.method("getInstanceData", function(pid){ // todo: update this function
-	var instances = this.instances;
-	var lines = instances.match(/^.*([\n\r]+|$)/gm);
-	var supertype = lines[1].replace(/[c][0-9]{1,}[_]/, "");
-	var myregex = new RegExp("[c][0-9]{1,}[_]" + supertype , "g"); 
-	var data = lines[1] + instances.split(myregex)[pid.substring(1)];
-	data = data.replace(" ", "  ");
-	return data;
+InstanceConverter.method("getInstanceData", function(instanceID){ // todo: update this function
+	var myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ \t]*\=?[ \t]*([^ ]*)\b/;
+	var instanceRegExp = /^=== Instance ([0-9]*) Begin ===$/gm;
+	var instanceEndRegExp = /^[-][-][-] Instance ([0-9]*) End [-][-][-]$/m;
+
+	var instanceTextArray = new Array();
+	var match = instanceRegExp.exec(this.instances);
+
+	if (match == null) // meaning no instances
+	{
+		return "";		
+	}
+
+	var mPos1 = 0;
+	var mPos2 = match.index;
+
+	while (match = instanceRegExp.exec(this.instances)) 
+	{
+		mPos1 = mPos2;
+		mPos2 = match.index;
+	    instanceTextArray.push(this.instances.substring(mPos1, mPos2));
+	}
+
+	instanceTextArray.push(this.instances.substring(mPos2, this.instances.length));
+
+	var instanceText = instanceTextArray[instanceID - 1];
+	var match = instanceEndRegExp.exec(instanceText);
+
+	if (!match)
+	{
+		return "";
+	}
+
+	instanceText = instanceText.substring(0, match.index + match[0].length) + "\n"; // removing this unnecessary things
+
+	return instanceText;
 });
