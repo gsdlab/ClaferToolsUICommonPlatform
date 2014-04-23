@@ -283,14 +283,14 @@ jQuery.extend({
                     left: "5px",
                     width: $(window).width() - 15,
                     height: $(window).height() - 45
-                }, "slow");
+                }, "slow", "swing", function() { if (options.onResizeEnd != null) options.onResizeEnd(); } );
                 if (options.type === "iframe") {
                     $obj.find("iframe").animate({
                         top: "5px",
                         left: "5px",
                         width: $(window).width() - 15 - dw,
                         height: $(window).height() - 45 - dh
-                    }, "slow");
+                    }, "slow", "swing", function() { if (options.onResizeEnd != null) options.onResizeEnd(); });
                 }
                 $obj.data("state", "maximized")
             }
@@ -300,14 +300,14 @@ jQuery.extend({
                     left: $obj.data("lastX"),
                     width: $obj.data("lastWidth"),
                     height: $obj.data("lastHeight")
-                }, "slow");
+                }, "slow", "swing", function() { if (options.onResizeEnd != null) options.onResizeEnd(); } );
                 if (options.type === "iframe") {
                     $obj.find("iframe").animate({
                         top: $obj.data("lastY"),
                         left: $obj.data("lastX"),
                         width: parseInt($obj.data("lastWidth") - dw),
                         height: parseInt($obj.data("lastHeight") - dh)
-                    }, "slow");
+                    }, "slow", "swing", function() { if (options.onResizeEnd != null) options.onResizeEnd(); } );
                 }
                 $obj.data("state", "normal")
             }
