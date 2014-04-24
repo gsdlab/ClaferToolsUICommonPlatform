@@ -51,7 +51,6 @@ FeatureQualityMatrix.method("resize", function() // not attached to the window a
 
 FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
-    console.log(data);
     this.processor = new ClaferProcessor(data.claferXML);
 
     this.abstractClaferTree = null;
