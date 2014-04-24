@@ -43,6 +43,12 @@ function FeatureQualityMatrix(host, settings)
     
 }
 
+FeatureQualityMatrix.method("resize", function() // not attached to the window anymore, so need to call the method
+{
+    this.synchronizeWidths();
+    return true;
+});
+
 FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
     console.log(data);
@@ -83,7 +89,7 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
 
 FeatureQualityMatrix.method("synchronizeWidths", function()
 {
-    for(var i = 1; i < $("#tHead #r0").children().length; i++)
+    for(var i = 1; i < $("#tHead #r0").children().length - 1; i++)
     {
         var width = $("#tBody #td0_" + i).innerWidth() - 6; // 6 = padding-left + padding-right
         $("#tHead #th0_" + i).width(width);
@@ -99,7 +105,7 @@ FeatureQualityMatrix.method("onRendered", function()
     
     this.filter.onRendered();
     
-    $.resizeWindow(this.id, this.width, $("#comparison").outerHeight() + 20); // resize the table to fit everything
+    $.resizeWindow(this.id, this.width, $("#comparison").outerHeight() + 40); // resize the table to fit everything
 
 // Add search bar 
     var td = $('#comparison .table_title')[0];
