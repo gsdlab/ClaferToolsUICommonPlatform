@@ -435,7 +435,7 @@ FeatureQualityMatrix.method("getDataTable", function()
         if (i > 0){ // do not push the parent clafer
             feature = new Object();
             feature.title = output[i].displayWithMargins;
-            feature.path = output[i].claferPath.join(".");
+            feature.path = output[i].claferPath.join("-");
             feature.id = output[i].claferId;
             feature.type = output[i].type;
             feature.card = output[i].card;

@@ -131,7 +131,7 @@ TableVisualizer.prototype.getHTML = function(data, colWidth)
 		
 		var td = $('<' + tagName + ' width="' + colWidth + '" style="min-width:' + colWidth + 'px"></' + tagName + '>').addClass('td_abstract').addClass(data.features[i].type);
 
-		var tooltip = data.features[i].path.replaceAll(".", "::");
+		var tooltip = data.features[i].path.replaceAll("-", "::");
 
 		$(td).attr("title", tooltip);	
 
