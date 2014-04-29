@@ -88,7 +88,7 @@ tableFilter.method("showAll", function (){
 
 tableFilter.method("hideRowByClaferPath", function (pathArray)
 {
-	var path = pathArray.join(".");
+	var path = pathArray.join("-");
 	for (var i = 1; i < this.rows.length; i++)
 	{
 		var curRow = this.rows[i];
@@ -109,7 +109,7 @@ tableFilter.method("openFeature", function (featurePath){
 
 tableFilter.method("closeFeature", function (featurePath){
 
-    var node = this.findNodeInTree(this.abstractClaferTree, featurePath.split("."), 0);
+    var node = this.findNodeInTree(this.abstractClaferTree, featurePath.split("-"), 0);
 
 	this.hideChildren(node);
 	
