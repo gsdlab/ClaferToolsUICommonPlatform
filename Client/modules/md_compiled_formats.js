@@ -193,7 +193,7 @@ CompiledFormats.method("setResult", function(data){
         }        
         else // to textarea: copy directly
         {
-            $("#" + data[i].id + "_format").val(data[i].result); 
+            $("#" + data[i].id + "_format").html(data[i].result.replaceAll(" ", "&nbsp;")); 
         }            
     }
 });
