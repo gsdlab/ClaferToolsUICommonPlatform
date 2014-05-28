@@ -177,9 +177,9 @@ var getDependencyVersionsText = function(callback)
     return dependencyVersions;
 };
 
-var addDependency = function(path, args, title)
+var addDependency = function(path, args, title, isVitallyImportant)
 {
-    dependencies.push({path : path, args : args, title : title, id: dependencies.length, tool_version: ""});
+    dependencies.push({path : path, args : args, title : title, id: dependencies.length, tool_version: "", vitallyImportant: isVitallyImportant});
 };
 
 function checkDependency(dependency, callback)
@@ -207,7 +207,15 @@ function checkDependency(dependency, callback)
         }
         else
         {
-            logNormal('ERROR: Non-zero return code of "' + dependency.title + '": "' + code + '". Please check whether it is installed and accessible.');
+            if (dependency.vitallyImportant)
+            {
+                logNormal('FATAL ERROR: Non-zero return code of "' + dependency.title + '": "' + code + '". Please check whether it is installed and accessible.');
+            }
+            else
+            {
+                logNormal('Warning: Non-zero return code of "' + dependency.title + '": "' + code + '". Please check whether it is installed and accessible. Proceeding anyway.');
+                dependency_ok(dependency, callback);
+            }
         }
     });
 }
