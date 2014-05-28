@@ -19,19 +19,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-//var mdComparisonTable;
-//var mdGoals;
-//var mdGraph;
-//var mdConsole;
-//var mdInput;
-
-var host = null;
 
 $(document).ready(function()
 {
     var configuration = getConfiguration();    
     
-    host = new Host(configuration.modules, configuration.settings);
+    new Host(configuration.modules, configuration.settings);
 
     window.onbeforeunload = exitConfirmation;
 });
