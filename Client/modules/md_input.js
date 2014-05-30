@@ -271,7 +271,7 @@ Input.method("getCaptionsByFileExt", function(fileName)
             == this.settings.file_extensions[i].ext               
             )
         {
-            if (!flag || this.settings.file_extensions[i].flag && flag == this.settings.file_extensions[i].flag)
+            if (!flag || !this.settings.file_extensions[i].flag || flag == this.settings.file_extensions[i].flag)
             {
                 return this.settings.file_extensions[i];
             }
