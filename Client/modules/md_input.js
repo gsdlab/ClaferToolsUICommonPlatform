@@ -138,6 +138,8 @@ Input.method("beginQuery", function(formData, jqForm, options) {
         return false;
     }
 
+    this.host.makeBusy(true);
+
     $("#load_area #myform").hide();
     $("#load_area").append('<div id="preloader"><img id="preloader_img" src="/commons/Client/images/preloader.gif" alt="Loading..."/><span id="status_label">Loading and processing...</span><button id="cancel">Cancel</button></div>');   
     $("#cancel").click(this.cancelCall.bind(this));
@@ -151,6 +153,7 @@ Input.method("endQuery", function()  {
     $("#load_area #myform").show();
 
     $("#claferFileURL").val(""); // empty the URL
+    this.host.makeBusy(false);
     
     return true;
 });

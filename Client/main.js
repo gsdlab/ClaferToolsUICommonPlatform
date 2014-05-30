@@ -26,11 +26,26 @@ $(document).ready(function()
     
     new Host(configuration.modules, configuration.settings);
 
-    window.onbeforeunload = exitConfirmation;
+});
+
+Host.method("makeBusy", function(isOn)
+{
+    if (isOn)
+    {
+        $(window).bind("beforeunload", exitConfirmation);
+    }
+    else
+    {
+        $(window).unbind("beforeunload");
+    }
+
 });
 
 function exitConfirmation() {
-    return 'Are you sure you want to quit? The tool does not save any of results, so you are responsible for saving your results.';
+    return ['The tool is in the middle of something running now...\n',
+            'Are you sure you want to close the tool?\n',
+            'If you exit now, your session will be cleared. If you have some data unsaved, you may want to save it first.\n',
+            'Close the tool now?'].join("");
 }
 
 function getParameterByName(name) {

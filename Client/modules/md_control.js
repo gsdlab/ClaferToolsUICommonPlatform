@@ -213,6 +213,7 @@ Control.method("runStopClick", function(){
         if (this.settings.onStart(this))
         {
             $("#ControlOp").val("run");
+            this.host.makeBusy(true);
             this.sessionActive = true; // activating IG session
             $("#ControlForm").submit();
         }
@@ -395,7 +396,8 @@ Control.method("handleError", function(response, statusText, xhr)  {
     clearTimeout(this.pollingTimeoutObject);
     
     this.sessionActive = false;
-    
+    this.host.makeBusy(false);
+
     var er = document.getElementById("error_overlay");
     er.style.display = "block"; 
     var caption = this.settings.onError(this, statusText, response, xhr);
@@ -431,6 +433,7 @@ Control.method("onPoll", function(responseObject)
         this.settings.onCompleted(this, responseObject);
         this.disableRuntimeControls();
         this.sessionActive = false;
+        this.host.makeBusy(false);
     }
     else
     {
