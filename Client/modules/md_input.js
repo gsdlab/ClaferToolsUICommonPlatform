@@ -93,6 +93,8 @@ Input.method("onInitRendered", function()
        $("#optimizationBackend")[0].onchange = this.onBackendChange.bind(this);    
     }
 
+    $("#optimize")[0].onclick = this.onOptimizeChecked.bind(this);
+
 
 //    var options = new Object();
 //    options.error = this.handleError.bind(this);
@@ -254,65 +256,95 @@ Input.method("submitTextCall", function(){
     this.onSubmit();
 });
 
-Input.method("exampleChange", function(){
-    if ($("#exampleURL").val())
+
+Input.method("getCaptionsByFileExt", function(fileName)
+{
+    var optimizationEnabled = $("#optimize").is(":checked");
+    var flag = false;
+    if (!optimizationEnabled)
+        flag = "no-optimize";
+
+    for (var i = 0; i < this.settings.file_extensions.length; i++)
     {
-        var filename = $("#exampleURL").val();
-        for (var i = 0; i < this.settings.file_extensions.length; i++)
+        if (fileName.length > this.settings.file_extensions[i].ext.length && 
+            fileName.toLowerCase().substring(fileName.length - this.settings.file_extensions[i].ext.length) 
+            == this.settings.file_extensions[i].ext               
+            )
         {
-            if (filename.length > this.settings.file_extensions[i].ext.length && 
-                filename.toLowerCase().substring(filename.length - this.settings.file_extensions[i].ext.length) == this.settings.file_extensions[i].ext                
-                )
+            if (!flag || this.settings.file_extensions[i].flag && flag == this.settings.file_extensions[i].flag)
             {
-                $("#submitExample").removeAttr("disabled");                    
-                $("#fileExtExample").val(this.settings.file_extensions[i].ext);                    
-                $("#submitExample").val(this.settings.file_extensions[i].button_example_caption);            
-
-                return;
+                return this.settings.file_extensions[i];
             }
-        }  
-
-        $("#submitExample").val("Unknown");
-        $("#submitExample").attr("disabled", "disabled");       
-        $("#fileExtExample").val("");                            
+        }
     }
-    else{ // no file
+
+    return false;
+});
+
+Input.method("exampleChange", function()
+{
+    var fileName = $("#exampleURL").val();
+
+    if (fileName)
+    {
+        var captions = this.getCaptionsByFileExt(fileName);
+        if (captions)
+        {
+            $("#submitExample").removeAttr("disabled");                    
+            $("#fileExtExample").val(captions.ext);                    
+            $("#submitExample").val(captions.button_example_caption);            
+        }  
+        else
+        {
+            $("#submitExample").val("Unknown");
+            $("#submitExample").attr("disabled", "disabled");       
+            $("#fileExtExample").val("");                           
+        } 
+    }
+    else
+    { // no example
+        fileName = "any.cfr";
         $("#submitExample").attr("disabled", "disabled");       
-        $("#submitExample").val(this.settings.file_extensions[0].button_example_caption);            
+        $("#submitExample").val(this.getCaptionsByFileExt(fileName).button_example_caption);            
         $("#fileExtExample").val("");                            
     }
 
 });
 
 Input.method("inputChange", function(){
-    var filename = $("#myform [type='file']").val();
+    var fileName = $("#myform [type='file']").val();
     
-    if (filename)
+    if (fileName)
     {
-        for (var i = 0; i < this.settings.file_extensions.length; i++)
+        var captions = this.getCaptionsByFileExt(fileName);
+        if (captions)
         {
-            if (filename.length > this.settings.file_extensions[i].ext.length && 
-                filename.toLowerCase().substring(filename.length - this.settings.file_extensions[i].ext.length) == this.settings.file_extensions[i].ext                
-                )
-            {
-                $("#submitFile").removeAttr("disabled");                    
-                $("#fileExtFile").val(this.settings.file_extensions[i].ext);                    
-                $("#submitFile").val(this.settings.file_extensions[i].button_file_caption);            
-
-                return;
-            }
+            $("#submitFile").removeAttr("disabled");                    
+            $("#fileExtFile").val(captions.ext);                    
+            $("#submitFile").val(captions.button_file_caption);            
         }  
-
-        $("#submitFile").val("Unknown");
-        $("#submitFile").attr("disabled", "disabled");       
-        $("#fileExtFile").val("");                            
+        else
+        {
+            $("#submitFile").val("Unknown");
+            $("#submitFile").attr("disabled", "disabled");       
+            $("#fileExtFile").val("");                            
+        }
     }
     else{ // no file
+        fileName = "any.cfr";
         $("#submitFile").attr("disabled", "disabled");       
-        $("#submitFile").val(this.settings.file_extensions[0].button_file_caption);            
+        $("#submitFile").val(this.getCaptionsByFileExt(fileName).button_file_caption);            
         $("#fileExtFile").val("");                            
     }
     
+});
+
+Input.method("editorChange", function()
+{
+    // using the default name
+    fileName = "any.cfr";
+    $("#submitText").val(this.getCaptionsByFileExt(fileName).button_editor_caption);            
+
 });
 
 Input.method("getInitContent", function()
@@ -348,7 +380,7 @@ Input.method("getInitContent", function()
         if (this.settings.input_default_cache)
             checked = ' checked = "checked"';
 
-        result += '<input id="useCache" type="checkbox" name="useCache"' + checked + '>Use cached results</input>';
+        result += '<input id="useCache" type="checkbox" name="useCache"' + checked + '/><span>Use cached results</span>';
         result += '</td>';                
     }
 
@@ -386,12 +418,14 @@ Input.method("getInitContent", function()
 
     if (this.settings.optimization_backend)
     {
+        var checked = ' checked = "checked"';
+
         result += '<div id="input_bottom_container" style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-22px; border: 2px groove threedface;">';
 //        result += '<div style="height:2px; border-top: 2px groove threedface;"></div>';
 
         result += '<table width="100%" height="100%" cellspacing="0" cellpadding="0"><tr><td style="border-right: 2px groove threedface">';
-        result += '<span id="input_backend_label">Optimization backend: </span>';
-
+        result += '<input id="optimize" type="checkbox" name="optimize" title="If you uncheck the box, you can run the model without optimization, and then add instances"' + checked + '></input>';
+        result += '<span id="input_backend_label">Run optimization </span>';
         result += '</td>';
 
         result += '<td>';
@@ -401,11 +435,11 @@ Input.method("getInitContent", function()
         if (this.settings.input_default_optimizer_scope)
             checked = ' checked = "checked"';
 
-        result += '<span id="optimizerScopeSettings">';
+        result += '<div class="optimizationBackendSetting"><span id="optimizerScopeSettings">';
         result += '<input id="optimizerScopeOverride" type="checkbox" name="optimizerScopeOverride" title="Override the global scope computed during the compilation process"' + checked + '></input>';
         result += '<span id="optimizerScopeLabel" style="padding-left:4px;padding-right:4px;">Scope:</span>';
         result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerScope" title="Enter the scope for optimization" name="optimizerScope"/>';
-        result += '</span>';
+        result += '</span></div>';
         result += '</td>';        
 
         result += '</td><td>';
@@ -415,11 +449,11 @@ Input.method("getInitContent", function()
         if (this.settings.input_default_optimizer_maxint)
             checked = ' checked = "checked"';
 
-        result += '<span id="optimizerMaxIntSettings">';
+        result += '<div class="optimizationBackendSetting"><span id="optimizerMaxIntSettings">';
         result += '<input id="optimizerMaxIntOverride" type="checkbox" name="optimizerMaxIntOverride" title="Override the maximum integer value computed during the compilation process"' + checked + '></input>';
         result += '<span id="optimizerMaxIntLabel" style="padding-left:4px;padding-right:4px;">MaxInt:</span>';
         result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerMaxInt" title="Enter the highest integer for optimization" name="optimizerMaxInt"/>';
-        result += '</span>';
+        result += '</span></div>';
         result += '</td>';
 
 
@@ -444,11 +478,11 @@ Input.method("getInitContent", function()
         if (this.settings.input_default_optimizer_limit)
             checked = ' checked = "checked"';
 
-        result += '<span id="optimizerLimitSettings">';
+        result += '<div class="optimizationBackendSetting"><span id="optimizerLimitSettings">';
         result += '<input id="optimizerLimitOverride" type="checkbox" name="optimizerLimitOverride" title="Limit the maximum number of instances produced"' + checked + '></input>';
         result += '<span id="optimizerLimitLabel" style="padding-left:4px;padding-right:4px;">Limit instances:</span>';
         result += '<input type="text" class="scopeInput" size="2" value="100" id="optimizerLimit" title="Enter the limit of instances for optimization" name="optimizerLimit"/>';
-        result += '</span>';
+        result += '</span></div>';
         result += '</td>';  
 
 
@@ -458,11 +492,11 @@ Input.method("getInitContent", function()
         if (this.settings.input_default_optimizer_cores)
             checked = ' checked = "checked"';
 
-        result += '<span id="optimizerCoresSettings">';
+        result += '<div class="optimizationBackendSetting"><span id="optimizerCoresSettings">';
         result += '<input id="optimizerCoresOverride" type="checkbox" name="optimizerCoresOverride" title="Use parallel optimization with the specified number of cores"' + checked + '></input>';
         result += '<span id="optimizerCoresLabel" style="padding-left:4px;padding-right:4px;">Number of cores:</span>';
         result += '<input type="text" class="scopeInput" size="2" value="4" id="optimizerCores" title="Enter the number of cores to use for optimization" name="optimizerCores"/>';
-        result += '</span>';
+        result += '</span></div>';
         result += '</td>';
 
         result += '</tr></table>';
@@ -616,4 +650,16 @@ Input.method("updateOptimizationSettings", function(config, id)
         $("#optimizer" + id + "Settings").hide();        
         $("#optimizer" + id).prop("disabled", true);
     }           
+});
+
+Input.method("onOptimizeChecked", function(){
+    var value = $("#optimize").is(":checked");
+    $('#optimizationBackend').attr('disabled', !value);
+    $('.optimizationBackendSetting').toggle(value);
+    $('#useCache').toggle(value);
+    $('#useCache').next("span").toggle(value);
+
+    this.inputChange();      
+    this.exampleChange();
+    this.editorChange();
 });
