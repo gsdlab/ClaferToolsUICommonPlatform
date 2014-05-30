@@ -90,10 +90,9 @@ Input.method("onInitRendered", function()
 
     if (this.settings.optimization_backend)
     {
-       $("#optimizationBackend")[0].onchange = this.onBackendChange.bind(this);    
+        $("#optimizationBackend")[0].onchange = this.onBackendChange.bind(this);    
+        $("#optimize")[0].onclick = this.onOptimizeChecked.bind(this);
     }
-
-    $("#optimize")[0].onclick = this.onOptimizeChecked.bind(this);
 
 
 //    var options = new Object();
