@@ -163,35 +163,25 @@ function Host(modules, settings)
             var versions = data.versions;
             context.print(versions);            
             context.loaded(context);
-            context.displayHelp(data.title, data.version);
+            context.initHelp(data.title, data.version);
         }
     ).error(function() 
         { 
             alert("Could not get server initialization data. Could not print versions");
             context.loaded(context);
-            context.displayHelp(data.title, data.version);
+            context.initHelp(data.title, data.version);
         });
 }
 
-Host.method("displayHelp", function(title, version)
+Host.method("initHelp", function(title, version)
 {
-    var displayHelp=getCookie("displayIntroHelp");
-    if(displayHelp==null){
-        $("body").prepend(this.helpGetter.getInitial(title, version));
-        this.helpGetter.setListeners();
-    }else{
-        $("body").prepend(this.helpGetter.getInitial(title, version));
-        this.helpGetter.setListeners();
-        $("#help").hide();
-        $(".fadeOverlay").hide();
-    }
+    this.helpGetter.initialize(title, version);
 
     for (var i = 0; i < this.modules.length; i++)
     {
         var helpButton = this.getHelpButton(this.modules[i].id);
         $("#" + this.modules[i].id + " .window-titleBar").append(helpButton);   
     }
-
 });
 
 Host.method("loaded", function(module)
@@ -232,4 +222,31 @@ Host.method("getHelp", function(moduleName){
 
 Host.method("getHelpButton", function(moduleName){
     return this.helpGetter.getHelpButton(moduleName);
+});
+
+Host.method("errorWindow", function(errorRecord){
+
+    var htmlTitle = '<b>' + errorRecord.caption + '</b>'; 
+    var htmlTime = errorRecord.datetime; 
+    var htmlBody = errorRecord.body.replaceAll("\\n", "<br>").replaceAll("\\t", "&nbsp;&nbsp;").replaceAll("\\r", "").replaceAll("\\\"", "\"") + "<br><br>" + errorRecord.contact;
+    var content = htmlTime + '<br>' + htmlBody;
+
+    var x = $.newWindow({
+        id: "error",
+        title: errorRecord.caption,
+        width: 700,
+        height: 500,
+        posx: 100,
+        posy: 100,
+        content: content,
+        type: "normal",
+        statusBar: true,
+        minimizeButton: true,
+        maximizeButton: true,
+        closeButton: true,
+        draggable: true,
+        resizeable: true,
+        modal: true
+    });  
+
 });

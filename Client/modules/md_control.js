@@ -376,16 +376,8 @@ Control.method("handleError", function(response, statusText, xhr)  {
     this.sessionActive = false;
     this.host.makeBusy(false);
 
-    var er = document.getElementById("error_overlay");
-    er.style.display = "block"; 
-    var caption = this.settings.onError(this, statusText, response, xhr);
-
-    document.getElementById("error_report").innerHTML = ('<span id="close_error" alt="close">Close Message</span><p>' + caption + "</p>");
-    document.getElementById("close_error").onclick = function(){ 
-        document.getElementById("error_overlay").style.display = "none";
-    };
-
     this.endQuery();
+    this.settings.onError(this, statusText, response, xhr);
     
 });
 

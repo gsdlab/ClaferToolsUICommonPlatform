@@ -366,16 +366,8 @@ jQuery.extend({
         $("#" + id + " .window-content").html(newContent);
     },
 
-    updateWindowContentWithAjax: function(id, url, cache) {
-        cache = cache === undefined ? true : false;
-        $.ajax({
-            url: url,
-            cache: cache,
-            dataType: "html",
-            success: function(data) {
-                $("#" + id + " .window-content").html(data);
-            }
-        });
+    updateWindowContentWithAjax: function(id, url) {
+        $("#" + id + " .window-content").find("iframe")[0].src = url;
     },
 
     moveWindow: function(id, x, y) {
