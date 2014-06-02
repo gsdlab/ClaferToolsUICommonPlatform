@@ -358,7 +358,7 @@ Input.method("getInitContent", function()
     result += '<tr height="1em">';
     result += '<td><div style="width:100%"><input type="file" style="width:100%" name="claferFile" id="claferFile" title="If you want to upload your clafer file, select one here "/></div></td>';
     result += '<td width="60"><input id="submitFile" type="submit" value="' + this.settings.file_extensions[0].button_file_caption + '" title="' + this.settings.file_extensions[0].button_file_tooltip + '"/></td>';
-    result += '<td width="160"><input id="loadExampleInEditor" type="checkbox" name="loadExampleInEditor" value="unchecked" title="If checked, the editor window below will be loaded with a file or an example submitted">Load into editor</input></td>';
+    result += '<td width="160"><input id="loadExampleInEditor" type="checkbox" checked="checked" name="loadExampleInEditor" value="unchecked" title="If checked, the editor window below will be loaded with a file or an example submitted">Load into editor</input></td>';
     result += '</tr><tr height="1em">';
     result += '<td><div style="width:100%"><select id="exampleURL" style="width:100%" name="exampleURL" title="If you want, you can choose to compile an example clafer model from the list">';   
     
