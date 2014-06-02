@@ -85,7 +85,7 @@ var getMainHTML = function()
     return contents;
 }
 
-var handleUploads = function(req, res, next, finalCallback)
+var handleUploads = function(req, res, next, finalCallback, reuseEnabled)
 	{
 
 		core.logSpecific("---Upload request initiated.", req.body.windowKey);
@@ -175,7 +175,7 @@ var handleUploads = function(req, res, next, finalCallback)
 	                core.logSpecific(err, req.body.windowKey);
 	            } else {
 	                core.logSpecific("The file was saved to ./uploads", req.body.windowKey);
-	                moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback);
+	                moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback, reuseEnabled);
 	            }
 	        });
 
@@ -202,14 +202,14 @@ var handleUploads = function(req, res, next, finalCallback)
 	            }).on('end', function(){
 	                file.end();
 	                core.logSpecific("File downloaded to ./uploads", req.body.windowKey);
-	                moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback);
+	                moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback, reuseEnabled);
 	            });
 	        });
 	    }
 	    else
 	    {
 	        if (req.body.exampleFlag != "2") 
-	        	moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback);
+	        	moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback, reuseEnabled);
 	    }
 	};
 
@@ -241,13 +241,13 @@ var generateTargetDirAndFilePath = function (oldPath, key)
         return result;
     };
 
-var moveUploadedFile = function (req, res, next, oldPath, urlFile, callback)
+var moveUploadedFile = function (req, res, next, oldPath, urlFile, callback, reuseEnabled)
 	{                    
         // here we need to check whether we need to generate a new path, or to upload to the same one (reload)
 
         var existingProcess = core.getProcess(req.body.windowKey);
 
-        if (existingProcess)
+        if (existingProcess && (reuseEnabled === true))
         {
             console.log(existingProcess.file);
             fs.rename(oldPath, existingProcess.file + req.body.fileExt, function (err){
