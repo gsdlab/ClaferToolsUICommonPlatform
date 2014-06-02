@@ -440,7 +440,7 @@ var writeCommand = function(process, command)
     }
     catch(e)
     {
-        console.logSpecific("Error: Could not write the command '" + command + "'. Please report this error.", process.windowKey);
+        core.logSpecific("Error: Could not write the command '" + command + "'. Please report this error.", process.windowKey);
     }
 };
 
