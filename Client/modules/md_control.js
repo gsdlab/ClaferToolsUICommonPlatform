@@ -293,6 +293,7 @@ Control.method("disableRuntimeControls", function(){
     $("#individualScopeDelta").attr("disabled", "disabled");    
     $("#incAllScopes").attr("disabled", "disabled");
     $("#allScopesDelta").attr("disabled", "disabled");
+    $("#setIntScope").attr("disabled", "disabled");
 
     $("#backend").removeAttr("disabled");
 
