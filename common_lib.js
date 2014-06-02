@@ -213,39 +213,74 @@ var handleUploads = function(req, res, next, finalCallback)
 	    }
 	};
 
-var moveUploadedFile = function (req, res, next, uploadedFilePath, urlFile, callback)
-	{                    
-	    var i = 0;
-	    while(fs.existsSync("./uploads/" + i + "tempfolder/")){
-	        i++;
-	    }
-	    core.logSpecific("Uploaded file: " + uploadedFilePath, req.body.windowKey);
-	    var pathTokens = "." + uploadedFilePath.split("Server")[1];
-	    core.logSpecific("Partial path: " + pathTokens, req.body.windowKey);
-	    
-	    var pathTokensLinux = pathTokens.split("/");
-	    var pathTokensWindows = pathTokens.split("\\");
-	    
-	    if (pathTokensWindows.length > pathTokensLinux.length)
-	        pathTokens = pathTokensWindows;
-	    else    
-	        pathTokens = pathTokensLinux;
-	    
-	    core.logSpecific('Path tokens: "' + pathTokens.join('; ') + '"', req.body.windowKey);
-	    var oldPath = uploadedFilePath;
-	    uploadedFilePath = ROOT + "/" + pathTokens[1] + "/" + i + "tempfolder/"; // this slash will work anyways
-	    fs.mkdir(uploadedFilePath, function (err){
-	        if (err) throw err;
-	        var uploadedFileDir = uploadedFilePath;
-	        uploadedFilePath += pathTokens[2];
-	        uploadedFilePath = uploadedFilePath.substring(0, uploadedFilePath.length - 4); // to remove the extention
+var generateTargetDirAndFilePath = function (oldPath, key)
+    {                    
+        var i = 0;
+        while(fs.existsSync("./uploads/" + i + "tempfolder/")){
+            i++;
+        }
+        core.logSpecific("Uploaded file: " + oldPath, key);
+        var pathTokens = "." + oldPath.split("Server")[1];
+        core.logSpecific("Partial path: " + oldPath, key);
+        
+        var pathTokensLinux = pathTokens.split("/");
+        var pathTokensWindows = pathTokens.split("\\");
+        
+        if (pathTokensWindows.length > pathTokensLinux.length)
+            pathTokens = pathTokensWindows;
+        else    
+            pathTokens = pathTokensLinux;
+        
+        core.logSpecific('Path tokens: "' + pathTokens.join('; ') + '"', key);
 
-	        fs.rename(oldPath, uploadedFilePath + req.body.fileExt, function (err){
-	            if (err) throw err;
-	            core.logSpecific("Proceeding with " + uploadedFilePath, req.body.windowKey);
-	            callback(uploadedFilePath, uploadedFileDir, urlFile);
-	        });
-	    });
+        var result = {};
+
+        result.folder = ROOT + "/" + pathTokens[1] + "/" + i + "tempfolder/"; // forward slash will work anyways
+        var targetFilePath = result.folder + pathTokens[2];
+        result.filePathWithoutExt = targetFilePath.substring(0, targetFilePath.length - 4); // we remove the extension to easy form other file paths (JS, HTML, etc.)
+        return result;
+    };
+
+var moveUploadedFile = function (req, res, next, oldPath, urlFile, callback)
+	{                    
+        // here we need to check whether we need to generate a new path, or to upload to the same one (reload)
+
+        var existingProcess = core.getProcess(req.body.windowKey);
+
+        if (existingProcess)
+        {
+            console.log(existingProcess.file);
+            fs.rename(oldPath, existingProcess.file + req.body.fileExt, function (err){
+                if (err) throw err;
+                core.logSpecific("Proceeding with existing session file " + existingProcess.file, req.body.windowKey);
+                existingProcess.urlFile = urlFile;
+                callback(core.resetProcessToCompilerMode(existingProcess));
+            });
+        }
+        else
+        {
+            var generated = generateTargetDirAndFilePath(oldPath, req.body.windowKey);
+            var targetDir = generated.folder;
+            var targetFilePath = generated.filePathWithoutExt;
+
+            fs.mkdir(targetDir, function (err){
+                if (err) throw err;
+
+                fs.rename(oldPath, targetFilePath  + req.body.fileExt, function (err){
+                    if (err) throw err;
+                    core.logSpecific("Proceeding with a new session file " + targetFilePath, req.body.windowKey);
+                    var newProcess = core.addProcess({ 
+                        windowKey: req.body.windowKey, 
+                        folder: targetDir,
+                        urlFile: urlFile, 
+                        file: targetFilePath});    
+
+                    callback(newProcess);
+                });
+            });
+
+        }
+
 	};
 
 
@@ -424,12 +459,18 @@ var handleControlRequest = function(req, res, settings){
         return false;
     }
 
+    process.mode = "ig"; // we are running the IG.
+
     if (req.body.operation == "run") // "Run" operation
     {
         core.logSpecific("Control: Run", req.body.windowKey);
 
         var backendId = req.body.backend;
         core.logSpecific("Backend: " + backendId, req.body.windowKey);
+/*
+    never happens actually, the UI denies this case
+    moreover, the ig would throw an error if something is not compiled yet
+
         if (process.mode != "ig")
         {
             core.logSpecific("Error: Not compiled yet", req.body.windowKey);
@@ -439,6 +480,7 @@ var handleControlRequest = function(req, res, settings){
         }
         else
         {
+*/            
             core.timeoutProcessClearInactivity(process); // reset the inactivity timeout
 
             // looking for a backend
@@ -567,7 +609,7 @@ var handleControlRequest = function(req, res, settings){
             res.writeHead(200, { "Content-Type": "text/html"});
             res.end("started");
 
-        }
+//        }
     }
     else if (req.body.operation == "stop") // "Stop" operation
     {
@@ -735,47 +777,6 @@ var handleControlRequest = function(req, res, settings){
         res.writeHead(200, { "Content-Type": "text/html"});
         res.end("int_scope_set");
     }
-/*
-    else if (req.body.operation == "setBitwidth") // "Set Bitwidth" operation
-    {
-        core.logSpecific("Control: setBitwidth", req.body.windowKey);
-
-        // looking for a backend
-        var backend = core.getBackend(req.body.backend);
-        if (!backend)
-        {
-            core.logSpecific("Error: Backend was not found", req.body.windowKey);
-            res.writeHead(400, { "Content-Type": "text/html"});
-            res.end("Error: Could not find the backend by its submitted id.");
-            return false;
-        }
-
-        core.logSpecific(backend.id + " " + req.body.operation_arg1, req.body.windowKey);
-
-        var replacements = [
-                {
-                    "needle": "$value$", 
-                    "replacement": req.body.operation_arg1
-                }
-            ];
-
-        var command = core.replaceTemplate(backend.scope_options.set_bitwidth.command, replacements);
-        process.tool.stdin.write(command);
-            
-        if (backend.scope_options.produce_scope_file)
-        {
-            process.tool.stdin.write(backend.scope_options.produce_scope_file.command);
-            process.producedScopes = false;
-        }
-        else
-        {
-            process.producedScopes = true;
-        }
-
-        res.writeHead(200, { "Content-Type": "text/html"});
-        res.end("bitwidth_set");
-    }
-*/
     else // else look for custom commands defined by backend config
     {
         var parts = req.body.operation.split("-");
@@ -828,7 +829,7 @@ var handleControlRequest = function(req, res, settings){
         writeCommand(process, operation.command);
 
         res.writeHead(200, { "Content-Type": "text/html"});
-        res.end("operation");
+        res.end(operation.id);
     }
 
     return true;

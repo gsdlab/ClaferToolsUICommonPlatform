@@ -109,9 +109,6 @@ Control.method("getInitContent", function(){
     ret += '<button id="setIntScope" title="Set the selected scope for integers">Set</button></td>';
     ret += '</tr>';
 
-//    ret += '<tr id="bitwidthSettings"><td style="padding-left:4px;padding-right:4px" width="60">Bitwidth:</td>';
-//    ret += '<td><input type="text" class="scopeInput" size="2" value="4" id="bitwidthValue" title="Enter the bitwidth for unknown integers"/><button id="setBitwidth" title="Set the selected bitwidth">Set</button></td></tr>';
-
     ret += '</table>';
     ret += '</fieldset>';
    
@@ -186,7 +183,6 @@ Control.method("onInitRendered", function()
     $("#setDefaultScope")[0].onclick = this.setDefaultScopeClick.bind(this);
     $("#setIndividualScope")[0].onclick = this.setIndividualScopeClick.bind(this);
     $("#setIntScope")[0].onclick = this.setIntScopeClick.bind(this);
-//    $("#setBitwidth")[0].onclick = this.setBitwidthClick.bind(this);
     $("#incAllScopes")[0].onclick = this.incAllScopesClick.bind(this);
     $("#incIndividualScope")[0].onclick = this.incIndividualScopeClick.bind(this);
  
@@ -231,41 +227,29 @@ Control.method("runStopClick", function(){
 Control.method("setDefaultScopeClick", function(){
     $("#ControlOp").val("setDefaultScope");
     $("#ControlOpArg1").val($ ("#defaultScopeValue").val());
-//    $("#ControlForm").submit();
 });
 
 Control.method("incAllScopesClick", function(){
     $("#ControlOp").val("incAllScopes");
     $("#ControlOpArg1").val($ ("#allScopesDelta").val());
-//    $("#ControlForm").submit();
 });
 
 Control.method("setIndividualScopeClick", function(){
     $("#ControlOp").val("setIndividualScope");
     $("#ControlOpArg1").val($ ("#individualScopeValue").val());
     $("#ControlOpArg2").val($ ("#individualClafer").val());
-//    $("#ControlForm").submit();
 });
 
 Control.method("incIndividualScopeClick", function(){
     $("#ControlOp").val("incIndividualScope");
     $("#ControlOpArg1").val($ ("#individualScopeDelta").val());
     $("#ControlOpArg2").val($ ("#individualClafer").val());
-//    $("#ControlForm").submit();
 });
 
 Control.method("setIntScopeClick", function(){
     $("#ControlOp").val("setIntScope");
-//    $("#ControlOpArg1").val($ ("#intLowScopeValue").val());
     $("#ControlOpArg1").val($ ("#intHighScopeValue").val());
-//    $("#ControlForm").submit();
 });
-
-//Control.method("setBitwidthClick", function(){
-//    $("#ControlOp").val("setBitwidth");
-//    $("#ControlOpArg1").val($ ("#bitwidthValue").val());
-////    $("#ControlForm").submit();
-//});
 
 Control.method("enableRuntimeControls", function(){
     $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button").removeAttr("disabled");
@@ -333,8 +317,6 @@ Control.method("disableAll", function(){
     $("#intHighScopeValue").attr("disabled", "disabled");   
     $("#setIntScope").attr("disabled", "disabled");   
 
-//    this.adjustBackendArgumentSettings();
-
     $("#backend").removeAttr("disabled");    
 });
 
@@ -366,10 +348,6 @@ Control.method("showResponse", function(responseText, statusText, xhr, $form)
     {
         this.settings.onIntScopeSet(this);
     }
-//    else if (responseText == "bitwidth_set" && this.settings.onBitwidthSet)
-//    {
-//        this.settings.onBitwidthSet(this);
-//    }        
     else if (responseText == "individual_scope_set" && this.settings.onIndividualScopeSet)
     {
         this.settings.onIndividualScopeSet(this);
@@ -437,13 +415,7 @@ Control.method("onPoll", function(responseObject)
     }
     else
     {
-//        if (responseObject.message.length >= 5 && responseObject.message.substring(0,5) == "Error")
-//        {
-//        }
-//        else
-//        {
-            this.pollingTimeoutObject = setTimeout(this.poll.bind(this), this.pollingDelay);
-//        }
+        this.pollingTimeoutObject = setTimeout(this.poll.bind(this), this.pollingDelay);
     }
 });        
 
@@ -677,4 +649,33 @@ Control.method("onBackendChange", function()
 
     if (this.settings.onBackendChange) 
         this.settings.onBackendChange(this, result);
+});
+
+Control.method("reload", function()
+{       
+    this.resumePolling();
+
+    var selectedId = $( "#backend option:selected" ).val();
+    var reloadButton = $("#" + selectedId + "-reload");
+
+    if ($(reloadButton).length > 0) // has reload button
+    {
+        reloadButton.click();
+        return true;
+    }
+    else
+    {
+        // no reload button
+        return false;
+    }
+});
+
+Control.method("pausePolling", function()
+{
+    clearTimeout(this.pollingTimeoutObject); // it's replaced with the compilation timeout 
+});
+
+Control.method("resumePolling", function()
+{
+    this.pollingTimeoutObject = setTimeout(this.poll.bind(this), this.pollingDelay); // start polling
 });

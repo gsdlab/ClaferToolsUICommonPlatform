@@ -130,10 +130,36 @@ processRemoveOlder = function (key)
     }
 };
 
+var defaultProcess = function (process)
+{   
+    process.toRemoveCompletely = false; 
+    process.tool = null;
+    process.freshData = ""; 
+    process.scopes = "";
+    process.clafer_compiler = null;
+    process.mode = "compiler"; 
+    process.freshError = "";
+    return process;
+};
+
+var resetProcessToCompilerMode = function (process)
+{   
+    timeoutProcessClearPing(process); // we need to clear the timeout, because it will be replaced by compilation process' timeout
+    process.toRemoveCompletely = false; 
+//    process.tool = null;
+//    process.freshData = ""; 
+    process.scopes = "";
+//    process.clafer_compiler = null;
+    process.mode = "compiler"; 
+//    process.freshError = "";
+    return process;
+};
+
 var addProcess = function (process)
-{    
+{   
     processRemoveOlder(process.windowKey);
-    processes.push(process);
+    processes.push(defaultProcess(process));
+    return getProcess(process.windowKey);
 };
 
 var pingTimeoutFunc = function (process)
@@ -479,6 +505,7 @@ var buildArg = function (args, config, value)
 
 
 module.exports.addProcess = addProcess;
+module.exports.resetProcessToCompilerMode = resetProcessToCompilerMode;
 module.exports.getProcess = getProcess;
 module.exports.timeoutProcessSetPing = timeoutProcessSetPing;
 module.exports.timeoutProcessClearPing = timeoutProcessClearPing;
