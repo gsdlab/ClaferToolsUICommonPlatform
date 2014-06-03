@@ -32,7 +32,7 @@ helpGetter.method("createWindow", function(){
         height: 500,
         posx: 100,
         posy: 100,
-        content: '<iframe border="0"></iframe>',
+        content: '<iframe id="helpFrame" border="0"></iframe>',
         type: "iframe",
         statusBar: true,
         minimizeButton: true,
@@ -43,16 +43,42 @@ helpGetter.method("createWindow", function(){
         modal: true
     });  
 
+	this.setListeners();
+
 });
 
 helpGetter.method("initialize", function (title, version){
 	this.title = title;
 	this.version = version;
-	this.createWindow();
-	$.updateWindowContentWithAjax("help", '/Client/help_pages/intro.html?title=' + this.title + '&version=' + this.version);
+
+    var displayHelp = getCookie("displayIntroHelp");
+    if (displayHelp == null)
+    {
+		this.createWindow();
+		$.updateWindowContentWithAjax("help", '/Client/help_pages/intro.html?title=' + this.title + '&version=' + this.version);
+	}
 });
 
 helpGetter.method("setListeners", function(){
+
+	$("#helpFrame")[0].onload = function(){
+		if ($("#helpFrame").contents().find("#noIDEHelpChoice").length > 0)
+		{
+			$("#helpFrame").contents().find("#noIDEHelpChoice").on('click', function(event) { 
+				if ($(this).is(":checked"))
+				{
+					setCookie("displayIntroHelp", "no", 5);
+				} 
+				else
+				{
+//					alert("not checked");	
+				}
+			});
+		}
+	};
+
+//	alert(length);//.contents().find("#noIDEHelpChoice").length);
+//	$("#helpFrame").contents().find("#noIDEHelpChoice").on('click', function(event) { alert('test'); });
 /*
 	$(".fadeOverlay").click(function(){
 		$("#help").hide(500);
