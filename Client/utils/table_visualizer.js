@@ -46,17 +46,24 @@ TableVisualizer.method("trimValue", function(s)
 TableVisualizer.method("mapValue", function(feature, sVal, type)
 {
 	var result = new Object();
+
+	if (feature.em !== null)
+	{
+		result.html = '<span title = "All the values are the same and equal ' + feature.em + '">&nbsp;</span>';
+		result.tdStyle = 'em';
+		return result;
+	}
 	
 	if (type == "bool")
 	{
 		if (sVal == "yes")
 		{
-			result.html = '<img title="' + feature + ' is present" class="tick" src="commons/Client/images/tick.png"/>';
+			result.html = '<img title="' + feature.id + ' is present" class="tick" src="commons/Client/images/tick.png"/>';
 			result.tdStyle = 'bool tick';
 		}
 		else
 		{
-			result.html = '<img title = "' + feature + ' is not present" class="no" src="commons/Client/images/no.png"/>';
+			result.html = '<img title = "' + feature.id + ' is not present" class="no" src="commons/Client/images/no.png"/>';
 			result.tdStyle = 'bool no';
 		}
 	}
@@ -64,30 +71,37 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 	{
 		if (sVal == "none")
 		{
-			result.html = '<img title = "' + feature + ' is not present" class="no" src="commons/Client/images/no.png"/>';
+			result.html = '<img title = "' + feature.id + ' is not present" class="no" src="commons/Client/images/no.png"/>';
 			result.tdStyle = 'bool no';
 		}
 		else
 		{
 			result.tdStyle = 'bool tick clafer';
-			result.html = '<img title="' + feature + ' is present as ' + this.trimValue(this.filterClaferValue(sVal)) + '" class="tick" src="commons/Client/images/tick.png"/>';
+			result.html = '<img title="' + feature.id + ' is present as ' + this.trimValue(this.filterClaferValue(sVal)) + '" class="tick" src="commons/Client/images/tick.png"/>';
 		}
 	}
 	else if (type == "int")
 	{
 		result.tdStyle = 'numeric';
-		result.html = '<span title="' + feature + ' = ' + sVal + '" class="number">' + sVal + '</span>';
+		if (sVal == "none")
+		{
+			result.html = '<span title="no ' + feature.id + '" class="clafer">' + '-' + '</span>';
+		}
+		else
+		{
+			result.html = '<span title="' + feature.id + ' = ' + sVal + '" class="number">' + sVal + '</span>';
+		}
 	}
 	else // just clafer of a non-primitive type
 	{
 		result.tdStyle = 'clafer';
 		if (sVal == "none")
 		{
-			result.html = '<span title="no ' + feature + '" class="clafer">' + '&nbsp;' + '</span>';
+			result.html = '<span title="no ' + feature.id + '" class="clafer">' + '-' + '</span>';
 		}
 		else
 		{
-			result.html = '<span title="' + feature + ' = ' + this.prettifyClaferSet(sVal) + '" class="clafer">' + this.trimValue(this.filterClaferValue(sVal)) + '</span>';
+			result.html = '<span title="' + feature.id + ' = ' + this.prettifyClaferSet(sVal) + '" class="clafer">' + this.trimValue(this.filterClaferValue(sVal)) + '</span>';
 		}
 	}
 		
@@ -96,7 +110,7 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 
 // The Main Content Generator
 
-TableVisualizer.prototype.getHTML = function(data, colWidth) 
+TableVisualizer.method("getHTML", function(data, colWidth) 
 {
 	var instanceCount = data.products.length;    
 	var table = $('<table  id="tBody" width="100%" cellspacing="0" cellspadding="0"></table>').addClass('foo');
@@ -147,6 +161,14 @@ TableVisualizer.prototype.getHTML = function(data, colWidth)
 			space = "";
 
 		html += space + '<span class="card">' + data.features[i].card + '</span>';
+
+		/* effectively mandatory */
+
+		if (data.features[i].em !== null)
+		{
+			html += '<span class="emvalue"> = ' + this.trimValue(this.filterClaferValue(data.features[i].em + "")) + '</span>';
+		}
+
 		$(td).html(html);
         
 		row.append(td);
@@ -155,7 +177,7 @@ TableVisualizer.prototype.getHTML = function(data, colWidth)
 		{
 			var td = $('<' + tagName + ' id="' + tagName + i + "_" + (j + 1) + '"></' + tagName + '>').addClass('td_instance');
 			
-            mappedValue = this.mapValue(data.features[i].id, data.matrix[i][j], data.features[i].type);
+            mappedValue = this.mapValue(data.features[i], data.matrix[i][j], data.features[i].type);
             td.html(mappedValue.html);
             td.addClass(mappedValue.tdStyle);
 
@@ -172,5 +194,5 @@ TableVisualizer.prototype.getHTML = function(data, colWidth)
 	}
 	return table;
 
-}
+});
 

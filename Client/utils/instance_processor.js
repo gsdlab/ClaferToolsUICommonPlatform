@@ -71,7 +71,7 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
 //			alert("Feature value not found: '" + instanceIndex + " " + claferPath + "'");
 
 			if (type == 'int')
-				return 0;
+				return "none";
 
 			if (type == 'bool')
 				return "-";

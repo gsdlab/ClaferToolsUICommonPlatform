@@ -175,3 +175,11 @@ td.tick, td.no
     padding-top:3px;
     padding-bottom:3px;
 }
+
+.em{
+    background-color: #ebebeb;
+}
+
+.emvalue{
+    color: #bbb;
+}

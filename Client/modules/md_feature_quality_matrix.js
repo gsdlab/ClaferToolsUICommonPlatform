@@ -428,52 +428,47 @@ FeatureQualityMatrix.method("getDataTable", function()
         result.products.push(String(j));
     }
     
-    for (var i = 0; i < output.length; i++)
+    for (var i = 1; i < output.length; i++)
     {
         var currentMatrixRow = new Array();
-        var currentContextRow = new Array();
-        if (i > 0){ // do not push the parent clafer
-            feature = new Object();
-            feature.title = output[i].displayWithMargins;
-            feature.path = output[i].claferPath.join("-");
-            feature.id = output[i].claferId;
-            feature.type = output[i].type;
-            feature.card = output[i].card;
-            result.features.push(feature);
-            currentContextRow.push(output[i].displayWithMargins);
-        }
-        else 
-            currentContextRow.push(output[i].displayWithMargins);
-
-        denyAddContextRow = false;
         
+        feature = new Object();
+        feature.title = output[i].displayWithMargins;
+        feature.path = output[i].claferPath.join("-");
+        feature.id = output[i].claferId;
+        feature.type = output[i].type;
+        feature.card = output[i].card;
+        feature.em = null; // null means not effectively mandatory, else it has the common value for all the instances
+
+        var emCheckComplete = false;
+
         for (var j = 1; j <= instanceCount; j++)
         {
-            if (i == 0)
+            sVal = this.instanceProcessor.getFeatureValue(j, output[i].claferPath, output[i].type);
+            currentMatrixRow.push(sVal);
+
+            /* check for effective mandatory features */
+            if (!emCheckComplete)
             {
-                currentContextRow.push(String(j));
-            }
-            else
-            {
-                sVal = this.instanceProcessor.getFeatureValue(j, output[i].claferPath, output[i].type);
-//                alert(output[i].claferId + " " + sVal);
-                currentMatrixRow.push(sVal);
-                if (sVal == "yes")
-                    currentContextRow.push("X");
-                else if (sVal == "-")
-                    currentContextRow.push("");
+                if (feature.em === null)
+                {
+                    feature.em = sVal;
+                }
                 else
-                    denyAddContextRow = true;
+                {
+                    if (feature.em !== sVal)
+                    {
+                        feature.em = null;
+                        emCheckComplete = true;
+                    }
+                }
             }
         }
-        
-        if (i > 0)
-            result.matrix.push(currentMatrixRow);
-            
-        if (!denyAddContextRow)
-            result.formalContext.push(currentContextRow);
-        
+
+        result.features.push(feature);        
+        result.matrix.push(currentMatrixRow);        
     }
+
     return result;
 
 });
