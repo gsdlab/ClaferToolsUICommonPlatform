@@ -31,6 +31,7 @@ textarea.child {height:100%;}
 .comparison table td, .comparison table th{
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
+    white-space: nowrap;
 }
 
 .comparison table #r0{
@@ -167,6 +168,18 @@ td.tick, td.no
     background: url("images/types/bool_unchecked.png");
 }
 
+.emabstract .filter_checked{
+    background: url("images/types/bool_always_checked.png");
+}
+
+.emabstract .filter_unchecked{
+    background: url("images/types/bool_always_unchecked.png");
+}
+
+.emabstract .int{
+    background: url("images/types/int_always_same.png");
+}
+
 .td_instance{
     padding:3px;
 }
@@ -182,4 +195,20 @@ td.tick, td.no
 
 .emvalue{
     color: #bbb;
+}
+
+tr.hiddenBySearch{
+    display:none;
+}
+
+.comparison table th{
+    border: 1px solid #ccc;
+}
+
+.verticalLine {
+    display: inline-block;
+    width: 2px;
+    border-left: 1px solid #ccc;
+    margin-left:5px;
+    margin-right:3px;
 }

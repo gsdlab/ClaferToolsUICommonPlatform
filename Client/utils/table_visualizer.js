@@ -35,21 +35,26 @@ TableVisualizer.method("prettifyClaferSet", function(s){
 
 TableVisualizer.method("trimValue", function(s)
 {
+	return s;
+/*
 	var maxLength = 25;
 
 	if (s.length <= maxLength)
 		return s;
 
 	return s.substring(0, maxLength) +  "&hellip;";
+*/
 });
 
 TableVisualizer.method("mapValue", function(feature, sVal, type)
 {
 	var result = new Object();
+//	result.title = "Hello";
 
 	if (feature.em !== null)
 	{
-		result.html = '<span title = "All the values are the same and equal ' + feature.em + '">&nbsp;</span>';
+		result.title =  'All the values are the same and equal ' + feature.em;
+		result.html = '<span>&nbsp;</span>';
 		result.tdStyle = 'em';
 		return result;
 	}
@@ -58,12 +63,14 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 	{
 		if (sVal == "yes")
 		{
-			result.html = '<img title="' + feature.id + ' is present" class="tick" src="commons/Client/images/tick.png"/>';
+			result.title = feature.id + ' is present';
+			result.html = '<img class="tick" src="commons/Client/images/tick.png"/>';
 			result.tdStyle = 'bool tick';
 		}
 		else
 		{
-			result.html = '<img title = "' + feature.id + ' is not present" class="no" src="commons/Client/images/no.png"/>';
+			result.title = feature.id + ' is not present';
+			result.html = '<img class="no" src="commons/Client/images/no.png"/>';
 			result.tdStyle = 'bool no';
 		}
 	}
@@ -71,13 +78,15 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 	{
 		if (sVal == "none")
 		{
-			result.html = '<img title = "' + feature.id + ' is not present" class="no" src="commons/Client/images/no.png"/>';
+			result.title = feature.id + ' is not present';
+			result.html = '<img title class="no" src="commons/Client/images/no.png"/>';
 			result.tdStyle = 'bool no';
 		}
 		else
 		{
+			result.title = feature.id + ' is present as ' + this.trimValue(this.filterClaferValue(sVal));
 			result.tdStyle = 'bool tick clafer';
-			result.html = '<img title="' + feature.id + ' is present as ' + this.trimValue(this.filterClaferValue(sVal)) + '" class="tick" src="commons/Client/images/tick.png"/>';
+			result.html = '<img class="tick" src="commons/Client/images/tick.png"/>';
 		}
 	}
 	else if (type == "int")
@@ -85,11 +94,13 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 		result.tdStyle = 'numeric';
 		if (sVal == "none")
 		{
-			result.html = '<span title="no ' + feature.id + '" class="clafer">' + '-' + '</span>';
+			result.title = 'no ' + feature.id;
+			result.html = '<span class="clafer">' + '-' + '</span>';
 		}
 		else
 		{
-			result.html = '<span title="' + feature.id + ' = ' + sVal + '" class="number">' + sVal + '</span>';
+			result.title = feature.id + ' = ' + sVal;
+			result.html = '<span class="number texttosearch">' + sVal + '</span>';
 		}
 	}
 	else // just clafer of a non-primitive type
@@ -97,11 +108,13 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 		result.tdStyle = 'clafer';
 		if (sVal == "none")
 		{
-			result.html = '<span title="no ' + feature.id + '" class="clafer">' + '-' + '</span>';
+			result.title = 'no ' + feature.id;
+			result.html = '<span class="clafer">' + '-' + '</span>';
 		}
 		else
 		{
-			result.html = '<span title="' + feature.id + ' = ' + this.prettifyClaferSet(sVal) + '" class="clafer">' + this.trimValue(this.filterClaferValue(sVal)) + '</span>';
+			result.title = feature.id + ' = ' + this.prettifyClaferSet(sVal);
+			result.html = '<span class="clafer texttosearch">' + this.trimValue(this.filterClaferValue(sVal)) + '</span>';
 		}
 	}
 		
@@ -113,10 +126,11 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 TableVisualizer.method("getHTML", function(data, colWidth) 
 {
 	var instanceCount = data.products.length;    
-	var table = $('<table  id="tBody" width="100%" cellspacing="0" cellspadding="0"></table>').addClass('foo');
+	var table = $('<table id="tBody" width="100%" cellspacing="0" cellspadding="0"></table>').addClass('foo');
+	var body = $('<tbody></tbody>');
 
     // first row - headers
-    var row = $('<tr id="r' + 0 +'"></tr>').addClass('bar');//
+    var row = $('<thead id="r' + 0 +'"></thead>').addClass('bar');//
 	var tagName = "th"; // to make headers
 	var td = $('<' + tagName + ' width="' + colWidth + '" style="min-width:' + colWidth + 'px"></' + tagName + '>').addClass('td_abstract').addClass('table_title');
 	td.html(data.title);
@@ -149,7 +163,7 @@ TableVisualizer.method("getHTML", function(data, colWidth)
 
 		$(td).attr("title", tooltip);	
 
-		var html = data.features[i].title.replaceAll(' ', '&nbsp;&nbsp;');
+		var html = '<span class="texttosearch">' + data.features[i].title.replaceAll(' ', '&nbsp;&nbsp;') + '</span>';
 		html += '<span class="path" style="display:none;">' + data.features[i].path + '</span>';
 		html += '<span class="id" style="display:none;">' + data.features[i].id + '</span>';
 		html += '<span class="typelabel ' + data.features[i].type + '"></span>';
@@ -167,6 +181,7 @@ TableVisualizer.method("getHTML", function(data, colWidth)
 		if (data.features[i].em !== null)
 		{
 			html += '<span class="emvalue"> = ' + this.trimValue(this.filterClaferValue(data.features[i].em + "")) + '</span>';
+			$(td).addClass("emabstract");
 		}
 
 		$(td).html(html);
@@ -179,6 +194,7 @@ TableVisualizer.method("getHTML", function(data, colWidth)
 			
             mappedValue = this.mapValue(data.features[i], data.matrix[i][j], data.features[i].type);
             td.html(mappedValue.html);
+            td.attr("title", mappedValue.title);
             td.addClass(mappedValue.tdStyle);
 
 			row.append(td);
@@ -190,8 +206,11 @@ TableVisualizer.method("getHTML", function(data, colWidth)
 		var td = $('<' + tagName + ' id="' + tagName + i + "_" + (instanceCount + 1) + '"></' + tagName + '>').addClass('td_extra');
 		row.append(td);
 
-        table.append(row);
+        body.append(row);
 	}
+
+    table.append(body);
+
 	return table;
 
 });

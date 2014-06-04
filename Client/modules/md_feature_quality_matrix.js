@@ -40,16 +40,20 @@ function FeatureQualityMatrix(host, settings)
 
     this.host = host;
     this.host.loaded();
-    
+
+    this.unparsedInstances = null;    
 }
 
 FeatureQualityMatrix.method("resize", function() // not attached to the window anymore, so need to call the method
 {
-    this.synchronizeWidths();
+//    this.synchronizeWidths();
     return true;
 });
 
 FeatureQualityMatrix.method("onDataLoaded", function(data){
+
+    this.unparsedInstances = data.unparsedInstances;
+
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
     this.processor = new ClaferProcessor(data.claferXML);
 
@@ -86,6 +90,7 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
 
 });
 
+/*
 FeatureQualityMatrix.method("synchronizeWidths", function()
 {
     for(var i = 1; i < $("#tHead #r0").children().length - 1; i++)
@@ -95,43 +100,43 @@ FeatureQualityMatrix.method("synchronizeWidths", function()
         $("#tHead #th0_" + i).css("min-width", width);
     }
 });
+*/
 
-
-FeatureQualityMatrix.method("onRendered", function()
+FeatureQualityMatrix.method("addControlPanel", function()
 {
-    if (!this.filter)
-        return;
-    
-    this.filter.onRendered();
-    
-    $.resizeWindow(this.id, this.width, $("#comparison").outerHeight() + 40); // resize the table to fit everything
+    var context = this;
 
 // Add search bar 
-    var td = $('#comparison .table_title')[0];
-    $(td).html('<input type="text" id="search" class="text_input" placeholder="search" style="width: 100px">');
-    $(td).addClass("TableSearch");
-
+    var panel = $('<div id="matrix-panel"></div>');
+    var vl = $('<div class="verticalLine">&nbsp;</div>');
+    $(panel).append('Search: <input type="text" id="search" class="text_input" placeholder="search" style="width: 100px">');
+    $(panel).append(vl);
 // Adding buttons for comparison table
 // Distinct button for greying out non-distinct features
-    td = $('#comparison .TableSearch')[0];
-    $(td).append('<button id="toggle_link">Toggle</button>');
-    var that = this;
+    $(panel).append('<button id="toggle_link">Toggle</button>');
+    $(panel).append('&nbsp;<button id="filter_reset">Toggle</button>');
+    $(panel).append(vl);
+//    $(panel).append('<button id="saveAll">Save all variants</button>');
+    $(panel).append('<input type="button" id="saveAll" value="Save all variants">');
+    $(panel).append('<form id="saveAllForm" action="/saveinstances" method="post" enctype="multipart/form-data">' + '<input type="hidden" name="data" id="saveAllData" value=""/>' + '<input type="hidden" name="windowKey" value="' + this.host.key + '"/>' + '</form>');
+
+    $("#comparison").prepend(panel);
+
+
     $('#toggle_link').html("Distinct");
     $('#toggle_link').click(function(event){
         event.stopPropagation();  //to keep table from sorting by instance number
-        that.toggleDistinct();
+        context.toggleDistinct();
     }).css("cursor", "pointer");
 
 // Reset button for reseting filters
 
-    $(td).append('&nbsp;<button id="filter_reset">Toggle</button>');
-
-    $('#filter_reset').html("Reset");
+    $('#filter_reset').html("Reset filters");
     $('#filter_reset').click(function(event){
         event.stopPropagation(); //to keep table from sorting by instance number
-        that.filter.cleanFilters();
-        that.filter.filterContent();
-        that.settings.onReset(that);
+        context.filter.cleanFilters();
+        context.filter.filterContent();
+        context.settings.onReset(context);
             //if currently set to distinct mode, refresh distinct rows
         if (this.toggled){
             this.toggleDistinct(); //one to turn off distinct
@@ -139,6 +144,26 @@ FeatureQualityMatrix.method("onRendered", function()
         }
     }).css("cursor", "pointer");
 
+// add handler to search bar
+    $('#search').keyup(function(){
+        context.applySearch();
+    }); 
+
+    $('#search').click(function(event){
+//        event.stopPropagation(); //to keep table from sorting by instance number
+    });
+
+    $('#saveAll').click(this.saveAll.bind(this)).css("cursor", "pointer");
+
+});
+
+FeatureQualityMatrix.method("onRendered", function()
+{
+    if (!this.filter)
+        return;
+    
+    this.filter.onRendered();
+    this.addControlPanel();
 
     if (this.settings.buttonsForRemoval)
     {
@@ -165,31 +190,6 @@ FeatureQualityMatrix.method("onRendered", function()
             });
         }
     }
-//************************* Most of the following is to get proper formatting on the table  *******************
-
-// Move headers into new div
-    $("#comparison").prepend('<div id="tHeadContainer"><table id="tHead" width="100%" cellspacing="0" cellspadding="0"></table></div>');
-    $("#tHead").append($("#comparison #r0"));
-
-// make headers positioning always on top of window
-    $('#mdFeatureQualityMatrix .window-content').scroll(function(){
-            $("#comparison #tHeadContainer").css("position", "relative");
-            $("#comparison #tHeadContainer").css("top", ($("#comparison").height() - $('#mdFeatureQualityMatrix .window-content').scrollTop())*(-1) + $("#comparison #tHeadContainer").height());
-            $("#comparison #tBodyContainer").css("top" , $("#comparison #tHeadContainer").height());
-    });
-
-    $("#mdFeatureQualityMatrix").resize(function(){
-        $('#mdFeatureQualityMatrix .window-content').scroll();
-    })
-
-// Move body into new div
-    $("#comparison").prepend('<div id="tBodyContainer" style="position: relative;"></div>');
-    $("#tBodyContainer").prepend($("#comparison #tBody"));
-    
-
-/* Synchronize the width of head and body tables */
-
-    this.synchronizeWidths();
 
 // Add tristate checkboxes for filtering features
     i = 1;
@@ -201,31 +201,46 @@ FeatureQualityMatrix.method("onRendered", function()
         if (row.hasClass("bool") || row.hasClass("boolclafer"))
         {
             $(row).attr("FilterStatus", "none");
-            $("#r" + i + " .td_abstract .typelabel").addClass("filter_normal");
 
-            $("#r" + i + " .td_abstract .typelabel").click(function()
+            var emValue = $(row).find(".emvalue");
+            if (emValue.length > 0) // is effectively  mandatory
             {
-                if ($(this).parent().parent().attr("FilterStatus") == "none"){
-                    $(this).removeClass("filter_normal");
-                    $(this).removeClass("filter_unchecked");
-                    $(this).addClass("filter_checked");
-                    $(this).parent().parent().attr("FilterStatus", "require");
-                    that.featureChecked($(this).parent().find(".path").text(), 1);
-                } else if ($(this).parent().parent().attr("FilterStatus") == "require"){
-                    $(this).removeClass("filter_normal");
-                    $(this).addClass("filter_unchecked");
-                    $(this).removeClass("filter_checked");
-                    $(this).parent().parent().attr("FilterStatus", "exclude");
-                    that.featureChecked($(this).parent().find(".path").text(), -1);
-                } else {
-                    $(this).addClass("filter_normal");
-                    $(this).removeClass("filter_unchecked");
-                    $(this).removeClass("filter_checked");
-                    $(this).parent().parent().attr("FilterStatus", "none");
-                    that.featureChecked($(this).parent().find(".path").text(), 0);                    
+                if ($(emValue).text().indexOf("yes") >= 0)
+                {
+                    $("#r" + i + " .td_abstract .typelabel").addClass("filter_checked");
                 }
-            }).css("cursor", "pointer");
-            
+                else
+                {
+                    $("#r" + i + " .td_abstract .typelabel").addClass("filter_unchecked");
+                }                    
+            }
+            else
+            {
+                $("#r" + i + " .td_abstract .typelabel").addClass("filter_normal");
+
+                $("#r" + i + " .td_abstract .typelabel").click(function()
+                {
+                    if ($(this).parent().parent().attr("FilterStatus") == "none"){
+                        $(this).removeClass("filter_normal");
+                        $(this).removeClass("filter_unchecked");
+                        $(this).addClass("filter_checked");
+                        $(this).parent().parent().attr("FilterStatus", "require");
+                        that.featureChecked($(this).parent().find(".path").text(), 1);
+                    } else if ($(this).parent().parent().attr("FilterStatus") == "require"){
+                        $(this).removeClass("filter_normal");
+                        $(this).addClass("filter_unchecked");
+                        $(this).removeClass("filter_checked");
+                        $(this).parent().parent().attr("FilterStatus", "exclude");
+                        that.featureChecked($(this).parent().find(".path").text(), -1);
+                    } else {
+                        $(this).addClass("filter_normal");
+                        $(this).removeClass("filter_unchecked");
+                        $(this).removeClass("filter_checked");
+                        $(this).parent().parent().attr("FilterStatus", "none");
+                        that.featureChecked($(this).parent().find(".path").text(), 0);                    
+                    }
+                }).css("cursor", "pointer");
+            }            
         }
         i++;
         row = $("#r" + i);
@@ -240,8 +255,8 @@ FeatureQualityMatrix.method("onRendered", function()
 
 //        adding tooltips
 
-        $("#r" + i + " .td_abstract").tipsy({fade: true, gravity: 'n', html: true});
-        $("#r" + i + " .td_instance [title]").tipsy({fade: true, gravity: 'w', html: true});
+        $("#r" + i + " .td_abstract").tipsy({fade: true, gravity: 'w', html: true});
+        $("#r" + i + " .td_instance").tipsy({fade: true, gravity: 's', html: true});
 
 //  Add sorting to quality attributes
         if (row.hasClass("int")) {
@@ -322,22 +337,21 @@ FeatureQualityMatrix.method("onRendered", function()
         }
     }
 
-// add handler to search bar
-    that = this;
-    $('#search').keyup(function(){
-        that.scrollToSearch($(this).val());
-    }); 
-    $('#search').click(function(event){
-        event.stopPropagation(); //to keep table from sorting by instance number
-    });
-
 //    this.filter.resetFilters(this.SavedFilters, this.permahidden);
 
     //fire the scroll handler to align table after half a second (fixes chrome bug)
-    setTimeout(function(){$('#mdFeatureQualityMatrix .window-content').scroll()},500);
+//    setTimeout(function(){$('#mdFeatureQualityMatrix .window-content').scroll()},500);
 
     this.filter.filterContent();
+    if ($("#tBody").length > 0)
+        $("#tBody").colResizable();
 
+    var h1 = $("#mdFeatureQualityMatrix #tBody").outerHeight();
+    var h2 = $("#mdFeatureQualityMatrix #matrix-panel").outerHeight();
+    var h3 = $("#mdFeatureQualityMatrix .window-titleBar").outerHeight();
+
+    $.resizeWindow(this.id, this.width, h1 + h2 + h3); // resize the table to fit everything
+    
 });
 
 FeatureQualityMatrix.method("getContent", function()
@@ -416,7 +430,7 @@ FeatureQualityMatrix.method("getDataTable", function()
     var current = this.abstractClaferTree;
     abstractClaferOutput = new Array();
 
-    this.traverse(current, 0, []);
+    this.traverse(current, -1, []);
     output = abstractClaferOutput;
     
     var goalNames = this.processor.getGoals();
@@ -561,7 +575,7 @@ FeatureQualityMatrix.method("toggleDistinct", function()
         }
     }
 //  since the table height has potentially changed we call this to realign the headers. 
-    this.scrollToSearch($("#search").val());
+    this.applySearch();
     return true;
 });
 
@@ -575,24 +589,39 @@ FeatureQualityMatrix.method("makePointsDeselected", function (pid){
     $("#mdFeatureQualityMatrix #th0_" + pid.substring(1)).find("text").css("fill", "Black");
 });
 
-FeatureQualityMatrix.method("scrollToSearch", function (input){
-    //method name is from before. doesn't actually scroll... hides rows not containing input.
+FeatureQualityMatrix.method("applySearch", function (){
     //You can search multiple strings by seperating them with a space or comma (or both)
-    var searchStrings = input.split(/[,\s]{1,}/g);
-    var iteratedRow = 0;
-    while (iteratedRow <= $("#comparison #tBody tbody").children().length){
-        var found = false;
-        for (var i = 0; i<searchStrings.length; i++){
-            if ($("#comparison #tBody #r" + iteratedRow).text().toLowerCase().indexOf(searchStrings[i].toLowerCase()) != -1)
-                found = true;
-        }
-        if (found)
-            $("#comparison #tBody #r" + iteratedRow).removeClass("searchOmitted");
-        else
-            $("#comparison #tBody #r" + iteratedRow).addClass("searchOmitted");;
-        iteratedRow++;
+
+    var input = $("#search").val();
+    if (input == "")
+    {
+       $("#comparison #tBody tbody tr").each(function() {
+            $(this).removeClass("hiddenBySearch");
+       });
+       return;
     }
-    $('#mdFeatureQualityMatrix .window-content').scroll();
+
+    var searchStrings = input.toLowerCase().split(/[,\s]{1,}/g);
+
+    $("#comparison #tBody tbody tr").each(function() {
+        var $this = $(this);
+        var found = false;
+        $this.find(".texttosearch").each(function(){
+            for (var i = 0; i < searchStrings.length; i++)
+            {
+                if ($(this).html().toLowerCase().indexOf(searchStrings[i]) != -1)
+                {
+                    $this.removeClass("hiddenBySearch");
+                    found = true;
+                    break;
+                }
+            }
+        });
+
+        if (!found)
+            $this.addClass("hiddenBySearch");
+
+    });
 
 });
 
@@ -653,7 +682,7 @@ FeatureQualityMatrix.method("rowSort", function(rowText){
         row = $("#comparison #r" + i);
     }
 
-    this.synchronizeWidths();
+//    this.synchronizeWidths();
 });
 
 FeatureQualityMatrix.method("getInitContent", function()
@@ -664,7 +693,7 @@ FeatureQualityMatrix.method("getInitContent", function()
 FeatureQualityMatrix.method("featureChecked", function (featurePath, state){
     this.filter.filterContent(); // filter after changing the feature status
     this.settings.onFeatureCheckedStateChange(this, featurePath, state);
-    this.synchronizeWidths();
+//    this.synchronizeWidths();
 });
 
 FeatureQualityMatrix.method("removeInstance", function(instanceNum){
@@ -681,3 +710,17 @@ FeatureQualityMatrix.method("onFeatureExpanded", function(featurePath){
     this.filter.openFeature(featurePath);
     this.settings.onFeatureExpanded(this, featurePath);
 });
+
+//saves all selected instances and downloads them to client
+FeatureQualityMatrix.method("saveAll", function(){
+    var instances = this.unparsedInstances;
+    var parser = new InstanceConverter(instances);
+    var data = "";
+    var instanceCount = this.instanceProcessor.getInstanceCount();
+    for (var i = 1; i <= instanceCount; i++){
+        data += parser.getInstanceData(i) + "\n";
+    }
+    $("#saveAllData").val(data);
+    $("#saveAllForm").submit();
+});
+

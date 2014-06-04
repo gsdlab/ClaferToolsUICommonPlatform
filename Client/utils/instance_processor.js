@@ -130,7 +130,7 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, 
 				return results[0];
 		}
 
-		return "{" + results.join(";") + "}";
+		return "{" + results.join("; ") + "}";
 	}
 	catch(e)
 	{

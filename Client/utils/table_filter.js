@@ -32,7 +32,7 @@ function tableFilter(tableid, claferXML, instancesXML, hostModule){
 }
 
 tableFilter.method("onRendered", function(){
-	this.rows = $(this.tableid + " tr");
+	this.rows = $(this.tableid + " tr," + this.tableid + " thead");
 });
 
 tableFilter.method("filterContent", function (){
@@ -71,7 +71,7 @@ tableFilter.method("filterContent", function (){
 	 	}
  	}
 
- 	this.host.scrollToSearch($("#search").val());
+ 	this.host.applySearch();
 });
 
 tableFilter.method("hideInstance", function (position){
@@ -116,7 +116,7 @@ tableFilter.method("closeFeature", function (featurePath){
 	if (this.closedFeatures.indexOf(featurePath) == -1)
 		this.closedFeatures.push(featurePath);
 
-	this.host.scrollToSearch($("#search").val());
+	this.host.applySearch();
 });
 
 tableFilter.method("hideChildren", function (node)
@@ -170,7 +170,7 @@ tableFilter.method("resetFilters", function (filters, permahidden){
  	}
  	this.permahidden = permahidden;
  	//fires to realign headers
- 	this.host.scrollToSearch("");
+ 	this.host.applySearch("");
 });
 
 tableFilter.method("saveFilters", function(){
