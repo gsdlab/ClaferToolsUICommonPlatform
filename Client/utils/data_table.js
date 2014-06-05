@@ -25,11 +25,145 @@ function DataTable ()
     this.matrix = new Array();   // matrix
     this.products = new Array(); // product labels
     this.features = new Array(); // features
-    this.formalContext = new Array(); // formal context table
-    this.EMcontext = new Array();    // Effectively mandatory array
     this.title = "";                 // instance super clafer
-
+    this.instanceShown = 0;
+    this.instanceCount = 0;
 }
+
+DataTable.method("loadFromXML", function(instanceProcessor, abstractClaferTree)
+{
+    this.instanceCount = instanceProcessor.getInstanceCount();
+    if (this.instanceCount > 10)
+    {
+        this.instanceShown = 10;
+    }
+    else
+    {
+        this.instanceShown = this.instanceCount;
+    }
+
+    var parent = null;
+    var current = abstractClaferTree;
+    abstractClaferOutput = new Array();
+
+    this.traverse(current, -1, []);
+    output = abstractClaferOutput;
+    
+    this.title = output[0].displayWithMargins;
+    
+    for (var j = 1; j <= this.instanceShown; j++)
+    {
+        this.products.push(String(j));
+    }
+    
+    for (var i = 1; i < output.length; i++)
+    {
+        var currentMatrixRow = new Array();
+        
+        feature = new Object();
+        feature.title = output[i].displayWithMargins;
+        feature.path = output[i].claferPath.join("-");
+        feature.id = output[i].claferId;
+        feature.type = output[i].type;
+        feature.card = output[i].card;
+        feature.em = null; // null means not effectively mandatory, else it has the common value for all the instances
+
+        var emCheckComplete = false;
+
+        for (var j = 1; j <= this.instanceShown; j++)
+        {
+            sVal = instanceProcessor.getFeatureValue(j, output[i].claferPath, output[i].type);
+            currentMatrixRow.push(sVal);
+
+            /* check for effective mandatory features */
+            if (!emCheckComplete)
+            {
+                if (feature.em === null)
+                {
+                    feature.em = sVal;
+                }
+                else
+                {
+                    if (feature.em !== sVal)
+                    {
+                        feature.em = null;
+                        emCheckComplete = true;
+                    }
+                }
+            }
+        }
+
+        this.features.push(feature);        
+        this.matrix.push(currentMatrixRow);        
+    }
+
+    return this;
+
+});
+
+
+//input: node in clafer tree, level in tree
+//output: object with unique clafer id, id for display and, display id with indentation
+DataTable.method("collector", function(clafer, spaceCount, path)
+{
+    var unit = new Object();
+    unit.claferId = clafer.claferId;
+    unit.displayId = clafer.displayId;
+    unit.claferPath = path.slice(0); // cloning an array
+    clafer.path = unit.claferPath; // NOT GOOD assignmend. TODO: make it better
+    unit.type = clafer.type;
+
+    var cardMin;
+    var cardMax;
+
+    if (clafer.claferCardMin == "-1")
+        cardMin = "*";
+    else
+        cardMin = clafer.claferCardMin;
+
+    if (clafer.claferCardMax == "-1")
+        cardMax = "*";
+    else
+        cardMax = clafer.claferCardMax;
+
+    var card;
+
+    if (cardMin == cardMax)
+        card = cardMin;
+    else card = cardMin + ".." + cardMax;
+    
+    if (card == "0..1")
+        card = "?";
+    else if (card == "1")
+        card = "";
+
+    unit.card = card;
+
+    unit.displayWithMargins = unit.displayId;
+    
+    for (var i = 0; i < spaceCount; i++)
+        unit.displayWithMargins = " " + unit.displayWithMargins;
+
+    abstractClaferOutput.push(unit);
+});
+
+//Traverses clafer tree to and runs collector on every node
+DataTable.method("traverse", function(clafer, level, path)
+{
+    path.push(clafer.claferId);
+    this.collector (clafer, level, path);
+
+    if (clafer.subclafers != null){
+        for (var i = 0; i < clafer.subclafers.length; i++)
+        {
+            this.traverse(clafer.subclafers[i], level + 1, path);
+        }
+    }
+
+    path.pop();
+});
+
+
 
 DataTable.method("subsetByProducts", function(arrayProducts)
 {
@@ -37,11 +171,6 @@ DataTable.method("subsetByProducts", function(arrayProducts)
     
     var marked = new Array();
     var newProducts = new Array;
-    var newFormalContext = new Array();
-    
-    var newFormalContextRow = new Array();
-    
-    newFormalContextRow.push(this.title);
     
     for (var i = 0; i < this.products.length; i++)
     {
@@ -54,26 +183,20 @@ DataTable.method("subsetByProducts", function(arrayProducts)
                 break;
             }
         }
+
         marked.push(found);
         if (found)
         {
             newProducts.push(this.products[i]);
-            newFormalContextRow.push(this.products[i]);
         }
     }
-    
-    newFormalContext.push(newFormalContextRow);
     
     var newMatrix = new Array();
     
     for (var i = 0; i < this.features.length; i++)
     {
         var newMatrixRow = new Array();
-        var newFormalContextRow = new Array();
         var denyAddContextRow = false;
-        
-        if (i < this.formalContext.length)
-            newFormalContextRow.push(this.formalContext[i][0]);
         
         for (var j = 0; j < this.products.length; j++)
         {
@@ -81,18 +204,8 @@ DataTable.method("subsetByProducts", function(arrayProducts)
             {
                 var sVal = this.matrix[i][j];
                 newMatrixRow.push(sVal);
-                
-                if (sVal == "yes")
-                    newFormalContextRow.push("X");
-                else if (sVal == "-")
-                    newFormalContextRow.push("");
-                else
-                    denyAddContextRow = true;
             }
         }
-        
-        if (!denyAddContextRow)
-            newFormalContext.push(newFormalContextRow);
         
         newMatrix.push(newMatrixRow);
     }
@@ -101,9 +214,7 @@ DataTable.method("subsetByProducts", function(arrayProducts)
     result.products = newProducts;    
     result.matrix = newMatrix;
     result.title = this.title;
-    
-    result.formalContext = newFormalContext;
-    
+
     return result;
 });
 
@@ -113,11 +224,6 @@ DataTable.method("subsetByFeatures", function(arrayFeatures)
     
     var marked = new Array();
     var newFeatures = new Array;
-    var newFormalContext = new Array();
-    
-//    var newFormalContextRow = new Array();
-    
-//    newFormalContextRow.push(this.title);
     
     for (var i = 0; i < this.features.length; i++)
     {
@@ -145,27 +251,12 @@ DataTable.method("subsetByFeatures", function(arrayFeatures)
             continue;
     
         var newMatrixRow = new Array();
-        var newFormalContextRow = new Array();
-        var denyAddContextRow = false;
-        
-        if (i < this.formalContext.length)
-            newFormalContextRow.push(this.formalContext[i][0]);
         
         for (var j = 0; j < this.products.length; j++)
         {
             var sVal = this.matrix[i][j];
             newMatrixRow.push(sVal);
-            
-            if (sVal == "yes")
-                newFormalContextRow.push("X");
-            else if (sVal == "-")
-                newFormalContextRow.push("");
-            else
-                denyAddContextRow = true;
         }
-        
-        if (!denyAddContextRow)
-            newFormalContext.push(newFormalContextRow);
         
         newMatrix.push(newMatrixRow);
     }
@@ -174,7 +265,6 @@ DataTable.method("subsetByFeatures", function(arrayFeatures)
     result.products = this.products;    
     result.matrix = newMatrix;
     result.title = this.title;    
-    result.formalContext = newFormalContext;
     
     return result;
 
@@ -295,3 +385,5 @@ DataTable.method("getMissingProductsInCommonData", function(commonData, productL
     
     return result;
 });
+
+

@@ -38,6 +38,8 @@ function FeatureQualityMatrix(host, settings)
 
     this.colWidth = 250;
 
+    this.dataTable = new DataTable();
+// here is where we store our model
     this.host = host;
     this.host.loaded();
 
@@ -83,24 +85,12 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
 //    this.clearFilters();
     this.abstractClaferOutput = "";    
     this.toggled = false;    
-    this.dataTable = this.getDataTable();    
+    this.dataTable.loadFromXML(this.instanceProcessor, this.abstractClaferTree);    
     this.content = $('<div id="comparison" class="comparison"></div>').append(new TableVisualizer().getHTML(this.dataTable, this.colWidth));
     this.currentRow = 1;
 //    this.EMfeatures = [];
 
 });
-
-/*
-FeatureQualityMatrix.method("synchronizeWidths", function()
-{
-    for(var i = 1; i < $("#tHead #r0").children().length - 1; i++)
-    {
-        var width = $("#tBody #td0_" + i).innerWidth() - 6; // 6 = padding-left + padding-right
-        $("#tHead #th0_" + i).width(width);
-        $("#tHead #th0_" + i).css("min-width", width);
-    }
-});
-*/
 
 FeatureQualityMatrix.method("addControlPanel", function()
 {
@@ -118,6 +108,8 @@ FeatureQualityMatrix.method("addControlPanel", function()
     $(panel).append(vl);
 //    $(panel).append('<button id="saveAll">Save all variants</button>');
     $(panel).append('<input type="button" id="saveAll" value="Save all variants">');
+    $(panel).append(vl);
+//    $(panel).append('Shown <span id="instanceshown"></span> out of <span id="instancecount"></span>');
     $(panel).append('<form id="saveAllForm" action="/saveinstances" method="post" enctype="multipart/form-data">' + '<input type="hidden" name="data" id="saveAllData" value=""/>' + '<input type="hidden" name="windowKey" value="' + this.host.key + '"/>' + '</form>');
 
     $("#comparison").prepend(panel);
@@ -154,6 +146,9 @@ FeatureQualityMatrix.method("addControlPanel", function()
     });
 
     $('#saveAll').click(this.saveAll.bind(this)).css("cursor", "pointer");
+
+    $('#instanceshown').html(this.dataTable.instanceShown);
+    $('#instancecount').html(this.dataTable.instanceCount);
 
 });
 
@@ -357,134 +352,6 @@ FeatureQualityMatrix.method("onRendered", function()
 FeatureQualityMatrix.method("getContent", function()
 {
     return this.content;
-});
-
-
-//input: node in clafer tree, level in tree
-//output: object with unique clafer id, id for display and, display id with indentation
-FeatureQualityMatrix.method("collector", function(clafer, spaceCount, path)
-{
-    var unit = new Object();
-    unit.claferId = clafer.claferId;
-    unit.displayId = clafer.displayId;
-    unit.claferPath = path.slice(0); // cloning an array
-    clafer.path = unit.claferPath; // NOT GOOD assignmend. TODO: make it better
-    unit.type = clafer.type;
-
-    var cardMin;
-    var cardMax;
-
-    if (clafer.claferCardMin == "-1")
-        cardMin = "*";
-    else
-        cardMin = clafer.claferCardMin;
-
-    if (clafer.claferCardMax == "-1")
-        cardMax = "*";
-    else
-        cardMax = clafer.claferCardMax;
-
-    var card;
-
-    if (cardMin == cardMax)
-        card = cardMin;
-    else card = cardMin + ".." + cardMax;
-    
-    if (card == "0..1")
-        card = "?";
-    else if (card == "1")
-        card = "";
-
-    unit.card = card;
-
-    unit.displayWithMargins = unit.displayId;
-    
-    for (var i = 0; i < spaceCount; i++)
-        unit.displayWithMargins = " " + unit.displayWithMargins;
-
-    abstractClaferOutput.push(unit);
-});
-
-//Traverses clafer tree to and runs collector on every node
-FeatureQualityMatrix.method("traverse", function(clafer, level, path)
-{
-    path.push(clafer.claferId);
-    this.collector (clafer, level, path);
-
-    if (clafer.subclafers != null){
-        for (var i = 0; i < clafer.subclafers.length; i++)
-        {
-            this.traverse(clafer.subclafers[i], level + 1, path);
-        }
-    }
-
-    path.pop();
-});
-
-//generate data table
-FeatureQualityMatrix.method("getDataTable", function()
-{
-    var instanceCount = this.instanceProcessor.getInstanceCount();
-
-    var parent = null;
-    var current = this.abstractClaferTree;
-    abstractClaferOutput = new Array();
-
-    this.traverse(current, -1, []);
-    output = abstractClaferOutput;
-    
-    var goalNames = this.processor.getGoals();
-    var result = new DataTable();   
-    result.title = output[0].displayWithMargins;
-    
-    for (var j = 1; j <= instanceCount; j++)
-    {
-        result.products.push(String(j));
-    }
-    
-    for (var i = 1; i < output.length; i++)
-    {
-        var currentMatrixRow = new Array();
-        
-        feature = new Object();
-        feature.title = output[i].displayWithMargins;
-        feature.path = output[i].claferPath.join("-");
-        feature.id = output[i].claferId;
-        feature.type = output[i].type;
-        feature.card = output[i].card;
-        feature.em = null; // null means not effectively mandatory, else it has the common value for all the instances
-
-        var emCheckComplete = false;
-
-        for (var j = 1; j <= instanceCount; j++)
-        {
-            sVal = this.instanceProcessor.getFeatureValue(j, output[i].claferPath, output[i].type);
-            currentMatrixRow.push(sVal);
-
-            /* check for effective mandatory features */
-            if (!emCheckComplete)
-            {
-                if (feature.em === null)
-                {
-                    feature.em = sVal;
-                }
-                else
-                {
-                    if (feature.em !== sVal)
-                    {
-                        feature.em = null;
-                        emCheckComplete = true;
-                    }
-                }
-            }
-        }
-
-        result.features.push(feature);        
-        result.matrix.push(currentMatrixRow);        
-    }
-
-    return result;
-
 });
 
 FeatureQualityMatrix.method("clearCachedData", function(row, isOn)
