@@ -22,26 +22,21 @@ SOFTWARE.
 
 function DataTable () 
 {
+    this.clear();
+}
+
+DataTable.method("clear", function(){
     this.matrix = new Array();   // matrix
     this.products = new Array(); // product labels
     this.features = new Array(); // features
     this.title = "";                 // instance super clafer
-    this.instanceShown = 0;
     this.instanceCount = 0;
-}
+});
 
 DataTable.method("loadFromXML", function(instanceProcessor, abstractClaferTree)
 {
+    this.clear();
     this.instanceCount = instanceProcessor.getInstanceCount();
-    if (this.instanceCount > 10)
-    {
-        this.instanceShown = 10;
-    }
-    else
-    {
-        this.instanceShown = this.instanceCount;
-    }
-
     var parent = null;
     var current = abstractClaferTree;
     abstractClaferOutput = new Array();
@@ -51,7 +46,7 @@ DataTable.method("loadFromXML", function(instanceProcessor, abstractClaferTree)
     
     this.title = output[0].displayWithMargins;
     
-    for (var j = 1; j <= this.instanceShown; j++)
+    for (var j = 1; j <= this.instanceCount; j++)
     {
         this.products.push(String(j));
     }
@@ -70,7 +65,7 @@ DataTable.method("loadFromXML", function(instanceProcessor, abstractClaferTree)
 
         var emCheckComplete = false;
 
-        for (var j = 1; j <= this.instanceShown; j++)
+        for (var j = 1; j <= this.instanceCount; j++)
         {
             sVal = instanceProcessor.getFeatureValue(j, output[i].claferPath, output[i].type);
             currentMatrixRow.push(sVal);

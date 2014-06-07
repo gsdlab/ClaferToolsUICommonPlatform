@@ -54,6 +54,7 @@ FeatureQualityMatrix.method("resize", function() // not attached to the window a
 
 FeatureQualityMatrix.method("onDataLoaded", function(data){
 
+    console.log("fqm: onDataLoaded enter");
     this.unparsedInstances = data.unparsedInstances;
 
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
@@ -61,6 +62,8 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
 
     this.abstractClaferTree = null;
     var instanceCount = this.instanceProcessor.getInstanceCount();
+
+    console.log("fqm: onDataLoaded middle");
 
     if (instanceCount == 0) // instance data contains no instances
     {
@@ -88,6 +91,7 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
     this.dataTable.loadFromXML(this.instanceProcessor, this.abstractClaferTree);    
     this.content = $('<div id="comparison" class="comparison"></div>').append(new TableVisualizer().getHTML(this.dataTable, this.colWidth));
     this.currentRow = 1;
+    console.log("fqm: onDataLoaded end");
 //    this.EMfeatures = [];
 
 });

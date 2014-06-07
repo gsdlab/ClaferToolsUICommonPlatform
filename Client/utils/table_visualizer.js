@@ -125,7 +125,11 @@ TableVisualizer.method("mapValue", function(feature, sVal, type)
 
 TableVisualizer.method("getHTML", function(data, colWidth) 
 {
-	var instanceCount = data.products.length;    
+	var instanceCount = data.products.length;
+
+	if (instanceCount >= 30)
+		instanceCount = 30;
+
 	var table = $('<table id="tBody" width="100%" cellspacing="0" cellspadding="0"></table>').addClass('foo');
 	var body = $('<tbody></tbody>');
 
