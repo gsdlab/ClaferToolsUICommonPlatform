@@ -20,80 +20,101 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-function DataTable () 
+function DataTable (dataSource) 
 {
     this.clear();
+    if (dataSource)
+        this.loadFromDataSource(dataSource);
 }
 
 DataTable.method("clear", function(){
-    this.matrix = new Array();   // matrix
-    this.products = new Array(); // product labels
-    this.features = new Array(); // features
-    this.title = "";                 // instance super clafer
+    this.matrix = new Array();   // the matrix in the form [{'clafer1' : value11, 'clafer2' : value12, ...}, {'clafer1' : value21, 'clafer2' : value22},]
+    this.instanceIds = new Array(); // instance ids
+    this.fields = new Array(); // fields (features and quality attributes)
+    this.title = "";
+    this.objectives = null;
+    this.fieldsWithChildren = null;
     this.instanceCount = 0;
 });
 
-DataTable.method("loadFromXML", function(instanceProcessor, abstractClaferTree)
+DataTable.method("loadFromDataSource", function(ds)
 {
-    this.clear();
-    this.instanceCount = instanceProcessor.getInstanceCount();
-    var parent = null;
-    var current = abstractClaferTree;
-    abstractClaferOutput = new Array();
+    this.instanceProcessor = new InstanceProcessor(ds.instancesXML);
+    this.claferProcessor = new ClaferProcessor(ds.claferXML);
+    this.abstractClaferTree = this.claferProcessor.getTopClaferTree('root');
 
-    this.traverse(current, -1, []);
-    output = abstractClaferOutput;
+    this.objectives = this.claferProcessor.getGoals();
+    this.fieldsWithChildren = this.claferProcessor.getFeaturesWithChildren(this.abstractClaferTree);
+
+    this.loadFromXMLDataSource(this.instanceProcessor, this.abstractClaferTree);
+});
+
+DataTable.method("loadFromXMLDataSource", function()
+{
+    this.instanceCount = this.instanceProcessor.getInstanceCount();
+
+    this.abstractClaferOutput = new Array();
+    var current = this.abstractClaferTree;
+    this.traverse(current, -1, []); // traversing the xml to get the clafer model tree
+    output = this.abstractClaferOutput;
     
-    this.title = output[0].displayWithMargins;
+//    this.title = output[0].displayWithMargins;
+    this.title = "Model \\ Variants";
     
     for (var j = 1; j <= this.instanceCount; j++)
     {
-        this.products.push(String(j));
+        this.instanceIds.push(String(j));
     }
     
+    var emCheckComplete = new Array();
+
     for (var i = 1; i < output.length; i++)
     {
-        var currentMatrixRow = new Array();
-        
-        feature = new Object();
-        feature.title = output[i].displayWithMargins;
-        feature.path = output[i].claferPath.join("-");
-        feature.id = output[i].claferId;
-        feature.type = output[i].type;
-        feature.card = output[i].card;
-        feature.em = null; // null means not effectively mandatory, else it has the common value for all the instances
+        var field = new Object();
+        field.title = output[i].displayWithMargins;
+        field.pathAsArray = output[i].claferPath;
+        field.path = output[i].claferPath.join("-");
+        field.id = output[i].claferId;
+        field.type = output[i].type;
+        field.card = output[i].card;
+        field.em = null; // null means not effectively mandatory, else it has the common value for all the instances
 
-        var emCheckComplete = false;
+        emCheckComplete.push(false);
+ 
+        this.fields.push(field);      
+    }
 
-        for (var j = 1; j <= this.instanceCount; j++)
+    for (var i = 1; i <= this.instanceCount; i++)
+    {
+        var currentMatrixRow = new Object();      
+        currentMatrixRow["id"] = i;
+
+        for (var j = 0; j < this.fields.length; j++)
         {
-            sVal = instanceProcessor.getFeatureValue(j, output[i].claferPath, output[i].type);
-            currentMatrixRow.push(sVal);
+            sVal = this.instanceProcessor.getFieldValue(i, this.fields[j].pathAsArray, this.fields[j].type);
+            currentMatrixRow[this.fields[j].path] = sVal;
 
-            /* check for effective mandatory features */
-            if (!emCheckComplete)
+            /* check for effective mandatory fields */
+            if (!emCheckComplete[j])
             {
-                if (feature.em === null)
+                if (this.fields[j].em === null)
                 {
-                    feature.em = sVal;
+                    this.fields[j].em = sVal;
                 }
                 else
                 {
-                    if (feature.em !== sVal)
+                    if (this.fields[j].em !== sVal)
                     {
-                        feature.em = null;
-                        emCheckComplete = true;
+                        this.fields[j].em = null;
+                        emCheckComplete[j] = true;
                     }
                 }
             }
         }
 
-        this.features.push(feature);        
         this.matrix.push(currentMatrixRow);        
+
     }
-
-    return this;
-
 });
 
 
@@ -139,7 +160,7 @@ DataTable.method("collector", function(clafer, spaceCount, path)
     for (var i = 0; i < spaceCount; i++)
         unit.displayWithMargins = " " + unit.displayWithMargins;
 
-    abstractClaferOutput.push(unit);
+    this.abstractClaferOutput.push(unit);
 });
 
 //Traverses clafer tree to and runs collector on every node
@@ -158,61 +179,22 @@ DataTable.method("traverse", function(clafer, level, path)
     path.pop();
 });
 
-
-
-DataTable.method("subsetByProducts", function(arrayProducts)
+DataTable.method("subsetByInstanceIds", function(requiredInstanceIds)
 {
-    var result = new DataTable();
-    
-    var marked = new Array();
-    var newProducts = new Array;
-    
-    for (var i = 0; i < this.products.length; i++)
-    {
-        var found = false;
-        for (var j = 0; j < arrayProducts.length; j++)
-        {
-            if (arrayProducts[j] == this.products[i])
-            {
-                found = true;
-                break;
-            }
-        }
-
-        marked.push(found);
-        if (found)
-        {
-            newProducts.push(this.products[i]);
-        }
-    }
-    
-    var newMatrix = new Array();
-    
-    for (var i = 0; i < this.features.length; i++)
-    {
-        var newMatrixRow = new Array();
-        var denyAddContextRow = false;
-        
-        for (var j = 0; j < this.products.length; j++)
-        {
-            if (marked[j])
-            {
-                var sVal = this.matrix[i][j];
-                newMatrixRow.push(sVal);
-            }
-        }
-        
-        newMatrix.push(newMatrixRow);
-    }
-    
-    result.features = this.features;
-    result.products = newProducts;    
-    result.matrix = newMatrix;
+    var result = new DataTable();        
+    result.fields = this.fields;
+    result.fieldsWithChildren = this.fieldsWithChildren;
+    result.instanceIds = requiredInstanceIds;  
+    result.instanceCount = requiredInstanceIds.length;  
+    result.matrix = this.matrix.filter(function(p, i){
+        return (requiredInstanceIds.indexOf(p.id) >= 0); 
+    });
     result.title = this.title;
+    result.objectives = this.objectives;
 
     return result;
 });
-
+/*
 DataTable.method("subsetByFeatures", function(arrayFeatures)
 {
     var result = new DataTable();
@@ -247,7 +229,7 @@ DataTable.method("subsetByFeatures", function(arrayFeatures)
     
         var newMatrixRow = new Array();
         
-        for (var j = 0; j < this.products.length; j++)
+        for (var j = 0; j < this.instanceIds.length; j++)
         {
             var sVal = this.matrix[i][j];
             newMatrixRow.push(sVal);
@@ -257,81 +239,86 @@ DataTable.method("subsetByFeatures", function(arrayFeatures)
     }
     
     result.features = newFeatures;
-    result.products = this.products;    
+    result.instanceIds = this.instanceIds;    
     result.matrix = newMatrix;
     result.title = this.title;    
     
     return result;
 
 });
+*/
 
-DataTable.method("makeAggregatedFeature", function(s)
+/* Produces a "common" datatable with a single instance - containing only common values for every feature */
+/* and a "difference" datatable with a single instance - containing only common values for every feature */
+
+DataTable.method("getCommonAndDifferent", function()
 {
-    return s + " (mean)";
-});
+    var result = new Object();
+    result["common"] = new DataTable();
+    result["common"].title = "Commonalities";
+    result["common"].instanceIds.push("Common Value");
+    result["common"].instanceCount = 1;
+    result["common"].fieldsWithChildren = this.fieldsWithChildren;
+    result["common"].objectives = this.objectives;
 
+    result["diff"] = new DataTable();
+    result["diff"].title = "Differences";
+    result["diff"].instanceIds = this.instanceIds;
+    result["diff"].instanceCount = this.instanceCount;
+    result["diff"].fieldsWithChildren = this.fieldsWithChildren;
+    result["diff"].objectives = this.objectives;
 
-DataTable.method("getCommon", function(needAggregate)
-{
-    var result = new DataTable();
-
-    if (this.products.length <= 1)
-        return result; // the task is not meaningful
-
-    result.title = "Commonalities";
-    var jointProductName = "Value";
-    result.products.push(jointProductName);
+    var jointInstance = {};
+    jointInstance["id"] = "Common Value";
     
-    for (var i = 0; i < this.features.length; i++)
+    for (var i = 0; i < this.fields.length; i++)
     {
+        var field = this.fields[i];
         var same = true;
-        var pivot = this.matrix[i][0];
-        var isNumber = isNumeric(pivot) && needAggregate;
-        
-        
-        var aggregator;
-        
-        if (isNumber)
-        {
-            aggregator = 0;
-        }
-        
-        for (var j = 0; j < this.products.length; j++)
-        {
-            if (isNumber)
-                aggregator += parseInt(this.matrix[i][j]);
+        var pivot = null;
                 
-            if (this.matrix[i][j] != pivot)
+        for (var j = 0; j < this.instanceCount; j++)
+        {
+            if (!pivot)
             {
-                same = false;
-                if (!isNumber)
+                pivot = this.matrix[j][field.path];
+            }
+            else
+            {
+                if (this.matrix[j][field.path] != pivot)
+                {
+                    same = false;
                     break;
+                }
             }
         }
         
         if (same)
         {
-            result.features.push(this.features[i]);
-            var tempAr = new Array();
-            tempAr.push(pivot);
-            result.matrix.push(tempAr);
+            result["common"].fields.push(field);
+            jointInstance[field.path] = pivot;
         }
         else
         {
-            if (isNumber)
-            {/*
-                aggregator = aggregator / this.products.length;
-                result.features.push(this.makeAggregatedFeature(this.features[i]));
-                var tempAr = new Array();
-                tempAr.push(Math.round(aggregator * 100) / 100);
-                result.matrix.push(tempAr);*/
-            }   
+            result["diff"].fields.push(field);
         }
+    }
+
+    result["common"].matrix.push(jointInstance);
+
+    for (var i = 0; i < this.instanceCount; i++)
+    {
+        var row = {"id" : this.matrix[i]["id"]};
+        for (var j = 0; j < result["diff"].fields.length; j++)
+        {
+            row[result["diff"].fields[j].path] = this.matrix[i][result["diff"].fields[j].path];
+        }
+        result["diff"].matrix.push(row);
     }
 
     return result;
 });
-
+/*
 DataTable.method("getMissingProductsInCommonData", function(commonData, productList)
 {
     var commonProducts = new Array();
@@ -380,5 +367,4 @@ DataTable.method("getMissingProductsInCommonData", function(commonData, productL
     
     return result;
 });
-
-
+*/

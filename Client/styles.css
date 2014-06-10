@@ -28,46 +28,9 @@ textarea.child {height:100%;}
     height: 22px;
 }
 
-.comparison table td, .comparison table th{
-    border-left: 1px solid #ccc;
-    border-right: 1px solid #ccc;
-    white-space: nowrap;
-}
-
-.comparison table #r0{
-    background: #eee;
-    padding:2px;
-}
-
-.comparison table td{
-    border-bottom: 1px solid #ccc;
-}
-
-img.tick{
-    width:14px;
-    height:14px;
-    margin:0;
-}
-
 #graph_table{
   table-layout:fixed;
   border-spacing:0px;
-}
-
-img.no{
-    width:14px;
-    height:14px;
-    margin:0;
-}
-
-th{
-    text-align:center;
-}
-
-th.td_abstract{
-    text-align:left;
-    padding-top:3px;
-    padding-bottom:3px;
 }
 
 .axis_drop div{
@@ -82,45 +45,9 @@ th.td_abstract{
     overflow:visible;
 }
 
-td.numeric
-{
-/*  color: #222;*/
-}
-
-td.tick, td.no
-{
-    text-align:left;
-}
-
-
-
-
-
-.help{
-    z-index: 10000;
-    position: absolute;
-    background: white;
-    width: 700px;
-    height: 450px;
-    color: #000000;
-    border: 1px solid #777;
-}
-
-.fadeOverlay{
-    z-index: 9000;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    background: #FFFFFF;
-    opacity: 0.5;
-    top: 0;
-    left: 0;
-}
-
 .window-helpButton.active{
     background: url("images/help_hover.png");
 }
-
 
 .window-helpButton {
     background: url("images/help.png");
@@ -139,71 +66,6 @@ td.tick, td.no
      -moz-box-sizing: border-box;
 }
 
-.td_abstract .typelabel{
-    float: right;
-    display: inline-block;
-    width: 16px;
-    height:16px;
-}
-
-.td_abstract .int{
-    background: url("images/types/int.png");
-}
-
-.td_abstract .clafer{
-}
-
-.td_abstract .bool{
-}
-
-.td_abstract .filter_normal{
-    background: url("images/types/bool_normal.png");
-}
-
-.td_abstract .filter_checked{
-    background: url("images/types/bool_checked.png");
-}
-
-.td_abstract .filter_unchecked{
-    background: url("images/types/bool_unchecked.png");
-}
-
-.emabstract .filter_checked{
-    background: url("images/types/bool_always_checked.png");
-}
-
-.emabstract .filter_unchecked{
-    background: url("images/types/bool_always_unchecked.png");
-}
-
-.emabstract .int{
-    background: url("images/types/int_always_same.png");
-}
-
-.td_instance{
-    padding:3px;
-}
-
-.td_abstract{
-    padding-top:3px;
-    padding-bottom:3px;
-}
-
-.em{
-    background-color: #ebebeb;
-}
-
-.emvalue{
-    color: #bbb;
-}
-
-tr.hiddenBySearch{
-    display:none;
-}
-
-.comparison table th{
-    border: 1px solid #ccc;
-}
 
 .verticalLine {
     display: inline-block;
@@ -211,4 +73,123 @@ tr.hiddenBySearch{
     border-left: 1px solid #ccc;
     margin-left:5px;
     margin-right:3px;
+}
+
+/* New Matrix */
+
+.comparison table th{
+    border: 1px solid #ccc;
+}
+
+.comparison table td, .comparison table th{
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    white-space: nowrap;
+}
+
+.comparison table #r0{
+    background: #eee;
+    padding:2px;
+}
+
+.comparison table td{
+    border-bottom: 1px solid #ccc;
+}
+
+.comparison th.field-row{
+    text-align:left;
+    padding-top:3px;
+    padding-bottom:3px;
+}
+
+.comparison td.numeric
+{
+/*  color: #222;*/
+}
+
+.comparison td.tick, td.no
+{
+    text-align:left;
+}
+
+.comparison .field-row .typelabel{
+    float: right;
+    display: inline-block;
+    width: 16px;
+    height:16px;
+}
+
+.comparison .field-row .int{
+    background: url("images/types/int.png");
+}
+
+.comparison .field-row .clafer{
+}
+
+.comparison .field-row .bool{
+}
+
+.comparison .field-row .filter_normal{
+    background: url("images/types/bool_normal.png");
+}
+
+.comparison .field-row .filter_checked{
+    background: url("images/types/bool_checked.png");
+}
+
+.comparison .field-row .filter_unchecked{
+    background: url("images/types/bool_unchecked.png");
+}
+
+.comparison .emabstract .filter_checked{
+    background: url("images/types/bool_always_checked.png");
+}
+
+.comparison .emabstract .filter_unchecked{
+    background: url("images/types/bool_always_unchecked.png");
+}
+
+.comparison .emabstract .int{
+    background: url("images/types/int_always_same.png");
+}
+
+.comparison .content-cell{
+    padding:3px;
+}
+
+.comparison .field-row{
+    padding-top:3px;
+    padding-bottom:3px;
+}
+
+.comparison .em{
+    background-color: #ebebeb;
+}
+
+.comparison .emvalue{
+    color: #bbb;
+}
+
+.comparison tr.hiddenBySearch{
+    display:none;
+}
+
+.comparison img.tick{
+    width:14px;
+    height:14px;
+    margin:0;
+}
+
+.comparison img.no{
+    width:14px;
+    height:14px;
+    margin:0;
+}
+
+.comparison th{
+    text-align:center;
+}
+
+.comparison th.selected{
+    color:red;
 }

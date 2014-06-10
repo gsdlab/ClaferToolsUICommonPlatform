@@ -60,7 +60,7 @@ InstanceProcessor.method("makeXMLPath", function(pathArray)
 // returns feature value of featureName feature of an instance number instanceIndex
 // forceNumeric forces to return an integer
 
-InstanceProcessor.method("getFeatureValue", function(instanceIndex, claferPath, type) 
+InstanceProcessor.method("getFieldValue", function(instanceIndex, claferPath, type) 
 {
 	try
 	{

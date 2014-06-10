@@ -38,7 +38,7 @@ function FeatureQualityMatrix(host, settings)
 
     this.colWidth = 250;
 
-    this.dataTable = new DataTable();
+//    this.dataTable = new DataTable();
 // here is where we store our model
     this.host = host;
     this.host.loaded();
@@ -57,42 +57,16 @@ FeatureQualityMatrix.method("onDataLoaded", function(data){
     console.log("fqm: onDataLoaded enter");
     this.unparsedInstances = data.unparsedInstances;
 
-    this.instanceProcessor = new InstanceProcessor(data.instancesXML);
-    this.processor = new ClaferProcessor(data.claferXML);
-
-    this.abstractClaferTree = null;
-    var instanceCount = this.instanceProcessor.getInstanceCount();
+    this.data = data;
+    var instanceCount = this.data.instanceCount;
 
     console.log("fqm: onDataLoaded middle");
 
-    if (instanceCount == 0) // instance data contains no instances
-    {
-        if (this.lastAbstractClaferTree)
-        {
-            this.abstractClaferTree = this.lastAbstractClaferTree;
-        }
-        else
-        {
-            return; // else we cannot do anything         
-        }
-    }
-    else
-    {
-        var instanceName = 'root';
-//        alert(instanceName);
-        this.abstractClaferTree = this.processor.getTopClaferTree(instanceName);
-        this.lastAbstractClaferTree = this.abstractClaferTree;
-    }
-    
-    this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this);    
+//    this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this);    
 //    this.clearFilters();
-    this.abstractClaferOutput = "";    
     this.toggled = false;    
-    this.dataTable.loadFromXML(this.instanceProcessor, this.abstractClaferTree);    
-    this.content = $('<div id="comparison" class="comparison"></div>').append(new TableVisualizer().getHTML(this.dataTable, this.colWidth));
     this.currentRow = 1;
     console.log("fqm: onDataLoaded end");
-//    this.EMfeatures = [];
 
 });
 
@@ -116,7 +90,7 @@ FeatureQualityMatrix.method("addControlPanel", function()
 //    $(panel).append('Shown <span id="instanceshown"></span> out of <span id="instancecount"></span>');
     $(panel).append('<form id="saveAllForm" action="/saveinstances" method="post" enctype="multipart/form-data">' + '<input type="hidden" name="data" id="saveAllData" value=""/>' + '<input type="hidden" name="windowKey" value="' + this.host.key + '"/>' + '</form>');
 
-    $("#comparison").prepend(panel);
+    $("#table").prepend(panel);
 
 
     $('#toggle_link').html("Distinct");
@@ -151,196 +125,53 @@ FeatureQualityMatrix.method("addControlPanel", function()
 
     $('#saveAll').click(this.saveAll.bind(this)).css("cursor", "pointer");
 
-    $('#instanceshown').html(this.dataTable.instanceShown);
-    $('#instancecount').html(this.dataTable.instanceCount);
+    $('#instanceshown').html(this.data.instanceShown);
+    $('#instancecount').html(this.data.instanceCount);
 
 });
 
 FeatureQualityMatrix.method("onRendered", function()
 {
-    if (!this.filter)
-        return;
-    
-    this.filter.onRendered();
+    this.tableVisualizer = new TableVisualizer("table", {
+        sorting: true,
+        filtering: true,
+        buttonsForRemoval: true,
+        selectable: true,
+        collapsing: true
+    }, {
+        "onFeatureChecked": function(){
+            alert("checked!");
+        },
+        "onSorted": function()
+        {
+            alert("sorted!");
+        },
+        "onExpanded": function(){
+            alert("expanded!");
+        },
+        "onCollapsed": function(){
+            alert("collapsed!");
+        },
+        "onSelected": function(){
+            alert("selected!");
+        },
+        "onDeselected": function(){
+            alert("deselected!");
+        },
+
+    });
+
+    this.tableVisualizer.refresh(this.data);    
+
     this.addControlPanel();
 
-    if (this.settings.buttonsForRemoval)
-    {
-    //  Add remove buttons to instances
-        var instances = $("#comparison #r0").find(".td_instance");
-        for (i=0; i<$(instances).length; i++){
-            $(instances[i]).prepend('<image id="rem' + $(instances[i]).text() + '" src="commons/Client/images/remove.png" alt="remove">')
-            var buttonId = "#rem" + $(instances[i]).text();
-            $(buttonId).attr("name", $(instances[i]).text());
-            $(buttonId).click(function(event){
-                that.removeInstance($(this).attr("name"));
-                event.stopPropagation();
-            });
-            $(buttonId).css("float", "left");
-            $(buttonId).css("vertical-align", "middle");
-            $(buttonId).css("cursor", "pointer");
-            
-            $(buttonId).hover(
-            function () {
-                $(this).attr("src", "/commons/Client/images/removeMouseOver.png");
-            }, 
-            function () {
-                $(this).attr("src", "/commons/Client/images/remove.png");
-            });
-        }
-    }
-
-// Add tristate checkboxes for filtering features
-    i = 1;
-    row = $("#r" + i);    
-        
-    var that = this;
-    while (row.length != 0){
-        // setting the default filtering status to each row - none
-        if (row.hasClass("bool") || row.hasClass("boolclafer"))
-        {
-            $(row).attr("FilterStatus", "none");
-
-            var emValue = $(row).find(".emvalue");
-            if (emValue.length > 0) // is effectively  mandatory
-            {
-                if ($(emValue).text().indexOf("yes") >= 0)
-                {
-                    $("#r" + i + " .td_abstract .typelabel").addClass("filter_checked");
-                }
-                else
-                {
-                    $("#r" + i + " .td_abstract .typelabel").addClass("filter_unchecked");
-                }                    
-            }
-            else
-            {
-                $("#r" + i + " .td_abstract .typelabel").addClass("filter_normal");
-
-                $("#r" + i + " .td_abstract .typelabel").click(function()
-                {
-                    if ($(this).parent().parent().attr("FilterStatus") == "none"){
-                        $(this).removeClass("filter_normal");
-                        $(this).removeClass("filter_unchecked");
-                        $(this).addClass("filter_checked");
-                        $(this).parent().parent().attr("FilterStatus", "require");
-                        that.featureChecked($(this).parent().find(".path").text(), 1);
-                    } else if ($(this).parent().parent().attr("FilterStatus") == "require"){
-                        $(this).removeClass("filter_normal");
-                        $(this).addClass("filter_unchecked");
-                        $(this).removeClass("filter_checked");
-                        $(this).parent().parent().attr("FilterStatus", "exclude");
-                        that.featureChecked($(this).parent().find(".path").text(), -1);
-                    } else {
-                        $(this).addClass("filter_normal");
-                        $(this).removeClass("filter_unchecked");
-                        $(this).removeClass("filter_checked");
-                        $(this).parent().parent().attr("FilterStatus", "none");
-                        that.featureChecked($(this).parent().find(".path").text(), 0);                    
-                    }
-                }).css("cursor", "pointer");
-            }            
-        }
-        i++;
-        row = $("#r" + i);
-    }
-    //  Add collapse buttons for features with children
-
-    var hasChild = this.processor.getFeaturesWithChildren(this.abstractClaferTree);
-    i = 1;
-    row = $("#r" + i);
-    var that = this;
-    while (row.length != 0){
-
-//        adding tooltips
-
-        $("#r" + i + " .td_abstract").tipsy({fade: true, gravity: 'w', html: true});
-        $("#r" + i + " .td_instance").tipsy({fade: true, gravity: 's', html: true});
-
-//  Add sorting to quality attributes
-        if (row.hasClass("int")) {
-            $("#r" + i + " .td_abstract").append('<div id=sortText style="display:inline"></div>');
-            $("#r" + i + " .td_abstract").addClass('noSort');
-            $("#r" + i + " .td_abstract").click(function(){
-                if($(this).hasClass("sortAsc")){
-                    $(this).toggleClass("sortAsc sortDesc");
-                    $(this).find("#sortText").html("&nbsp;\u25B6");
-                } else if ($(this).hasClass("sortDesc")){
-                    $(this).toggleClass("sortDesc sortAsc");
-                    $(this).find("#sortText").html("&nbsp;\u25C0");
-                } else if ($(this).hasClass("noSort")){
-                    $(this).toggleClass("noSort sortAsc");
-                    $(this).find("#sortText").html("&nbsp;\u25C0");
-                }
-                that.rowSort($(this).text());
-            }).css("cursor", "pointer");
-        }
-        else 
-        { 
-            // collapse / expand features
-
-            var feature = $($("#r" + i + " .td_abstract").find(".id")).text();
-
-            if (hasChild.indexOf(feature) != -1){
-                $("#r" + i + " .td_abstract").append('<text id="r' + i + 'collapse" status="false">&nbsp;\u21B4<text>')
-                $("#r" + i + "collapse").click(function(){
-                    if ($(this).attr("status") === "false")
-                    {
-                        that.onFeatureCollapsed($($($(this).parent()).find(".path")).text());
-                        $(this).attr("status", "true");
-                        $(this).html("&nbsp;\u2192");
-                    } else {
-                        that.onFeatureExpanded($($($(this).parent()).find(".path")).text());
-                        $(this).attr("status", "false");
-                        $(this).html("&nbsp;\u21B4");
-                    }
-                }).css("cursor", "pointer");
-            }
-        }        
-            
-        i++;
-        row = $("#r" + i);
-    }
-
-//  Add sorting by instance names (default), the top row
-
-    $("#r" + 0 + " .td_abstract").append('<div id=sortText style="display:inline">&nbsp;\u25C0</div>');
-    $("#r" + 0 + " .td_abstract").addClass('sortAsc');
-    $("#r" + 0 + " .td_abstract").click(function(){
-        if($(this).hasClass("sortAsc")){
-            $(this).toggleClass("sortAsc sortDesc");
-            $(this).find("#sortText").html("&nbsp;\u25B6");
-        } else if ($(this).hasClass("sortDesc")){
-            $(this).toggleClass("sortDesc sortAsc");
-            $(this).find("#sortText").html("&nbsp;\u25C0");
-        } else if ($(this).hasClass("noSort")){
-            $(this).toggleClass("noSort sortAsc");
-            $(this).find("#sortText").html("&nbsp;\u25C0");
-        }
-        that.rowSort($(this).text());
-    }).css("cursor", "pointer");
-// Selection of instances for analysis from top row of table
-
-    if (this.settings.instancesSelectable) // can select instances
-    {
-        var length = $("#r0").find(".td_instance").length;
-        for(i=1; i<=length; i++){
-            $("#th0_" + i).click(function(){
-                var pid = getPID($(this).attr('id').substring(4))
-                var locationInArray = $.inArray(pid, that.settings.getSelection(that));
-                if (locationInArray == -1)
-                    that.settings.onSelected(that,pid);
-                else
-                    that.settings.onDeselected(that,pid);
-            }).css("cursor", "pointer");
-        }
-    }
+    $(".field-item").tipsy({fade: true, gravity: 'w', html: true});
+    $(".content-cell").tipsy({fade: true, gravity: 's', html: true});
 
 //    this.filter.resetFilters(this.SavedFilters, this.permahidden);
 
     //fire the scroll handler to align table after half a second (fixes chrome bug)
-//    setTimeout(function(){$('#mdFeatureQualityMatrix .window-content').scroll()},500);
-
+/*
     this.filter.filterContent();
     if ($("#tBody").length > 0)
         $("#tBody").colResizable();
@@ -350,12 +181,13 @@ FeatureQualityMatrix.method("onRendered", function()
     var h3 = $("#mdFeatureQualityMatrix .window-titleBar").outerHeight();
 
     $.resizeWindow(this.id, this.width, h1 + h2 + h3); // resize the table to fit everything
-    
+*/    
 });
 
 FeatureQualityMatrix.method("getContent", function()
 {
-    return this.content;
+    return '<div id="table" class="comparison"></div>';
+//    return this.content;
 });
 
 FeatureQualityMatrix.method("clearCachedData", function(row, isOn)
@@ -380,34 +212,30 @@ FeatureQualityMatrix.method("toggleRow", function(row, isOn)
   between transparent and opaque*/
 FeatureQualityMatrix.method("toggleDistinct", function()
 {
+    var context = this;
     this.toggled = !this.toggled;
     if (!this.toggled)
     {
-        var table = $("#comparison table");
         $("#toggle_link").html("Distinct");
-        
-        var rows = table.find("tr");
+
+        var tableBody = $("#table table tBody");        
+        var rows = tableBody.children();
         for (var i = 0; i < rows.length; i++)
         {
-            this.toggleRow(rows[i], true);
+            context.toggleRow(rows[i], true);
         }
     }
     else
     {
         $("#toggle_link").html("Normal");
 
-        var table = $("#comparison");
+        var tableBody = $("#table table tBody");
         
-        var row = table.find("#r1");
-        var i = 1;
-        while (row.length != 0)
-        {
-            var instanceTds = row.find(".td_instance");
+        tableBody.children().each(function(e){
+            var row = $(this);
+            var instanceTds = row.children(".content-cell");
 
             var allAreTheSame = true;
-
-            if (instanceTds.length == 0)
-                continue;
 
             var first = null;
 
@@ -438,12 +266,10 @@ FeatureQualityMatrix.method("toggleDistinct", function()
 //  toggles based on outcome of loop
             if (allAreTheSame)
             {
-                this.toggleRow(row, false);
+                context.toggleRow(row, false);
             }
             
-            i++;
-            row = table.find("#r" + i);
-        }
+        });
     }
 //  since the table height has potentially changed we call this to realign the headers. 
     this.applySearch();
@@ -466,7 +292,7 @@ FeatureQualityMatrix.method("applySearch", function (){
     var input = $("#search").val();
     if (input == "")
     {
-       $("#comparison #tBody tbody tr").each(function() {
+       $("#table tbody tr").each(function() {
             $(this).removeClass("hiddenBySearch");
        });
        return;
@@ -474,7 +300,7 @@ FeatureQualityMatrix.method("applySearch", function (){
 
     var searchStrings = input.toLowerCase().split(/[,\s]{1,}/g);
 
-    $("#comparison #tBody tbody tr").each(function() {
+    $("#table tbody tr").each(function() {
         var $this = $(this);
         var found = false;
         $this.find(".texttosearch").each(function(){
@@ -500,7 +326,7 @@ FeatureQualityMatrix.method("applySearch", function (){
 // gets passed the text of the row clicked
 FeatureQualityMatrix.method("rowSort", function(rowText){
     var i=0;
-    var row = $("#comparison #r" + i);
+    var row = $("#table #r" + i);
     while (row.length != 0){
         //finds the correct row
         if (row.find(".numeric").length != 0 || i==0){
@@ -531,14 +357,14 @@ FeatureQualityMatrix.method("rowSort", function(rowText){
                     current = sortableArray.pop().instance;
                     current = current.replace(/[^_]{1,}/, "");
                     //headers
-                    $("#comparison #th0" + current).appendTo("#comparison #r0");
+                    $("#table #th0" + current).appendTo("#table #r0");
                     //body
                     j = 1;
-                    row = $("#comparison #r" + j);
+                    row = $("#table #r" + j);
                     while (row.length != 0){
-                        $("#comparison #td" + (j-1) + current).appendTo(row);
+                        $("#table #td" + (j-1) + current).appendTo(row);
                         j++;
-                        row = $("#comparison #r" + j);
+                        row = $("#table #r" + j);
                     }
 
                 }
@@ -550,7 +376,7 @@ FeatureQualityMatrix.method("rowSort", function(rowText){
             }
         }
         i++;
-        row = $("#comparison #r" + i);
+        row = $("#table #r" + i);
     }
 
 //    this.synchronizeWidths();
