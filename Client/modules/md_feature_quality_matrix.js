@@ -95,7 +95,6 @@ FeatureQualityMatrix.method("addControlPanel", function()
 
     $('#toggle_link').html("Distinct");
     $('#toggle_link').click(function(event){
-        event.stopPropagation();  //to keep table from sorting by instance number
         context.toggleDistinct();
     }).css("cursor", "pointer");
 
@@ -103,7 +102,7 @@ FeatureQualityMatrix.method("addControlPanel", function()
 
     $('#filter_reset').html("Reset filters");
     $('#filter_reset').click(function(event){
-        event.stopPropagation(); //to keep table from sorting by instance number
+/*
         context.filter.cleanFilters();
         context.filter.filterContent();
         context.settings.onReset(context);
@@ -112,6 +111,7 @@ FeatureQualityMatrix.method("addControlPanel", function()
             this.toggleDistinct(); //one to turn off distinct
             this.toggleDistinct(); //one to reapply it
         }
+*/
     }).css("cursor", "pointer");
 
 // add handler to search bar
@@ -132,31 +132,29 @@ FeatureQualityMatrix.method("addControlPanel", function()
 
 FeatureQualityMatrix.method("onRendered", function()
 {
+    var context = this;
+
     this.tableVisualizer = new TableVisualizer("table", {
         sorting: true,
         filtering: true,
         selectable: true,
         collapsing: true
     }, {
-        "onFeatureChecked": function(){
-            alert("checked!");
+        "onFeatureChecked": function(f, value){
+            context.settings.onFeatureCheckedStateChange(context, f, value);
         },
-        "onSorted": function()
-        {
-            alert("sorted!");
+        "onSelected": function(i){
+            context.settings.onSelected(context, getPID(i));
         },
-        "onExpanded": function(){
-            alert("expanded!");
+        "onDeselected": function(i){
+            context.settings.onDeselected(context, getPID(i));
         },
-        "onCollapsed": function(){
-            alert("collapsed!");
+        "onMouseOver": function(i){
+            context.settings.onMouseOver(context, getPID(i));
         },
-        "onSelected": function(){
-            alert("selected!");
-        },
-        "onDeselected": function(){
-            alert("deselected!");
-        },
+        "onMouseOut": function(i){
+            context.settings.onMouseOut(context, getPID(i));
+        }
 
     });
 
@@ -164,23 +162,22 @@ FeatureQualityMatrix.method("onRendered", function()
 
     this.addControlPanel();
 
-    $(".field-item").tipsy({fade: true, gravity: 'w', html: true});
-    $(".content-cell").tipsy({fade: true, gravity: 's', html: true});
+    $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
+    $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
 
 //    this.filter.resetFilters(this.SavedFilters, this.permahidden);
 
     //fire the scroll handler to align table after half a second (fixes chrome bug)
-/*
-    this.filter.filterContent();
-    if ($("#tBody").length > 0)
-        $("#tBody").colResizable();
 
-    var h1 = $("#mdFeatureQualityMatrix #tBody").outerHeight();
+//    if ($("#tBody").length > 0)
+//        $("#tBody").colResizable();
+
+    var h1 = $("#mdFeatureQualityMatrix #table").outerHeight();
     var h2 = $("#mdFeatureQualityMatrix #matrix-panel").outerHeight();
     var h3 = $("#mdFeatureQualityMatrix .window-titleBar").outerHeight();
 
     $.resizeWindow(this.id, this.width, h1 + h2 + h3); // resize the table to fit everything
-*/    
+    
 });
 
 FeatureQualityMatrix.method("getContent", function()
@@ -387,24 +384,12 @@ FeatureQualityMatrix.method("getInitContent", function()
 });
 
 FeatureQualityMatrix.method("featureChecked", function (featurePath, state){
-    this.filter.filterContent(); // filter after changing the feature status
     this.settings.onFeatureCheckedStateChange(this, featurePath, state);
-//    this.synchronizeWidths();
 });
 
 FeatureQualityMatrix.method("removeInstance", function(instanceNum){
-    this.filter.removeInstance(instanceNum);
-    this.settings.onInstanceRemove(this, instanceNum);
-});
-
-FeatureQualityMatrix.method("onFeatureCollapsed", function(featurePath){
-    this.filter.closeFeature(featurePath);
-    this.settings.onFeatureCollapsed(this, featurePath);
-});
-
-FeatureQualityMatrix.method("onFeatureExpanded", function(featurePath){
-    this.filter.openFeature(featurePath);
-    this.settings.onFeatureExpanded(this, featurePath);
+//    this.filter.removeInstance(instanceNum);
+//    this.settings.onInstanceRemove(this, instanceNum);
 });
 
 //saves all selected instances and downloads them to client
@@ -423,5 +408,5 @@ FeatureQualityMatrix.method("saveAll", function(){
 // this function is called every time a user filters by features or quality values
 FeatureQualityMatrix.method("onFiltered", function(data)
 {
-//    this.redrawChart();
+    this.tableVisualizer.filter(data);
 });

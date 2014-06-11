@@ -142,7 +142,16 @@ TableVisualizer.method("refresh", function(data)
                     context.chartListeners.onDeselected(d);
                     d3.select(this).classed("selected", false);
                 }
-            }).style("cursor", "pointer");
+            })
+		.on("mouseover", function(d){
+            context.chartListeners.onMouseOver(d);
+            d3.select(this).classed("over", true);
+		})
+		.on("mouseout", function(d){
+            context.chartListeners.onMouseOut(d);
+            d3.select(this).classed("over", false);
+		})
+		.style("cursor", "pointer");
    }
 
   var cat1 = context.body.selectAll("tr.field-row").data(data.fields, function(d){return d.id;});
@@ -150,19 +159,21 @@ TableVisualizer.method("refresh", function(data)
   context.rows = cat1.enter()
     .append("tr").attr("class", "field-row").attr("id", function (d) {return d.path; });
 
-  context.rows.append("td")
+  context.fieldCells = context.rows.append("td")
       .attr("class", "field-item").each(function(d){
 
       		var me = d3.select(this);
       		me.append("span").attr("class", "texttosearch").html(d.title.replaceAll(' ', '&nbsp;&nbsp;'));
       		me.append("span").attr("class", "path").style("display", "none").html(d.path);
+//      		me.append("span").attr("class", "level").style("display", "none").html(d.level);
       		me.append("span").attr("class", "id").style("display", "none").html(d.id);
       		var typeLabel = me.append("span").attr("class", "typelabel " + d.type);
       		me.append("span").attr("class", "card").html(d.card != "" ? "&nbsp;" + d.card : "");
 
 			if (d.em !== null)
 			{
-	      		me.append("span").attr("class", "emvalue").html(' = ' + context.trimValue(context.filterClaferValue(d.em + "")));
+				me.append("span").text(' = ');
+	      		me.append("span").attr("class", "emvalue").text(context.trimValue(context.filterClaferValue(d.em + "")));
 				me.classed("emabstract", true);
 			}
 
@@ -184,13 +195,13 @@ TableVisualizer.method("refresh", function(data)
       						{
 	      						d3.select(this).attr("status", "true");
 	      						d3.select(this).html("&nbsp;\u2192");
-	      						context.chartListeners.onCollapsed(d.path);
+	      						context.collapse(d.path);
 	      					}
 	      					else
       						{
 	      						d3.select(this).attr("status", "false");
 	      						d3.select(this).html("&nbsp;\u21B4");
-	      						context.chartListeners.onExpanded(d.path);
+	      						context.expand(d.path);
 	      					}
       					})
 	            }
@@ -254,13 +265,13 @@ TableVisualizer.method("refresh", function(data)
 	            var emValueNode = me.select(".emvalue");
 	            if (!emValueNode.empty()) // is effectively  mandatory
 	            {
-	                if (emValueNode.text().indexOf("yes") >= 0)
+	                if (emValueNode.text() == "none")
 	                {
-	                    typeLabelNode.classed("filter_checked", true);
+	                    typeLabelNode.classed("filter_unchecked", true);
 	                }
 	                else
 	                {
-	                    typeLabelNode.classed("filter_unchecked", true);
+	                    typeLabelNode.classed("filter_checked", true);
 	                }                    
 	            }
 	            else
@@ -459,4 +470,45 @@ TableVisualizer.method("mapValue", function(field, sVal)
 	}
 		
 	return result;
+});
+
+TableVisualizer.method("filter", function(data)
+{
+	var context = this;
+	context.headers.each(function(d){
+		d3.select(this).style("display", data.matrix.some(function(el){ return (el.id == d) && (el["_hidden"] === true);}) ? "none" : null);
+	});
+
+	context.rows.selectAll("td.content-cell").each(function(d){
+		d3.select(this).style("display", data.matrix.some(function(el){ return (el.id == d.id) && (el["_hidden"] === true);}) ? "none" : null);
+	});
+
+});
+
+TableVisualizer.method("collapse", function(id)
+{
+	var context = this;
+	context.fieldCells.each(function(d){
+		if ((d.path.length > id.length) && (d.path.substring(0, id.length) == id))
+		{
+			d3.select(d3.select(this).node().parentNode).classed("collapsed", true);
+		}
+	});
+
+	if (context.chartListeners.onCollapsed)
+		context.chartListeners.onCollapsed(id);
+});
+
+TableVisualizer.method("expand", function(id)
+{
+	var context = this;
+	context.fieldCells.each(function(d){
+		if ((d.path.length > id.length) && (d.path.substring(0, id.length) == id))
+		{
+			d3.select(d3.select(this).node().parentNode).classed("collapsed", false);
+		}
+	});
+
+	if (context.chartListeners.onExpanded)
+		context.chartListeners.onExpanded(id);
 });

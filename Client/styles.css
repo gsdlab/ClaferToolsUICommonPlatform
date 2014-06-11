@@ -77,11 +77,11 @@ textarea.child {height:100%;}
 
 /* New Matrix */
 
-.comparison table th{
-    border: 1px solid #ccc;
+.comparison table td, .comparison table th{
+    white-space: nowrap;
 }
 
-.comparison table td, .comparison table th{
+.comparison table td{
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
     white-space: nowrap;
@@ -188,8 +188,18 @@ textarea.child {height:100%;}
 
 .comparison th{
     text-align:center;
+    background: #ccc;
+    border: 1px solid #777;
 }
 
 .comparison th.selected{
     color:red;
+}
+
+.comparison th.over{
+    background: rgb(255, 255, 204);
+}
+
+.comparison tr.collapsed{
+    display: none;
 }

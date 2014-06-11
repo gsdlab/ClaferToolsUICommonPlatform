@@ -84,6 +84,7 @@ DataTable.method("loadFromXMLDataSource", function()
         var field = new Object();
         field.title = output[i].displayWithMargins;
         field.pathAsArray = output[i].claferPath;
+        field.level = field.pathAsArray.length;
         field.path = output[i].claferPath.join("-");
         field.id = output[i].claferId;
         field.type = output[i].type;
