@@ -84,7 +84,8 @@ TableVisualizer.method("addSortingFeature", function(elem){
 				sortLabel.html("&nbsp;\u25C0");
 			}
 
-			context.chartListeners.onSorted(d.id, sortFlag);
+			if (context.chartListeners.onSorted)
+				context.chartListeners.onSorted(d.id, sortFlag);
 		});
 
 });
@@ -145,19 +146,19 @@ TableVisualizer.method("refresh", function(data)
             })
 		.on("mouseover", function(d){
             context.chartListeners.onMouseOver(d);
-            d3.select(this).classed("over", true);
+            context.makeActive(d);
 		})
 		.on("mouseout", function(d){
             context.chartListeners.onMouseOut(d);
-            d3.select(this).classed("over", false);
+            context.makeInactive(d);
 		})
 		.style("cursor", "pointer");
    }
 
-  var cat1 = context.body.selectAll("tr.field-row").data(data.fields, function(d){return d.id;});
+  var cat1 = context.body.selectAll("tr.field-row").data(data.fields, function(d){return d.path;});
 
   context.rows = cat1.enter()
-    .append("tr").attr("class", "field-row").attr("id", function (d) {return d.path; });
+    .append("tr").attr("class", "field-row").attr("id", function (d) {return context.nodeId + "-" + d.path; });
 
   context.fieldCells = context.rows.append("td")
       .attr("class", "field-item").each(function(d){
@@ -211,7 +212,7 @@ TableVisualizer.method("refresh", function(data)
 
   context.rows.each(function(tr, i){
 
-  		var path = d3.select(this).attr("id");
+  		var path = d3.select(this).attr("id").substring((context.nodeId + "-").length);
   		var field = context.data.fields.filter(function(el){return el.path == path})[0];
 
   		var reducedData = context.data.matrix.reduce(function(prev, cur){
@@ -511,4 +512,14 @@ TableVisualizer.method("expand", function(id)
 
 	if (context.chartListeners.onExpanded)
 		context.chartListeners.onExpanded(id);
+});
+
+TableVisualizer.method("makeActive", function(d)
+{
+	d3.select("#" + context.nodeId + "-" + "th" + d).classed("over", true);
+});
+
+TableVisualizer.method("makeInactive", function(d)
+{
+	d3.select("#" + context.nodeId + "-" + "th" + d).classed("over", false);
 });

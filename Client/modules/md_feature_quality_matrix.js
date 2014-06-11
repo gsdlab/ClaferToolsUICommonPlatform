@@ -42,8 +42,6 @@ function FeatureQualityMatrix(host, settings)
 // here is where we store our model
     this.host = host;
     this.host.loaded();
-
-    this.unparsedInstances = null;    
 }
 
 FeatureQualityMatrix.method("resize", function() // not attached to the window anymore, so need to call the method
@@ -55,7 +53,6 @@ FeatureQualityMatrix.method("resize", function() // not attached to the window a
 FeatureQualityMatrix.method("onDataLoaded", function(data){
 
     console.log("fqm: onDataLoaded enter");
-    this.unparsedInstances = data.unparsedInstances;
 
     this.data = data;
     var instanceCount = this.data.instanceCount;
@@ -87,7 +84,9 @@ FeatureQualityMatrix.method("addControlPanel", function()
 //    $(panel).append('<button id="saveAll">Save all variants</button>');
     $(panel).append('<input type="button" id="saveAll" value="Save all variants">');
     $(panel).append(vl);
-//    $(panel).append('Shown <span id="instanceshown"></span> out of <span id="instancecount"></span>');
+    $(panel).append('<span id="instanceshown"></span> out of <span id="instancecount"></span> variant(s) satisfy the criteria');
+    $(panel).append(vl);
+    $(panel).append('<input type="checkbox" id="showQualities" checked="checked"/> Show nested quality attributes');
     $(panel).append('<form id="saveAllForm" action="/saveinstances" method="post" enctype="multipart/form-data">' + '<input type="hidden" name="data" id="saveAllData" value=""/>' + '<input type="hidden" name="windowKey" value="' + this.host.key + '"/>' + '</form>');
 
     $("#table").prepend(panel);
@@ -123,9 +122,19 @@ FeatureQualityMatrix.method("addControlPanel", function()
 //        event.stopPropagation(); //to keep table from sorting by instance number
     });
 
+    var context = this;
+
+    $('#showQualities').click(function(){
+
+        $("#table").find(".int").parent().parent().each(function(){
+            if (Object.keys(context.data.objectives).indexOf($(this).find(".path").text()) == -1)
+                $(this).toggleClass("hiddenAsNestedQuality");
+        });
+    });
+
     $('#saveAll').click(this.saveAll.bind(this)).css("cursor", "pointer");
 
-    $('#instanceshown').html(this.data.instanceShown);
+    $('#instanceshown').html(this.data.instanceCount);
     $('#instancecount').html(this.data.instanceCount);
 
 });
@@ -394,10 +403,10 @@ FeatureQualityMatrix.method("removeInstance", function(instanceNum){
 
 //saves all selected instances and downloads them to client
 FeatureQualityMatrix.method("saveAll", function(){
-    var instances = this.unparsedInstances;
+    var instances = this.data.unparsedInstances;
     var parser = new InstanceConverter(instances);
     var data = "";
-    var instanceCount = this.instanceProcessor.getInstanceCount();
+    var instanceCount = this.data.instanceCount;
     for (var i = 1; i <= instanceCount; i++){
         data += parser.getInstanceData(i) + "\n";
     }
@@ -409,4 +418,15 @@ FeatureQualityMatrix.method("saveAll", function(){
 FeatureQualityMatrix.method("onFiltered", function(data)
 {
     this.tableVisualizer.filter(data);
+    $('#instanceshown').html(this.data._instanceShown);    
+});
+
+FeatureQualityMatrix.method("makeHighlighted", function(pid)
+{ 
+    this.tableVisualizer.makeActive(parsePID(pid));
+});
+
+FeatureQualityMatrix.method("makeDehighlighted", function(pid)
+{ 
+    this.tableVisualizer.makeInactive(parsePID(pid));
 });

@@ -203,3 +203,7 @@ textarea.child {height:100%;}
 .comparison tr.collapsed{
     display: none;
 }
+
+.comparison .hiddenAsNestedQuality{
+    display:none;
+}

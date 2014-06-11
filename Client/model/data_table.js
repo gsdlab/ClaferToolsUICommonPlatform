@@ -52,6 +52,7 @@ DataTable.method("loadFromDataSource", function(ds)
     this.instanceProcessor = new InstanceProcessor(ds.instancesXML);
     this.claferProcessor = new ClaferProcessor(ds.claferXML);
     this.abstractClaferTree = this.claferProcessor.getTopClaferTree('root');
+    this.unparsedInstances = ds.unparsedInstances;
 
     this.objectives = this.claferProcessor.getGoals();
     this.fieldsWithChildren = this.claferProcessor.getFeaturesWithChildren(this.abstractClaferTree);
@@ -63,6 +64,7 @@ DataTable.method("loadFromDataSource", function(ds)
 DataTable.method("loadFromXMLDataSource", function()
 {
     this.instanceCount = this.instanceProcessor.getInstanceCount();
+    this.instanceShown = this.instanceCount;
 
     this.abstractClaferOutput = new Array();
     var current = this.abstractClaferTree;
@@ -95,6 +97,8 @@ DataTable.method("loadFromXMLDataSource", function()
  
         this.fields.push(field);      
     }
+
+    console.log(this.fields);
 
     for (var i = 1; i <= this.instanceCount; i++)
     {
