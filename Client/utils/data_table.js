@@ -37,6 +37,16 @@ DataTable.method("clear", function(){
     this.instanceCount = 0;
 });
 
+DataTable.method("computeRanges", function()
+{
+    for (var o in this.objectives)
+    {
+        this.objectives[o].minValue = d3.min(this.matrix, function(d) { return d[o];} );
+        this.objectives[o].maxValue = d3.max(this.matrix, function(d) { return d[o];} );
+    }
+});
+
+
 DataTable.method("loadFromDataSource", function(ds)
 {
     this.instanceProcessor = new InstanceProcessor(ds.instancesXML);
@@ -47,6 +57,7 @@ DataTable.method("loadFromDataSource", function(ds)
     this.fieldsWithChildren = this.claferProcessor.getFeaturesWithChildren(this.abstractClaferTree);
 
     this.loadFromXMLDataSource(this.instanceProcessor, this.abstractClaferTree);
+    this.computeRanges();
 });
 
 DataTable.method("loadFromXMLDataSource", function()

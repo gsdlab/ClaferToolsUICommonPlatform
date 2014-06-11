@@ -135,7 +135,6 @@ FeatureQualityMatrix.method("onRendered", function()
     this.tableVisualizer = new TableVisualizer("table", {
         sorting: true,
         filtering: true,
-        buttonsForRemoval: true,
         selectable: true,
         collapsing: true
     }, {
@@ -421,3 +420,8 @@ FeatureQualityMatrix.method("saveAll", function(){
     $("#saveAllForm").submit();
 });
 
+// this function is called every time a user filters by features or quality values
+FeatureQualityMatrix.method("onFiltered", function(data)
+{
+//    this.redrawChart();
+});

@@ -81,7 +81,7 @@ ClaferProcessor.method("buildExp", function(exp)
 ClaferProcessor.method("getGoals", function() 
 {
 	var xpGoals = this.xmlHelper.queryXML(this.source, "/module/declaration[@type='IGoal']/parentexp/exp");
-	var result = new Array();
+	var result = new Object();
 
 	for (var i = 0; i < xpGoals.length; i++) 
 	{
@@ -100,7 +100,7 @@ ClaferProcessor.method("getGoals", function()
 		
 //		alert("|" + rest + "|");
 		
-		result[i] = goal;
+		result[goal.arg] = goal;
 	}
 	
 	return result;
