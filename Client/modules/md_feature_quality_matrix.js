@@ -38,8 +38,6 @@ function FeatureQualityMatrix(host, settings)
 
     this.colWidth = 250;
 
-//    this.dataTable = new DataTable();
-// here is where we store our model
     this.host = host;
     this.host.loaded();
 }
@@ -52,19 +50,10 @@ FeatureQualityMatrix.method("resize", function() // not attached to the window a
 
 FeatureQualityMatrix.method("onDataLoaded", function(data){
 
-    console.log("fqm: onDataLoaded enter");
-
     this.data = data;
     var instanceCount = this.data.instanceCount;
-
-    console.log("fqm: onDataLoaded middle");
-
-//    this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this);    
-//    this.clearFilters();
     this.toggled = false;    
     this.currentRow = 1;
-    console.log("fqm: onDataLoaded end");
-
 });
 
 FeatureQualityMatrix.method("addControlPanel", function()
@@ -283,12 +272,12 @@ FeatureQualityMatrix.method("toggleDistinct", function()
 
 //makes instance red on graph, for actual selection function see onSelected(pid) in selector.js
 FeatureQualityMatrix.method("makePointsSelected", function (pid){;
-    $("#mdFeatureQualityMatrix #th0_" + pid.substring(1)).find("text").css("fill", "Red");
+    this.tableVisualizer.select(parsePID(pid));
 });
 
 //makes instance red on graph, for actual deselection function see onDeselected(pid) in selector.js
 FeatureQualityMatrix.method("makePointsDeselected", function (pid){
-    $("#mdFeatureQualityMatrix #th0_" + pid.substring(1)).find("text").css("fill", "Black");
+    this.tableVisualizer.unselect(parsePID(pid));
 });
 
 FeatureQualityMatrix.method("applySearch", function (){

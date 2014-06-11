@@ -136,12 +136,10 @@ TableVisualizer.method("refresh", function(data)
 				if (!d3.select(this).classed("selected"))
 				{
                     context.chartListeners.onSelected(d);
-                    d3.select(this).classed("selected", true);
 				}
                 else
                 {
                     context.chartListeners.onDeselected(d);
-                    d3.select(this).classed("selected", false);
                 }
             })
 		.on("mouseover", function(d){
@@ -347,15 +345,15 @@ function TableVisualizer(nodeId, options, chartListeners)
 
 }
 
-TableVisualizer.method("select", function(i)
+TableVisualizer.method("select", function(d)
 {
-    d3.select("#R" + i).classed("selected", true);    
+	d3.select("#" + this.nodeId + "-" + "th" + d).classed("selected", true);
 });
 
 //formats object as not selected
-TableVisualizer.method("unselect", function(i)
+TableVisualizer.method("unselect", function(d)
 {
-    d3.select("#R" + i).classed("selected", false);    
+	d3.select("#" + this.nodeId + "-" + "th" + d).classed("selected", false);
 });
 
 
@@ -516,10 +514,10 @@ TableVisualizer.method("expand", function(id)
 
 TableVisualizer.method("makeActive", function(d)
 {
-	d3.select("#" + context.nodeId + "-" + "th" + d).classed("over", true);
+	d3.select("#" + this.nodeId + "-" + "th" + d).classed("over", true);
 });
 
 TableVisualizer.method("makeInactive", function(d)
 {
-	d3.select("#" + context.nodeId + "-" + "th" + d).classed("over", false);
+	d3.select("#" + this.nodeId + "-" + "th" + d).classed("over", false);
 });
