@@ -158,6 +158,7 @@ TableVisualizer.method("refresh", function(data)
   context.rows = cat1.enter()
     .append("tr").attr("class", "field-row").attr("id", function (d) {return context.nodeId + "-" + d.path; });
 
+  // adding fields
   context.fieldCells = context.rows.append("td")
       .attr("class", "field-item").each(function(d){
 
@@ -208,6 +209,7 @@ TableVisualizer.method("refresh", function(data)
       		}
       });
 
+  // adding values
   context.rows.each(function(tr, i){
 
   		var path = d3.select(this).attr("id").substring((context.nodeId + "-").length);
@@ -218,7 +220,7 @@ TableVisualizer.method("refresh", function(data)
   			return prev;
   		}, []);
 
-  		var cat2 = d3.select(this).selectAll("td.content-cell").data(reducedData);
+  		var cat2 = d3.select(this).selectAll("td.content-cell").data(reducedData, function(d) {return d.id;});
 
   		cat2.enter()
 		    .append("td").each(function(d){
