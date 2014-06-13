@@ -175,11 +175,11 @@ TableVisualizer.method("refresh", function(data)
 		    	var mappedObject = context.mapValue(d, d.em, true);
 		    	if (mappedObject.tdClass == 'numeric' || mappedObject.tdClass == 'clafer')
 		    	{
-		    		cont = mappedObject.elemContent;		    		
+		    		cont = mappedObject.elemContent + ""; // to make it string
 			    	if (cont == "&nbsp;")
 			    		cont = "";
 
-			    	if (cont != "")
+			    	if (cont != "") 
 			    	{
 						me.append("span").text(' = ');
 					}
