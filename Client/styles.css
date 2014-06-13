@@ -207,3 +207,7 @@ textarea.child {height:100%;}
 .comparison .hiddenAsNestedQuality{
     display:none;
 }
+
+.comparison .emvalueEq{
+    color: #bbb;
+}

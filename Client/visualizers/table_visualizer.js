@@ -181,7 +181,7 @@ TableVisualizer.method("refresh", function(data)
 
 			    	if (cont != "") 
 			    	{
-						me.append("span").text(' = ');
+						me.append("span").attr("class", "emvalueEq").text(' = ');
 					}
 		      		me.append("span").attr("class", "emvalue").text(cont);
 		    	}
