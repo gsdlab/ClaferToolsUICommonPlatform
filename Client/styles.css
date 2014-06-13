@@ -174,13 +174,13 @@ textarea.child {height:100%;}
     display:none;
 }
 
-.comparison img.tick{
+.comparison img.tick, .comparison img.tickMan {
     width:14px;
     height:14px;
     margin:0;
 }
 
-.comparison img.no{
+.comparison img.no, .comparison img.noMan {
     width:14px;
     height:14px;
     margin:0;

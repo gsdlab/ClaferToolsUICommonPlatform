@@ -172,8 +172,20 @@ TableVisualizer.method("refresh", function(data)
 
 			if (d.em !== null)
 			{
-				me.append("span").text(' = ');
-	      		me.append("span").attr("class", "emvalue").text(context.trimValue(context.filterClaferValue(d.em + "")));
+		    	var mappedObject = context.mapValue(d, d.em, true);
+		    	if (mappedObject.tdClass == 'numeric' || mappedObject.tdClass == 'clafer')
+		    	{
+		    		cont = mappedObject.elemContent;		    		
+			    	if (cont == "&nbsp;")
+			    		cont = "";
+
+			    	if (cont != "")
+			    	{
+						me.append("span").text(' = ');
+					}
+		      		me.append("span").attr("class", "emvalue").text(cont);
+		    	}
+
 				me.classed("emabstract", true);
 			}
 
@@ -228,11 +240,7 @@ TableVisualizer.method("refresh", function(data)
 		    	var mappedObject = context.mapValue(field, d.value);
 		    	if (mappedObject.elem == 'img')
 		    	{
-		    		var src = '';
-		    		if (mappedObject.elemClass == 'tick')
-		    			src = 'commons/Client/images/tick.png';
-		    		else
-		    			src = 'commons/Client/images/no.png';
+		    		var src = 'commons/Client/images/' + mappedObject.elemClass + '.png';
 
 		    		d3.select(this)
 		    			.attr("class", "content-cell " + mappedObject.tdClass)
@@ -384,7 +392,7 @@ TableVisualizer.method("trimValue", function(s)
 //			result.html = '<img class="no" src="commons/Client/images/no.png"/>';
 
 
-TableVisualizer.method("mapValue", function(field, sVal)
+TableVisualizer.method("mapValue", function(field, sVal, denyEMCheck)
 {
 	var result = new Object();
 //	result.title = "Hello";
@@ -445,24 +453,46 @@ TableVisualizer.method("mapValue", function(field, sVal)
 	else // just clafer of a non-primitive type
 	{
 		result.tdClass = 'clafer';
-		if (sVal == "none")
+
+		if (field.card == "")
 		{
-			result.hint = 'no ' + field.id;
-			result.elem = 'span';
-			result.elemClass = 'clafer';
-			result.elemContent = '-';
+			if (sVal == "none")
+			{
+				result.hint = field.id + ' is not present';
+				result.elem = 'img';
+				result.elemClass = 'noMan';
+				result.tdClass = 'bool no';
+			}
+			else
+			{
+				result.hint = field.id + ' is present as ' + this.trimValue(this.filterClaferValue(sVal));
+				result.elem = 'img';
+				result.elemClass = 'tickMan';
+				result.tdClass = 'bool tick';
+			}
+
 		}
 		else
 		{
-			result.hint = field.id + ' = ' + this.prettifyClaferSet(sVal);
-			result.elem = 'span';
-			result.elemContent = this.trimValue(this.filterClaferValue(sVal));
-			result.elemClass = 'clafer texttosearch';
+			if (sVal == "none")
+			{
+				result.hint = 'no ' + field.id;
+				result.elem = 'span';
+				result.elemClass = 'clafer';
+				result.elemContent = '-';
+			}
+			else
+			{
+				result.hint = field.id + ' = ' + this.prettifyClaferSet(sVal);
+				result.elem = 'span';
+				result.elemContent = this.trimValue(this.filterClaferValue(sVal));
+				result.elemClass = 'clafer texttosearch';
+			}
 		}
 	}
 
 
-	if (field.em !== null)
+	if (field.em !== null && (denyEMCheck === undefined || denyEMCheck === false ))
 	{
 		result.hint =  'All the values are the same and equal ' + field.em;
 		result.elem = 'span';
