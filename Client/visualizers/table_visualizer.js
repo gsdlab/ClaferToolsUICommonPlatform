@@ -165,7 +165,7 @@ TableVisualizer.method("refresh", function(data)
       		var me = d3.select(this);
       		me.append("span").attr("class", "texttosearch").html(d.title.replaceAll(' ', '&nbsp;&nbsp;'));
       		me.append("span").attr("class", "path").style("display", "none").html(d.path);
-//      		me.append("span").attr("class", "level").style("display", "none").html(d.level);
+      		me.append("span").attr("class", "super").style("display", "none").html(d.super);
       		me.append("span").attr("class", "id").style("display", "none").html(d.id);
       		var typeLabel = me.append("span").attr("class", "typelabel " + d.type);
       		me.append("span").attr("class", "card").html(d.card != "" ? "&nbsp;" + d.card : "");
@@ -266,7 +266,7 @@ TableVisualizer.method("refresh", function(data)
 	            var emValueNode = me.select(".emvalue");
 	            if (!emValueNode.empty()) // is effectively  mandatory
 	            {
-	                if (emValueNode.text() == "none")
+	                if (emValueNode.text() == "none" || emValueNode.text() == "-")
 	                {
 	                    typeLabelNode.classed("filter_unchecked", true);
 	                }

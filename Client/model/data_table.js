@@ -89,6 +89,7 @@ DataTable.method("loadFromXMLDataSource", function()
         field.level = field.pathAsArray.length;
         field.path = output[i].claferPath.join("-");
         field.id = output[i].claferId;
+        field.super = output[i].super; 
         field.type = output[i].type;
         field.card = output[i].card;
         field.em = null; // null means not effectively mandatory, else it has the common value for all the instances
@@ -139,10 +140,11 @@ DataTable.method("loadFromXMLDataSource", function()
 DataTable.method("collector", function(clafer, spaceCount, path)
 {
     var unit = new Object();
+    unit.super = clafer.superClafer;
     unit.claferId = clafer.claferId;
     unit.displayId = clafer.displayId;
     unit.claferPath = path.slice(0); // cloning an array
-    clafer.path = unit.claferPath; // NOT GOOD assignmend. TODO: make it better
+    clafer.path = unit.claferPath; // NOT GOOD assignmend (by reference). TODO: make it a clone
     unit.type = clafer.type;
 
     var cardMin;

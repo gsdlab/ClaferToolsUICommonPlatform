@@ -27,7 +27,7 @@ function ClaferProcessor (sourceXML) {
 //returns claferid without the cXX_ extension
 ClaferProcessor.method("claferFilter", function(s)
 {
-	return s.replace(/c[^_]*_/g, "");
+	return s.replace(/c[0-9]*_/g, "");
 });
 
 ClaferProcessor.method("operationFilter", function(s)
