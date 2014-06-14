@@ -450,6 +450,24 @@ TableVisualizer.method("mapValue", function(field, sVal, denyEMCheck)
 			result.elemClass = 'number texttosearch';
 		}
 	}
+	else if (type == "string")
+	{
+		result.tdClass = 'string';
+		if (sVal == "none")
+		{
+			result.hint = 'no ' + field.id;
+			result.elem = 'span';
+			result.elemClass = 'string';
+			result.elemContent = '-';
+		}
+		else
+		{
+			result.hint = field.id + ' = ' + sVal;
+			result.elem = 'span';
+			result.elemContent = sVal;
+			result.elemClass = 'string texttosearch';
+		}
+	}
 	else // just clafer of a non-primitive type
 	{
 		result.tdClass = 'clafer';

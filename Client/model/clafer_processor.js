@@ -111,6 +111,9 @@ ClaferProcessor.method("calcClaferType", function(clafer)
 	if (clafer.superClafer == 'integer')
 		return 'int';
 
+	if (clafer.superClafer == 'string')
+		return 'string';
+
 	if (clafer.claferCardMin == 0 && clafer.claferCardMax == 1)
 	{
 		if (clafer.superClafer == 'clafer')
@@ -189,7 +192,7 @@ ClaferProcessor.method("getTopClaferTree", function(id) // id can be either 'roo
 		var node = null;
 		var omitAbstracts = false;
 		
-		if (id == 'integer' || id == 'clafer') // a primitive type, will not be in the IR
+		if (id == 'integer' || id == 'clafer' || id == 'string') // a primitive type, will not be in the IR
 		{
 			return null;
 		}
