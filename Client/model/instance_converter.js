@@ -28,8 +28,8 @@ function InstanceConverter(source)
 	this.residualText = "";
 }
 
-InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClaferID){
-	var myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ \t]*\=?[ \t]*([^ ]*)\b/;
+InstanceConverter.method("convertFromClaferMooOutputToXML", function(){
+	var myRegExp = /\b([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ \t]*\=?[ \t]*(.*)/;
 	var instanceRegExp = /^=== Instance ([0-9]*) Begin ===$/gm;
 	var instanceEndRegExp = /^[-][-][-] Instance ([0-9]*) End [-][-][-]$/m;
 //	var topClaferExp = /\^([^:= ]*)[ ]*\:?[ ]*([^:=]*)[ ]*\=?[ ]*([^ ]*)\b/;
@@ -93,13 +93,10 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 
 		result += '\n<instance>';
 
-		if (targetClaferID == null)
-		{
-			result += '\n<clafer id="' + 'root' + '" counter="' + '0' + '">';
-			result += '<super>' + 'clafer' + '</super>';
-			result += '<value id="" counter=""></value>';
-			result += '<subclafers>';			
-		}
+		result += '\n<clafer id="' + 'root' + '" counter="' + '0' + '">';
+		result += '<super>' + 'clafer' + '</super>';
+		result += '<value id="" counter=""></value>';
+		result += '<subclafers>';			
 
 		var temp = "";
 		var oldpos = -1;
@@ -126,51 +123,7 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 				continue;
 			}
 
-			if (targetClaferID != null)
-			{
-
-				var topClaferMatch = myRegExp.exec(lines[line]); // checking whether we are at the top clafer declaration
-				if (topClaferMatch != null && (topClaferMatch.index == 0)) // if we are at the line with a top clafer
-				{
-	//				alert("top clafer" + lines[line]);
-
-					// we should skip the top clafers we don't need
-					while (line < lines.length)
-					{
-						var topClaferMatch = myRegExp.exec(lines[line]);
-						line++;
-						if (topClaferMatch == null)
-							continue;
-
-						var claferParts = topClaferMatch[1].split("$");
-						var claferId = claferParts[0];
-
-						if (claferId == targetClaferID)
-						{
-							break;
-						}
-					}
-
-					if (0 < oldpos)
-					{
-						for (var j = 0; j < (oldpos) / tabSize + 1; j++)
-						{
-							result += "</subclafers></clafer>";
-						}
-					}	
-
-					if (line >= lines.length)
-						break;
-
-					s = lines[line - 1];
-
-					oldpos = -1;
-				}
-				else
-					line++;
-			}
-			else
-				line++;
+			line++;
 
 			if (s.trim().length == 0)
 			{
@@ -194,30 +147,23 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 			
 			if (oldpos != -1)
 			{					
-				if (pos == oldpos) // clearly NO children
-				{
-					result += "</subclafers></clafer>";
-				}
-
 				if (pos > oldpos) // nesting level increases
 				{
-					result += ""; // don't do anything, clafers will be nested after the loop
 					tabSize = pos - oldpos;
+					result += ""; // don't do anything, clafers will be nested after the loop
 				}
-				
-				if (pos < oldpos)
+				else
 				{
-					for (var j = 0; j < (oldpos - pos) / tabSize + 1; j++)
+					result += "</subclafers></clafer>";
+					if (pos < oldpos)
 					{
-						result += "</subclafers></clafer>";
+						for (var j = 0; j < (oldpos - pos) / tabSize; j++)
+						{
+							result += "</subclafers></clafer>";
+						}
 					}
 				}
-					
-//				if (pos == 0) // new instance begins
-//				{
-//					result += "</instance><instance>";
-//				}
-				
+									
 				oldpos = pos;
 			}
 			else oldpos = 0;
@@ -231,49 +177,20 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(targetClafe
 				superClafer = "";
 
 			value = lineMatch[3]; // value can be numeric or another instance clafer, it does not matter
-			var valueId = "";
-			var valueCounter;
-
-			if (value == "")
-			{
-				valueId = "";
-				valueCounter = "";
-			}
-			else
-			{
-				var valueParts = value.split("$");
-
-				if (valueParts && valueParts.length == 2) // we have just value, not an instance reference
-				{
-					valueId = valueParts[0];
-					valueCounter = valueParts[1];
-				}
-				else
-				{
-					valueId = value;
-					valueCounter = "";
-				}
-			}
-
 			result += '\n<clafer id="' + claferId + '" counter="' + claferCounter + '">';
 			result += '<super>' + superClafer + '</super>';
-			result += '<value id="'  + valueId  + '" counter="' + valueCounter  + '"></value>';
+			result += '<value v="' + value.encodeHTML() + '"/>';
 			result += '<subclafers>';
 		}
 
-		if (0 < oldpos)
+		result += "</subclafers></clafer>"; // close the current clafer
+
+		for (var j = 0; j < oldpos / tabSize; j++)
 		{
-			for (var j = 0; j < (oldpos) / tabSize + 1; j++)
-			{
-				result += "</subclafers></clafer>";
-			}
-		}	
-	
-		if (targetClaferID == null)
-		{
-			result += "</subclafers></clafer>";
+			result += "</subclafers></clafer>"; // close all the clafers on the way to the current one
 		}
 
+		result += "</subclafers></clafer>"; // close the ROOT
 		result += "</instance>";
 	}
 

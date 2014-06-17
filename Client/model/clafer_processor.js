@@ -22,6 +22,7 @@ SOFTWARE.
 function ClaferProcessor (sourceXML) {
     this.source = (new XMLHelper()).stringToXML(sourceXML);
     this.xmlHelper = new XMLHelper();
+    this.primitiveTypes = ['integer', 'clafer', 'string'];
 }
 
 //returns claferid without the cXX_ extension
@@ -108,10 +109,12 @@ ClaferProcessor.method("getGoals", function()
 
 ClaferProcessor.method("calcClaferType", function(clafer)
 {
-	if (clafer.superClafer == 'integer')
+//	console.log(clafer);
+
+	if (clafer.supers.indexOf('integer') >= 0)
 		return 'int';
 
-	if (clafer.superClafer == 'string')
+	if (clafer.supers.indexOf('string') >= 0)
 		return 'string';
 
 	if (clafer.claferCardMin == 0 && clafer.claferCardMax == 1)
@@ -135,6 +138,8 @@ ClaferProcessor.method("getClaferTree", function(root, options)
 	result.claferId = "root";
 	result.displayId = "root";
 	result.claferValue = "";
+	result.superClafer = "";
+	result.supers = [];
 
 	if (root.tagName != 'module' && root.getAttribute("type") != "IClafer")
 	{
@@ -168,20 +173,43 @@ ClaferProcessor.method("getClaferTree", function(root, options)
 			if (nextSubtree != null)
 				result.subclafers[subLength++] = nextSubtree; 
 		} 
-		else if (current.tagName == "supers")
+		else if (current.tagName == "supers") // inheritance
 		{
 			if ($($(current).find("isoverlapping")[0]).text() == "false") // if NOT a reference
 			{
 				result.superClafer = $(current).find("id").text();
+				result.supers.push(result.superClafer);
 				var nextSubtree = this.getTopClaferTree(result.superClafer, {});
 				if (nextSubtree != null)
-					for (var i = 0; i<nextSubtree.subclafers.length; i++)
+				{
+					result.supers = result.supers.concat(nextSubtree.supers);
+					for (var i = 0; i < nextSubtree.subclafers.length; i++)
 						result.subclafers[subLength++] = nextSubtree.subclafers[i];		 
+				}
+			}
+			else // we have a reference
+			{
+				// we only process reference to primitive types
+				var superClaferId = $(current).find("id").text();
+
+				if (this.primitiveTypes.indexOf(superClaferId) >= 0)
+				{
+					if (result.superClafer != "")
+						result.superClafer = superClaferId;
+
+					result.supers.push(superClaferId);
+				}
 			}
 		}		
 	}
 	
 	result.type = this.calcClaferType(result);
+
+	if (result.claferId == "c0_q")
+	{
+		console.log(result);
+	}
+
 	return result;
 });
 //
@@ -192,7 +220,7 @@ ClaferProcessor.method("getTopClaferTree", function(id) // id can be either 'roo
 		var node = null;
 		var omitAbstracts = false;
 		
-		if (id == 'integer' || id == 'clafer' || id == 'string') // a primitive type, will not be in the IR
+		if (this.primitiveTypes.indexOf(id) >= 0) // a primitive type, will not be in the IR
 		{
 			return null;
 		}

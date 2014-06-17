@@ -71,7 +71,9 @@ InstanceProcessor.method("getFieldValue", function(instanceIndex, claferPath, ty
 //			alert("Feature value not found: '" + instanceIndex + " " + claferPath + "'");
 
 			if (type == 'int')
+			{
 				return "none";
+			}
 
 			if (type == 'bool')
 				return "-";
@@ -96,26 +98,16 @@ InstanceProcessor.method("getFieldValue", function(instanceIndex, claferPath, ty
 
 				if (current.tagName == "value")
 				{
-//					alert("foundValue");
-					var id = current.getAttribute("id");
-					var counter = current.getAttribute("counter");
-//					alert(id + " | " + counter);
-
-					if (counter == "")
-						result = id;
-					else
-						result = id + "$" + counter;
-
-//					break;
+					value = current.getAttribute("v").decodeHTML();
+					break;
 				}
 			}
 
-			if (result == "")
-				result = clafers[resultId].getAttribute("id") + "$" + clafers[resultId].getAttribute("counter");
-
-			if (type == 'int')
-				results.push(parseInt(result));
-			else results.push(result);
+			if (type == "string")
+				results.push(value);
+			else if (type == "int")
+				results.push(parseInt(value));
+			else results.push(value);
 
 		}
 
