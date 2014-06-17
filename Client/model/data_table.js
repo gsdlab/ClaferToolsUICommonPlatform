@@ -97,7 +97,7 @@ DataTable.method("loadFromXMLDataSource", function()
         field.card = output[i].card;
         field.em = null; // null means not effectively mandatory, else it has the common value for all the instances
 
-        emCheckComplete.push(this.instanceCount <= 1);
+        emCheckComplete.push(this.instanceCount <= 1 ? true : false);
  
         this.fields.push(field);      
     }
@@ -113,7 +113,7 @@ DataTable.method("loadFromXMLDataSource", function()
             currentMatrixRow[this.fields[j].path] = sVal;
 
             /* check for effective mandatory fields */
-            if (!emCheckComplete[j])
+            if (emCheckComplete[j] === false)
             {
                 if (this.fields[j].em === null)
                 {

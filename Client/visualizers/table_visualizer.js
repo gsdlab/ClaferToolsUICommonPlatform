@@ -180,17 +180,21 @@ TableVisualizer.method("refresh", function(data)
 			if (d.em !== null)
 			{
 		    	var mappedObject = context.mapValue(d, d.em, true);
-		    	if (mappedObject.tdClass == 'numeric' || mappedObject.tdClass == 'clafer')
-		    	{
-		    		cont = mappedObject.elemContent + ""; // to make it string
-			    	if (cont == "&nbsp;")
-			    		cont = "";
 
-			    	if (cont != "") 
-			    	{
-						me.append("span").attr("class", "emvalueEq").text(' = ');
-					}
-		      		me.append("span").attr("class", "emvalue").text(cont);
+		    	if (mappedObject.elem == 'img')
+		    	{
+		    		var b = (d.card != "");
+
+					me.append("span").attr("class", "emvalueEq").text(' = ').style("display", b ? null : "none");
+			      	me.append("span").attr("class", "emvalue " + mappedObject.tdClass).html(
+
+						(mappedObject.tdClass.indexOf("no") >= 0) ? "no" : "yes" 
+		      			).style("display", b ? null : "none");
+		    	}
+		    	else
+		    	{
+					me.append("span").attr("class", "emvalueEq").text(' = ');
+		      		me.append("span").attr("class", "emvalue " + mappedObject.tdClass).html(mappedObject.elemContent);		    		
 		    	}
 
 				me.classed("emabstract", true);
@@ -289,7 +293,7 @@ TableVisualizer.method("refresh", function(data)
 	            var emValueNode = me.select(".emvalue");
 	            if (!emValueNode.empty()) // is effectively  mandatory
 	            {
-	                if (emValueNode.text() == "none" || emValueNode.text() == "-")
+	                if (emValueNode.classed("no"))
 	                {
 	                    typeLabelNode.classed("filter_unchecked", true);
 	                }
