@@ -20,28 +20,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+function TableVisualizer(nodeId, options, chartListeners) 
+{
+    this.nodeId = nodeId;
+    this.options = options;
+    var context = this;
+    context.chartListeners = chartListeners;
 
-/*
-Copyright (C) 2012 - 2014 Alexander Murashkin, Neil Redman <http://gsd.uwaterloo.ca>
+   /* appending a "canvas" */
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+    var root = d3.select("#" + context.nodeId);
+    context.table = root.append("table")
+    	.attr("width", "100%")
+    	.attr("cellspadding", "0")
+    	.attr("cellspacing", "0")
+    	.attr("height", "100%");
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+    context.head = context.table.append("thead");
+    context.body = context.table.append("tbody");
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+    this.firstColWidth = 280;
+    this.colWidth = 220;
+}
 
 TableVisualizer.method("addSortingFeature", function(elem){
 	var context = this;
@@ -95,7 +95,7 @@ TableVisualizer.method("refresh", function(data)
 	this.data = data;
 	var context = this;
 
-	var titleNode = context.head.append("th").data([{"id" : "id"}]).text(data.title).attr("width", 200);
+	var titleNode = context.head.append("th").data([{"id" : "id"}]).text(data.title).attr("width", context.firstColWidth).style("min-width", context.firstColWidth + "px");
 
 	var cat0 = context.head.selectAll("th.instance-id").data(data.instanceIds, function(d){return d;});
 
@@ -103,7 +103,10 @@ TableVisualizer.method("refresh", function(data)
 	    .append("th")
 	    	.attr("class", "instance-id")
 	    	.attr("id", function (d) {return context.nodeId + "-" + "th" + d; })
+			.attr("width", context.colWidth)
 	    	.text(function (d) {return d; });
+
+	context.head.append("th"); // extra col for the ease of resizing
 
 	if (context.options.sorting)
 		context.addSortingFeature(titleNode);
@@ -163,6 +166,10 @@ TableVisualizer.method("refresh", function(data)
       .attr("class", "field-item").each(function(d){
 
       		var me = d3.select(this);
+      		d.type.split(" ").forEach(function(el){
+	      		me.classed(el, true);
+      		});
+			me.attr("width", context.firstColWidth).style("min-width", context.firstColWidth + "px");
       		me.append("span").attr("class", "texttosearch").html(d.title.replaceAll(' ', '&nbsp;&nbsp;'));
       		me.append("span").attr("class", "path").style("display", "none").html(d.path);
       		me.append("span").attr("class", "super").style("display", "none").html(d.super);
@@ -259,9 +266,17 @@ TableVisualizer.method("refresh", function(data)
 		    					.html(mappedObject.elemContent);		    		
 		    	}
 
+		    	d3.select(this).attr("width", context.colWidth);
+		    	d3.select(this).style("max-width", context.colWidth + "px");
+
 		    });
 
   });
+
+  	context.rows.each(function(tr, i){
+	  	d3.select(this).append("td"); // extra td for ease of resizing
+
+	});
 
 	if (this.options.filtering)
 	{
@@ -334,27 +349,6 @@ TableVisualizer.method("resize", function (w, h, m)
 });
 */
 
-function TableVisualizer(nodeId, options, chartListeners) 
-{
-    this.nodeId = nodeId;
-    this.options = options;
-    var context = this;
-    context.chartListeners = chartListeners;
-
-   /* appending a "canvas" */
-
-    var root = d3.select("#" + context.nodeId);
-    context.table = root.append("table")
-    	.attr("width", "100%")
-    	.attr("cellspadding", "0")
-    	.attr("cellspacing", "0")
-    	.attr("height", "100%");
-
-    context.head = context.table.append("thead");
-    context.body = context.table.append("tbody");
-
-}
-
 TableVisualizer.method("select", function(d)
 {
 	d3.select("#" + this.nodeId + "-" + "th" + d).classed("selected", true);
@@ -368,7 +362,7 @@ TableVisualizer.method("unselect", function(d)
 
 
 TableVisualizer.method("filterClaferValue", function(s){
-	return s.replace(/c[0-9]*_/g, "");
+	return s.replace(/c[0-9]*_/g, "").replace("$0", "");
 });
 
 TableVisualizer.method("prettifyClaferSet", function(s){
@@ -456,9 +450,8 @@ TableVisualizer.method("mapValue", function(field, sVal, denyEMCheck)
 		if (sVal == "none")
 		{
 			result.hint = 'no ' + field.id;
-			result.elem = 'span';
-			result.elemClass = 'string';
-			result.elemContent = '-';
+			result.elem = 'img';
+			result.elemClass = 'noMan';
 		}
 		else
 		{
@@ -495,9 +488,8 @@ TableVisualizer.method("mapValue", function(field, sVal, denyEMCheck)
 			if (sVal == "none")
 			{
 				result.hint = 'no ' + field.id;
-				result.elem = 'span';
-				result.elemClass = 'clafer';
-				result.elemContent = '-';
+				result.elem = 'img';
+				result.elemClass = 'noMan';
 			}
 			else
 			{

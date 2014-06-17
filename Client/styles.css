@@ -79,12 +79,12 @@ textarea.child {height:100%;}
 
 .comparison table td, .comparison table th{
     white-space: nowrap;
+    overflow: hidden;
 }
 
 .comparison table td{
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
-    white-space: nowrap;
 }
 
 .comparison table #r0{
@@ -119,14 +119,14 @@ textarea.child {height:100%;}
     height:16px;
 }
 
-.comparison .field-row .int{
+.comparison .field-row .typelabel.int{
     background: url("images/types/int.png");
 }
 
-.comparison .field-row .clafer{
+.comparison .field-row .typelabel.clafer{
 }
 
-.comparison .field-row .bool{
+.comparison .field-row .typelabel.bool{
 }
 
 .comparison .field-row .filter_normal{
@@ -160,10 +160,6 @@ textarea.child {height:100%;}
 .comparison .field-row{
     padding-top:3px;
     padding-bottom:3px;
-}
-
-.comparison .em{
-    background-color: #ebebeb;
 }
 
 .comparison .emvalue{
@@ -211,3 +207,22 @@ textarea.child {height:100%;}
 .comparison .emvalueEq{
     color: #bbb;
 }
+
+.comparison .field-item.bool, .comparison .field-item.boolclafer {
+    background: #F0E68C;
+}
+
+.comparison td.field-item.emabstract {
+    background-color: #ebebeb;
+}
+
+.comparison td.field-item{
+    background-color: #f9f9f9;    
+}
+
+.comparison .em{
+    background-color: #ebebeb;
+    border-right: none;
+    border-left: none;
+}
+
