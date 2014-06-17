@@ -274,7 +274,7 @@ TableVisualizer.method("refresh", function(data)
   });
 
   	context.rows.each(function(tr, i){
-	  	d3.select(this).append("td"); // extra td for ease of resizing
+	  	d3.select(this).append("td").attr("class", "extra-cell").html("&nbsp;"); // extra td for ease of resizing
 
 	});
 

@@ -97,7 +97,7 @@ DataTable.method("loadFromXMLDataSource", function()
         field.card = output[i].card;
         field.em = null; // null means not effectively mandatory, else it has the common value for all the instances
 
-        emCheckComplete.push(false);
+        emCheckComplete.push(this.instanceCount <= 1);
  
         this.fields.push(field);      
     }
