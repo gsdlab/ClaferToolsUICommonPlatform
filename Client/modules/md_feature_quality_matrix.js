@@ -115,7 +115,7 @@ FeatureQualityMatrix.method("addControlPanel", function()
 
     $('#showQualities').click(function(){
 
-        $("#table").find(".int").parent().parent().each(function(){
+        $("#table").find(".typelabel.int").parent().parent().each(function(){
             if (Object.keys(context.data.objectives).indexOf($(this).find(".path").text()) == -1)
                 $(this).toggleClass("hiddenAsNestedQuality");
         });

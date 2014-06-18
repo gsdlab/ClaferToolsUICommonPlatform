@@ -270,8 +270,16 @@ TableVisualizer.method("refresh", function(data)
 		    					.html(mappedObject.elemContent);		    		
 		    	}
 
-		    	d3.select(this).attr("width", context.colWidth);
-		    	d3.select(this).style("max-width", context.colWidth + "px");
+		    	d3.select(this).attr("width", context.colWidth)
+		    	.style("max-width", context.colWidth + "px")
+
+	      		.on("mouseover", function(d){
+	      			d3.select(this).style("overflow", "visible");
+	      		}).on("mouseout", function(d){
+	      			d3.select(this).style("overflow", null);
+	      		});
+
+
 
 		    });
 
