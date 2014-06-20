@@ -39,7 +39,7 @@ function TableVisualizer(nodeId, options, chartListeners)
     context.head = context.table.append("thead");
     context.body = context.table.append("tbody");
 
-    this.firstColWidth = 280;
+    this.firstColWidth = 330;
     this.colWidth = 220;
 }
 
@@ -95,7 +95,11 @@ TableVisualizer.method("refresh", function(data)
 	this.data = data;
 	var context = this;
 
-	var titleNode = context.head.append("th").data([{"id" : "id"}]).text(data.title).attr("width", context.firstColWidth).style("min-width", context.firstColWidth + "px");
+	var titleNode = context.head.append("th").data([{"id" : "id"}])
+		.text(data.title)
+		.attr("width", context.firstColWidth)
+		.style("min-width", context.firstColWidth + "px")
+		.style("max-width", context.firstColWidth + "px");
 
 	var cat0 = context.head.selectAll("th.instance-id").data(data.instanceIds, function(d){return d;});
 
@@ -169,7 +173,9 @@ TableVisualizer.method("refresh", function(data)
       		d.type.split(" ").forEach(function(el){
 	      		me.classed(el, true);
       		});
-			me.attr("width", context.firstColWidth).style("min-width", context.firstColWidth + "px");
+			me.attr("width", context.firstColWidth)
+				.style("min-width", context.firstColWidth + "px")
+				.style("max-width", context.firstColWidth + "px");
       		me.append("span").attr("class", "texttosearch").html(d.title.replaceAll(' ', '&nbsp;&nbsp;'));
       		me.append("span").attr("class", "path").style("display", "none").html(d.path);
       		me.append("span").attr("class", "super").style("display", "none").html(d.super);
