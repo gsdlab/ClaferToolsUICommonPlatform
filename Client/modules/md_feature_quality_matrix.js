@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2012, 2013 Neil Redman, Alexander Murashkin <http://gsd.uwaterloo.ca>
+Copyright (C) 2012 - 2014 Alexander Murashkin, Neil Redman <http://gsd.uwaterloo.ca>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -34,440 +34,154 @@ function FeatureQualityMatrix(host, settings)
     this.normalColor = "#000"
 
     this.fadeOpacity = "0.7";
-    this.normalOpacity = "1.0"
+    this.normalOpacity = "1.0";
+
+    this.colWidth = 250;
 
     this.host = host;
     this.host.loaded();
-    
 }
 
-FeatureQualityMatrix.method("onDataLoaded", function(data){
-    this.instanceProcessor = new InstanceProcessor(data.instancesXML);
-    this.processor = new ClaferProcessor(data.claferXML, data.qualities);
-
-    this.abstractClaferTree = null;
-    var instanceCount = this.instanceProcessor.getInstanceCount();
-
-    if (instanceCount == 0) // instance data contains no instances
-    {
-        if (this.lastAbstractClaferTree)
-        {
-            this.abstractClaferTree = this.lastAbstractClaferTree;
-        }
-        else
-        {
-            return; // else we cannot do anything         
-        }
-    }
-    else
-    {
-        if (this.settings.useInstanceName)
-        {
-            var instanceName = this.instanceProcessor.getInstanceName();
-            this.abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceName, {"includeSupers": "true"});
-        }
-        else
-        {
-            var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
-            this.abstractClaferTree = this.processor.getAbstractClaferTree("/module/declaration/uniqueid", instanceSuperClafer, {"includeSupers": "false"});        
-        }
-
-        this.lastAbstractClaferTree = this.abstractClaferTree;
-    }
-    
-    this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this);    
-//    this.clearFilters();
-    this.abstractClaferOutput = "";    
-    this.toggled = false;    
-    this.dataTable = this.getDataTable();    
-    this.content = $('<div id="comparison" class="comparison"></div>').append(new TableVisualizer().getHTML(this.dataTable));
-    $("#mdFeatureQualityMatrix .window-titleBar-content").text("Feature and Quality Matrix: " + this.dataTable.title);
-    this.currentRow = 1;
-    this.EMfeatures = [];
-
+FeatureQualityMatrix.method("resize", function() // not attached to the window anymore, so need to call the method
+{
+//    this.synchronizeWidths();
+    return true;
 });
 
-FeatureQualityMatrix.method("onRendered", function()
+FeatureQualityMatrix.method("onDataLoaded", function(data){
+
+    this.data = data;
+    var instanceCount = this.data.instanceCount;
+    this.toggled = false;    
+    this.currentRow = 1;
+});
+
+FeatureQualityMatrix.method("addControlPanel", function()
 {
-    if (!this.filter)
-        return;
-    
-    this.filter.onRendered();
-    
-    $.resizeWindow(this.id, this.width, $("#comparison").height() + 80); // resize the table to fit everything
+    var context = this;
 
 // Add search bar 
-    var td = $('#comparison .table_title')[0];
-    $(td).html('<input type="text" id="search" class="text_input" placeholder="search" style="width: 100px">');
-    $(td).addClass("TableSearch");
-
+    var panel = $('<div id="matrix-panel"></div>');
+    var vl = $('<div class="verticalLine">&nbsp;</div>');
+    $(panel).append('Search: <input type="text" id="search" class="text_input" placeholder="search" style="width: 100px">');
+    $(panel).append(vl);
 // Adding buttons for comparison table
 // Distinct button for greying out non-distinct features
-    td = $('#comparison .TableSearch')[0];
-    $(td).append('<button id="toggle_link">Toggle</button>');
-    var that = this;
+    $(panel).append('<button id="toggle_link">Toggle</button>');
+    $(panel).append('&nbsp;<button id="filter_reset">Toggle</button>');
+    $(panel).append(vl);
+//    $(panel).append('<button id="saveAll">Save all variants</button>');
+    $(panel).append('<input type="button" id="saveAll" value="Save all variants">');
+    $(panel).append(vl);
+    $(panel).append('<span id="instanceshown"></span> out of <span id="instancecount"></span> variant(s) satisfy the criteria');
+    $(panel).append(vl);
+    $(panel).append('<input type="checkbox" id="showQualities" checked="checked"/> Show nested quality attributes');
+    $(panel).append('<form id="saveAllForm" action="/saveinstances" method="post" enctype="multipart/form-data">' + '<input type="hidden" name="data" id="saveAllData" value=""/>' + '<input type="hidden" name="windowKey" value="' + this.host.key + '"/>' + '</form>');
+
+    $("#table").prepend(panel);
+
+
     $('#toggle_link').html("Distinct");
     $('#toggle_link').click(function(event){
-        event.stopPropagation();  //to keep table from sorting by instance number
-        that.toggleDistinct();
+        context.toggleDistinct();
     }).css("cursor", "pointer");
 
 // Reset button for reseting filters
 
-    $(td).append('&nbsp;<button id="filter_reset">Toggle</button>');
-
-    $('#filter_reset').html("Reset");
+    $('#filter_reset').html("Reset filters");
     $('#filter_reset').click(function(event){
-        event.stopPropagation(); //to keep table from sorting by instance number
-        that.filter.cleanFilters();
-        that.filter.filterContent();
-        that.settings.onReset(that);
+/*
+        context.filter.cleanFilters();
+        context.filter.filterContent();
+        context.settings.onReset(context);
             //if currently set to distinct mode, refresh distinct rows
         if (this.toggled){
             this.toggleDistinct(); //one to turn off distinct
             this.toggleDistinct(); //one to reapply it
         }
+*/
     }).css("cursor", "pointer");
-
-
-    if (this.settings.buttonsForRemoval)
-    {
-    //  Add remove buttons to instances
-        var instances = $("#comparison #r0").find(".td_instance");
-        for (i=0; i<$(instances).length; i++){
-            $(instances[i]).prepend('<image id="rem' + $(instances[i]).text() + '" src="commons/Client/images/remove.png" alt="remove">')
-            var buttonId = "#rem" + $(instances[i]).text();
-            $(buttonId).attr("name", $(instances[i]).text());
-            $(buttonId).click(function(event){
-                that.removeInstance($(this).attr("name"));
-                event.stopPropagation();
-            });
-            $(buttonId).css("float", "left");
-            $(buttonId).css("vertical-align", "middle");
-            $(buttonId).css("cursor", "pointer");
-            
-            $(buttonId).hover(
-            function () {
-                $(this).attr("src", "/commons/Client/images/removeMouseOver.png");
-            }, 
-            function () {
-                $(this).attr("src", "/commons/Client/images/remove.png");
-            });
-        }
-    }
-//************************* Most of the following is to get proper formatting on the table  *******************
-
-// Move headers into new div
-    $("#comparison").prepend('<div id="tHeadContainer"><table id="tHead" width="100%" cellspacing="0" cellspadding="0"></table></div>');
-    $("#tHead").append($("#comparison #r0"));
-
-// make headers positioning always on top of window
-    $('#mdFeatureQualityMatrix .window-content').scroll(function(){
-            $("#comparison #tHeadContainer").css("position", "relative");
-            $("#comparison #tHeadContainer").css("top", ($("#comparison").height() - $('#mdFeatureQualityMatrix .window-content').scrollTop())*(-1) + $("#comparison #tHeadContainer").height());
-            $("#comparison #tBodyContainer").css("top" , $("#comparison #tHeadContainer").height());
-    });
-
-    $("#mdFeatureQualityMatrix").resize(function(){
-        $('#mdFeatureQualityMatrix .window-content').scroll();
-    })
-
-// Move body into new div
-    $("#comparison").prepend('<div id="tBodyContainer" style="position: relative;"></div>');
-    $("#tBodyContainer").prepend($("#comparison #tBody"));
-    
-
-
-
-// fix formatting for new headers
-// shrink table to obtain minimum widths
-    $("#tBodyContainer").css("width", "10%")
-    $("#tHeadContainer").css("width", "10%")
-
-// obtain minimum widths
-    var i;
-
-    $("#tHead .td_abstract").width("40%");
-    $("#tBody .td_abstract").width("40%");
-
-    i = 0;
-    var row = $("#r" + i);
-    var minWidth = 0;
-    while ($(row).children().length != 0){
-        for (var x = 1; x<=$(row).children().length; x++){
-            var current = $(row).children()[x];
-            if ($(current).width() > minWidth)
-                minWidth = $(current).width();
-        }
-        i++;
-        row = $("#r" + i);
-    }
-
-    var minAbstractWidth = $("#tBody .td_abstract").width();
-
-// Set new widths and minimum widths (important to do both for cross browser functionality)
-    for(i=1; i<$("#tHead #r0").children().length; i++){
-        $("#tHead #th0_" + i).width(minWidth);
-        $("#tBody #td0_" + i).width(minWidth);
-        $("#tHead #th0_" + i).css("min-width", minWidth);
-        $("#tBody #td0_" + i).css("min-width", minWidth);
-        var x = 1;
-        row = $("#r" + x);
-        while ($(row).children().length != 0){
-            $("#tBody #td" + x + "_" + i).width(minWidth);
-            $("#tBody #td" + x + "_" + i).css("min-width", minWidth);
-            x++;
-            row = $("#r" + x);
-        }
-    }
-
-    $("#tHead .td_abstract").width(minAbstractWidth);
-    $("#tBody .td_abstract").width(minAbstractWidth);
-    $("#tHead .td_abstract").css("min-width", minAbstractWidth);
-    $("#tBody .td_abstract").css("min-width", minAbstractWidth);
-
-// reset table widths to 100%
-    $("#tBodyContainer").css("width", "100%")
-    $("#tHeadContainer").css("width", "100%")
-
-// Mostly done formatting table. adding interactive features now.
-
-// Add tristate checkboxes for filtering features
-    i = 1;
-    row = $("#r" + i);
-    
-        
-    var that = this;
-    while (row.length != 0){
-        // setting the default filtering status to each row - none
-        $(row).attr("FilterStatus", "none");
-        if (!row.find(".numeric").length && !row.find(".EffectMan").length){
-            $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_empty.bmp">');
-            $("#r" + i + "box").click(function(){
-                if ($(this).parent().parent().attr("FilterStatus") == "none"){
-                    this.src = "commons/Client/images/checkbox_ticked.bmp";
-//                    this.className = "wanted";
-                    $(this).parent().parent().attr("FilterStatus", "require");
-                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 1);
-                } else if ($(this).parent().parent().attr("FilterStatus") == "require"){
-                    this.src = "commons/Client/images/checkbox_x.bmp";
-//                    this.className = "unwanted";
-                    $(this).parent().parent().attr("FilterStatus", "exclude");
-                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), -1);
-                } else {
-                    this.src = "commons/Client/images/checkbox_empty.bmp";
-//                    this.className = "maybe";
-                    $(this).parent().parent().attr("FilterStatus", "none");
-                    that.featureChecked($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 0);                    
-                }
-            }).css("cursor", "pointer");
-        }
-//  Add Greyed out checkboxes to denote effectively mandatory features
-        else if (!row.find(".numeric").length && row.find(".EffectMan").length){
-            $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="commons/Client/images/checkbox_ticked_greyed.png">');
-        }
-        i++;
-        row = $("#r" + i);
-    }
-    //  Add collapse buttons for features with children
-
-    var hasChild = this.processor.getFeaturesWithChildren(this.abstractClaferTree);
-    i = 1;
-    row = $("#r" + i);
-    var that = this;
-    while (row.length != 0){
-        if (!row.find(".numeric").length){
-            var feature = $("#r" + i + " .td_abstract").text().replaceAll(/[\s?]{1,}/g, '');
-            if (hasChild.indexOf(feature) != -1){
-                $("#r" + i + " .td_abstract").append('<text id="r' + i + 'collapse" status="false">   \u21B4<text>')
-                $("#r" + i + "collapse").click(function(){
-                    if ($(this).attr("status") === "false"){
-                        that.onFeatureCollapsed($(this).parent().text().replaceAll(/[^A-z]/g, ''));
-                        $(this).attr("status", "true")
-                        $(this).text("   \u2192")
-                    } else {
-                        that.onFeatureExpanded($(this).parent().text().replaceAll(/[^A-z]/g, ''));
-                        $(this).attr("status", "false")
-                        $(this).text("   \u21B4")
-                    }
-                }).css("cursor", "pointer");
-            }
-        }
-//  Add sorting to quality attributes
-        else {
-            $("#r" + i + " .td_abstract").append('<div id=sortText style="display:inline"></div>');
-            $("#r" + i + " .td_abstract").addClass('noSort');
-            $("#r" + i + " .td_abstract").click(function(){
-                if($(this).hasClass("sortAsc")){
-                    $(this).toggleClass("sortAsc sortDesc");
-                    $(this).find("#sortText").text(" \u25B6");
-                } else if ($(this).hasClass("sortDesc")){
-                    $(this).toggleClass("sortDesc sortAsc");
-                    $(this).find("#sortText").text(" \u25C0");
-                } else if ($(this).hasClass("noSort")){
-                    $(this).toggleClass("noSort sortAsc");
-                    $(this).find("#sortText").text(" \u25C0");
-                }
-                that.rowSort($(this).text());
-            }).css("cursor", "pointer");
-        }
-            
-        i++;
-        row = $("#r" + i);
-    }
-//  Add sorting by instance names (default);
-    $("#r" + 0 + " .td_abstract").append('<div id=sortText style="display:inline"> \u25C0</div>');
-    $("#r" + 0 + " .td_abstract").addClass('sortAsc');
-    $("#r" + 0 + " .td_abstract").click(function(){
-        if($(this).hasClass("sortAsc")){
-            $(this).toggleClass("sortAsc sortDesc");
-            $(this).find("#sortText").text(" \u25B6");
-        } else if ($(this).hasClass("sortDesc")){
-            $(this).toggleClass("sortDesc sortAsc");
-            $(this).find("#sortText").text(" \u25C0");
-        } else if ($(this).hasClass("noSort")){
-            $(this).toggleClass("noSort sortAsc");
-            $(this).find("#sortText").text(" \u25C0");
-        }
-        that.rowSort($(this).text());
-    }).css("cursor", "pointer");
-// Selection of instances for analysis from top row of table
-
-    if (this.settings.instancesSelectable) // can select instances
-    {
-        var length = $("#r0").find(".td_instance").length;
-        for(i=1; i<=length; i++){
-            $("#th0_" + i).click(function(){
-                var pid = getPID($(this).attr('id').substring(4))
-                var locationInArray = $.inArray(pid, that.settings.getSelection(that));
-                if (locationInArray == -1)
-                    that.settings.onSelected(that,pid);
-                else
-                    that.settings.onDeselected(that,pid);
-            }).css("cursor", "pointer");
-        }
-    }
 
 // add handler to search bar
-    that = this;
     $('#search').keyup(function(){
-        that.scrollToSearch($(this).val());
+        context.applySearch();
     }); 
+
     $('#search').click(function(event){
-        event.stopPropagation(); //to keep table from sorting by instance number
+//        event.stopPropagation(); //to keep table from sorting by instance number
     });
+
+    var context = this;
+
+    $('#showQualities').click(function(){
+
+        $("#table").find(".typelabel.int").parent().parent().each(function(){
+            if (Object.keys(context.data.objectives).indexOf($(this).find(".path").text()) == -1)
+                $(this).toggleClass("hiddenAsNestedQuality");
+        });
+    });
+
+    $('#saveAll').click(this.saveAll.bind(this)).css("cursor", "pointer");
+
+    $('#instanceshown').html(this.data.instanceCount);
+    $('#instancecount').html(this.data.instanceCount);
+
+});
+
+FeatureQualityMatrix.method("onRendered", function()
+{
+    var context = this;
+
+    this.tableVisualizer = new TableVisualizer("table", {
+        sorting: true,
+        filtering: true,
+        selectable: true,
+        collapsing: true
+    }, {
+        "onFeatureChecked": function(f, value){
+            context.settings.onFeatureCheckedStateChange(context, f, value);
+        },
+        "onSelected": function(i){
+            context.settings.onSelected(context, getPID(i));
+        },
+        "onDeselected": function(i){
+            context.settings.onDeselected(context, getPID(i));
+        },
+        "onMouseOver": function(i){
+            context.settings.onMouseOver(context, getPID(i));
+        },
+        "onMouseOut": function(i){
+            context.settings.onMouseOut(context, getPID(i));
+        }
+
+    });
+
+    this.tableVisualizer.refresh(this.data);    
+
+    this.addControlPanel();
+
+    $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
+    $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
 
 //    this.filter.resetFilters(this.SavedFilters, this.permahidden);
 
     //fire the scroll handler to align table after half a second (fixes chrome bug)
-    setTimeout(function(){$('#mdFeatureQualityMatrix .window-content').scroll()},500);
 
-    this.filter.filterContent();
+//    if ($("#tBody").length > 0)
+//        $("#tBody").colResizable();
 
+    var h1 = $("#mdFeatureQualityMatrix #table").outerHeight();
+    var h2 = $("#mdFeatureQualityMatrix #matrix-panel").outerHeight();
+    var h3 = $("#mdFeatureQualityMatrix .window-titleBar").outerHeight();
+
+    $.resizeWindow(this.id, this.width, h1 + h2 + h3); // resize the table to fit everything
+    
 });
 
 FeatureQualityMatrix.method("getContent", function()
 {
-    return this.content;
-});
-
-
-//input: node in clafer tree, level in tree
-//output: object with unique clafer id, id for display and, display id with indentation
-FeatureQualityMatrix.method("collector", function(clafer, spaceCount)
-{
-    var unit = new Object();
-    unit.claferId = clafer.claferId;
-    unit.displayId = clafer.displayId;
-
-    unit.displayWithMargins = unit.displayId;
-    
-    for (var i = 0; i < spaceCount; i++)
-        unit.displayWithMargins = " " + unit.displayWithMargins;
-
-    abstractClaferOutput.push(unit);
-});
-
-//Traverses clafer tree to and runs collector on every node
-FeatureQualityMatrix.method("traverse", function(clafer, level)
-{
-    this.collector (clafer, level);
-
-    if (clafer.subclafers != null){
-        for (var i = 0; i < clafer.subclafers.length; i++)
-        {
-            this.traverse(clafer.subclafers[i], level + 1);
-        }
-    }
-});
-
-//generate data table
-FeatureQualityMatrix.method("getDataTable", function()
-{
-    var instanceCount = this.instanceProcessor.getInstanceCount();
-
-    var EMfeatures = this.processor.getEffectivelyMandatoryFeatures(this.abstractClaferTree);
-    
-    var parent = null;
-    var current = this.abstractClaferTree;
-    abstractClaferOutput = new Array();
-
-    this.traverse(current, 0);
-    output = abstractClaferOutput;
-    
-    var goalNames = this.processor.getGoals();
-    var result = new DataTable();   
-    result.title = output[0].displayWithMargins;
-    
-    for (var j = 1; j <= instanceCount; j++)
-    {
-        result.products.push(String(j));
-    }
-    
-    for (var i = 0; i < output.length; i++)
-    {
-        var currentMatrixRow = new Array();
-        var currentContextRow = new Array();
-        if (i > 0){ // do not push the parent clafer
-            result.features.push(output[i].displayWithMargins + " " + this.processor.getIfMandatory(output[i].claferId));
-            currentContextRow.push(output[i].displayWithMargins + " " + this.processor.getIfMandatory(output[i].claferId));
-            var featureIsEM = (EMfeatures.indexOf(output[i].displayId) != -1);
-        }
-        else 
-            currentContextRow.push(output[i].displayWithMargins);
-
-        denyAddContextRow = false;
-        
-        for (var j = 1; j <= instanceCount; j++)
-        {
-            if (i == 0)
-            {
-                currentContextRow.push(String(j));
-            }
-            else
-            {
-                sVal = this.instanceProcessor.getFeatureValue(j, output[i].claferId, false);
-                currentMatrixRow.push(sVal);
-                if (sVal == "yes")
-                    currentContextRow.push("X");
-                else if (sVal == "-")
-                    currentContextRow.push("");
-                else
-                    denyAddContextRow = true;
-            }
-        }
-        
-        if (i > 0)
-            result.matrix.push(currentMatrixRow);
-            
-        if (!denyAddContextRow)
-            result.formalContext.push(currentContextRow);
-            result.EMcontext.push(featureIsEM);
-
-
-    }
-    return result;
-
+    return '<div id="table" class="comparison"></div>';
+//    return this.content;
 });
 
 FeatureQualityMatrix.method("clearCachedData", function(row, isOn)
@@ -492,32 +206,32 @@ FeatureQualityMatrix.method("toggleRow", function(row, isOn)
   between transparent and opaque*/
 FeatureQualityMatrix.method("toggleDistinct", function()
 {
+    var context = this;
     this.toggled = !this.toggled;
     if (!this.toggled)
     {
-        var table = $("#comparison table");
         $("#toggle_link").html("Distinct");
-        
-        var rows = table.find("tr");
+
+        var tableBody = $("#table table tBody");        
+        var rows = tableBody.children();
         for (var i = 0; i < rows.length; i++)
         {
-            this.toggleRow(rows[i], true);
+            context.toggleRow(rows[i], true);
         }
     }
     else
     {
         $("#toggle_link").html("Normal");
 
-        var table = $("#comparison");
+        var tableBody = $("#table table tBody");
         
-        var row = table.find("#r1");
-        var i = 1;
-        while (row.length != 0)
-        {
-            var instanceTds = row.find(".td_instance");
+        tableBody.children().each(function(e){
+            var row = $(this);
+            var instanceTds = row.children(".content-cell");
 
             var allAreTheSame = true;
-            var last = "";
+
+            var first = null;
 
 /*  loop iterates through cells until it has crossed an entire row without finding 
     a difference (non-distinct) or it finds a difference (distinct). It will also 
@@ -528,67 +242,77 @@ FeatureQualityMatrix.method("toggleDistinct", function()
                 if ($(instanceTds[j]).css("display") == "none"){ //case for filtered out elements that are hidden
                     //do nothing
                 }
-                else if ($(instanceTds[j]).hasClass("tick"))
+                else
                 {
-                    if (last == "" || last == "tick")
-                        last = "tick";
-                    else {allAreTheSame = false; break;}
-                }   
-                else if ($(instanceTds[j]).hasClass("no"))
-                {
-                    if (last == "" || last == "no")
-                        last = "no";
-                    else {allAreTheSame = false; break;}
+                    var html = $(instanceTds[j]).html();
+
+                    if (!first)
+                        first = html;
+                    else
+                        if (first != html)
+                        {
+                            allAreTheSame = false;
+                            break;
+                        }
                 }
-                else if ($(instanceTds[j]).hasClass("EffectMan")){
-                    allAreTheSame = true; break;
-                }
-                else {allAreTheSame = false; break;}
             }
             
 //  toggles based on outcome of loop
             if (allAreTheSame)
             {
-                this.toggleRow(row, false);
+                context.toggleRow(row, false);
             }
             
-            i++;
-            row = table.find("#r" + i);
-        }
+        });
     }
 //  since the table height has potentially changed we call this to realign the headers. 
-    this.scrollToSearch($("#search").val());
+    this.applySearch();
     return true;
 });
 
 //makes instance red on graph, for actual selection function see onSelected(pid) in selector.js
 FeatureQualityMatrix.method("makePointsSelected", function (pid){;
-    $("#mdFeatureQualityMatrix #th0_" + pid.substring(1)).find("text").css("fill", "Red");
+    this.tableVisualizer.select(parsePID(pid));
 });
 
 //makes instance red on graph, for actual deselection function see onDeselected(pid) in selector.js
 FeatureQualityMatrix.method("makePointsDeselected", function (pid){
-    $("#mdFeatureQualityMatrix #th0_" + pid.substring(1)).find("text").css("fill", "Black");
+    this.tableVisualizer.unselect(parsePID(pid));
 });
 
-FeatureQualityMatrix.method("scrollToSearch", function (input){
-    //method name is from before. doesn't actually scroll... hides rows not containing input.
+FeatureQualityMatrix.method("applySearch", function (){
     //You can search multiple strings by seperating them with a space or comma (or both)
-    var searchStrings = input.split(/[,\s]{1,}/g);
-    var iteratedRow = 0;
-    while (iteratedRow <= $("#comparison #tBody tbody").children().length){
-        var found = false;
-        for (var i = 0; i<searchStrings.length; i++){
-            if ($("#comparison #tBody #r" + iteratedRow).text().toLowerCase().indexOf(searchStrings[i].toLowerCase()) != -1)
-                found = true;
-        }
-        if (found)
-            $("#comparison #tBody #r" + iteratedRow).removeClass("searchOmitted");
-        else
-            $("#comparison #tBody #r" + iteratedRow).addClass("searchOmitted");;
-        iteratedRow++;
+
+    var input = $("#search").val();
+    if (input == "")
+    {
+       $("#table tbody tr").each(function() {
+            $(this).removeClass("hiddenBySearch");
+       });
+       return;
     }
-    $('#mdFeatureQualityMatrix .window-content').scroll();
+
+    var searchStrings = input.toLowerCase().split(/[,\s]{1,}/g);
+
+    $("#table tbody tr").each(function() {
+        var $this = $(this);
+        var found = false;
+        $this.find(".texttosearch").each(function(){
+            for (var i = 0; i < searchStrings.length; i++)
+            {
+                if ($(this).html().toLowerCase().indexOf(searchStrings[i]) != -1)
+                {
+                    $this.removeClass("hiddenBySearch");
+                    found = true;
+                    break;
+                }
+            }
+        });
+
+        if (!found)
+            $this.addClass("hiddenBySearch");
+
+    });
 
 });
 
@@ -596,7 +320,7 @@ FeatureQualityMatrix.method("scrollToSearch", function (input){
 // gets passed the text of the row clicked
 FeatureQualityMatrix.method("rowSort", function(rowText){
     var i=0;
-    var row = $("#comparison #r" + i);
+    var row = $("#table #r" + i);
     while (row.length != 0){
         //finds the correct row
         if (row.find(".numeric").length != 0 || i==0){
@@ -604,17 +328,20 @@ FeatureQualityMatrix.method("rowSort", function(rowText){
             if ($(current).text() == rowText){
                 //gets cells of row and pairs them with their values
                 var instances = row.find(".td_instance");
+                var extra_td = row.find(".td_extra")[0];
                 var sortableArray = [];
                 for(var j=0; j<instances.length; j++){
                     sortableArray.push({ instance: $(instances[j]).attr("id"), value: $(instances[j]).text()} );
                 }
                 //checks what kind of sort is applied
                 if($(current).hasClass("sortDesc")){ //sort instances by descending value
+                    sortableArray.push({ instance: $(extra_td).attr("id"), value: -1000000000} );
                     sortableArray.sort(function(a,b){
                         return a.value - b.value;
                     });
                 }
                 else if($(current).hasClass("sortAsc")){
+                    sortableArray.push({ instance: $(extra_td).attr("id"), value: 1000000000} );
                     sortableArray.sort(function(a,b){ //sort instances by ascending value
                         return b.value - a.value
                     });
@@ -624,14 +351,14 @@ FeatureQualityMatrix.method("rowSort", function(rowText){
                     current = sortableArray.pop().instance;
                     current = current.replace(/[^_]{1,}/, "");
                     //headers
-                    $("#comparison #th0" + current).appendTo("#comparison #r0");
+                    $("#table #th0" + current).appendTo("#table #r0");
                     //body
                     j = 1;
-                    row = $("#comparison #r" + j);
+                    row = $("#table #r" + j);
                     while (row.length != 0){
-                        $("#comparison #td" + (j-1) + current).appendTo(row);
+                        $("#table #td" + (j-1) + current).appendTo(row);
                         j++;
-                        row = $("#comparison #r" + j);
+                        row = $("#table #r" + j);
                     }
 
                 }
@@ -643,8 +370,10 @@ FeatureQualityMatrix.method("rowSort", function(rowText){
             }
         }
         i++;
-        row = $("#comparison #r" + i);
+        row = $("#table #r" + i);
     }
+
+//    this.synchronizeWidths();
 });
 
 FeatureQualityMatrix.method("getInitContent", function()
@@ -652,22 +381,41 @@ FeatureQualityMatrix.method("getInitContent", function()
     return '';     
 });
 
-FeatureQualityMatrix.method("featureChecked", function (feature, state){
-    this.filter.filterContent(); // filter after changing the feature status
-    this.settings.onFeatureCheckedStateChange(this, feature, state);
+FeatureQualityMatrix.method("featureChecked", function (featurePath, state){
+    this.settings.onFeatureCheckedStateChange(this, featurePath, state);
 });
 
 FeatureQualityMatrix.method("removeInstance", function(instanceNum){
-    this.filter.removeInstance(instanceNum);
-    this.settings.onInstanceRemove(this, instanceNum);
+//    this.filter.removeInstance(instanceNum);
+//    this.settings.onInstanceRemove(this, instanceNum);
 });
 
-FeatureQualityMatrix.method("onFeatureCollapsed", function(feature){
-    this.filter.closeFeature(feature);
-    this.settings.onFeatureCollapsed(this, feature);
+//saves all selected instances and downloads them to client
+FeatureQualityMatrix.method("saveAll", function(){
+    var instances = this.data.unparsedInstances;
+    var parser = new InstanceConverter(instances);
+    var data = "";
+    var instanceCount = this.data.instanceCount;
+    for (var i = 1; i <= instanceCount; i++){
+        data += parser.getInstanceData(i) + "\n";
+    }
+    $("#saveAllData").val(data);
+    $("#saveAllForm").submit();
 });
 
-FeatureQualityMatrix.method("onFeatureExpanded", function(feature){
-    this.filter.openFeature(feature);
-    this.settings.onFeatureExpanded(this, feature);
+// this function is called every time a user filters by features or quality values
+FeatureQualityMatrix.method("onFiltered", function(data)
+{
+    this.tableVisualizer.filter(data);
+    $('#instanceshown').html(this.data._instanceShown);    
+});
+
+FeatureQualityMatrix.method("makeHighlighted", function(pid)
+{ 
+    this.tableVisualizer.makeActive(parsePID(pid));
+});
+
+FeatureQualityMatrix.method("makeDehighlighted", function(pid)
+{ 
+    this.tableVisualizer.makeInactive(parsePID(pid));
 });

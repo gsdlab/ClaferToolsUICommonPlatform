@@ -28,43 +28,9 @@ textarea.child {height:100%;}
     height: 22px;
 }
 
-.comparison table td, .comparison table th{
-    border-left: 1px solid #ccc;
-    border-right: 1px solid #ccc;
-    padding:0px 0px 0px 0px;
-}
-
-.comparison table #r0{
-    background: #eee;
-    padding:2px;
-}
-
-.comparison table td{
-    border-bottom: 1px solid #ccc;
-}
-
-img.tick{
-    width:18px;
-    height:18px;
-}
-
 #graph_table{
   table-layout:fixed;
   border-spacing:0px;
-}
-
-img.no{
-    width:18px;
-    height:18px;
-}
-
-th{
-    text-align:center;
-}
-
-th.td_abstract{
-    text-align:left;
-    width:50%;
 }
 
 .axis_drop div{
@@ -79,45 +45,9 @@ th.td_abstract{
     overflow:visible;
 }
 
-td.numeric
-{
-/*  color: #222;*/
-}
-
-td.tick, td.no
-{
-    text-align:center;
-}
-
-
-
-
-
-.help{
-    z-index: 10000;
-    position: absolute;
-    background: white;
-    width: 700px;
-    height: 450px;
-    color: #000000;
-    border: 1px solid #777;
-}
-
-.fadeOverlay{
-    z-index: 9000;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    background: #FFFFFF;
-    opacity: 0.5;
-    top: 0;
-    left: 0;
-}
-
 .window-helpButton.active{
     background: url("images/help_hover.png");
 }
-
 
 .window-helpButton {
     background: url("images/help.png");
@@ -135,3 +65,164 @@ td.tick, td.no
      -webkit-box-sizing:border-box;
      -moz-box-sizing: border-box;
 }
+
+
+.verticalLine {
+    display: inline-block;
+    width: 2px;
+    border-left: 1px solid #ccc;
+    margin-left:5px;
+    margin-right:3px;
+}
+
+/* New Matrix */
+
+.comparison table td, .comparison table th{
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.comparison table td{
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+
+.comparison table #r0{
+    background: #eee;
+    padding:2px;
+}
+
+.comparison table td{
+    border-bottom: 1px solid #ccc;
+}
+
+.comparison th.field-row{
+    text-align:left;
+    padding-top:3px;
+    padding-bottom:3px;
+}
+
+.comparison td.numeric
+{
+/*  color: #222;*/
+}
+
+.comparison td.tick, td.no
+{
+    text-align:left;
+}
+
+.comparison .field-row .typelabel{
+    float: right;
+    display: inline-block;
+    width: 16px;
+    height:16px;
+}
+
+.comparison .field-row .typelabel.int{
+    background: url("images/types/int.png");
+}
+
+.comparison .field-row .typelabel.clafer{
+}
+
+.comparison .field-row .typelabel.bool{
+}
+
+.comparison .field-row .filter_normal{
+    background: url("images/types/bool_normal.png");
+}
+
+.comparison .field-row .filter_checked{
+    background: url("images/types/bool_checked.png");
+}
+
+.comparison .field-row .filter_unchecked{
+    background: url("images/types/bool_unchecked.png");
+}
+
+.comparison .emabstract .filter_checked{
+    background: url("images/types/bool_always_checked.png");
+}
+
+.comparison .emabstract .filter_unchecked{
+    background: url("images/types/bool_always_unchecked.png");
+}
+
+.comparison .emabstract .int{
+    background: url("images/types/int_always_same.png");
+}
+
+.comparison .content-cell, .comparison .extra-cell{
+    padding:3px;
+}
+
+.comparison .field-row{
+    padding-top:3px;
+    padding-bottom:3px;
+}
+
+.comparison .emvalue{
+    color: #bbb;
+}
+
+.comparison tr.hiddenBySearch{
+    display:none;
+}
+
+.comparison img.tick, .comparison img.tickMan {
+    width:14px;
+    height:14px;
+    margin:0;
+}
+
+.comparison img.no, .comparison img.noMan {
+    width:14px;
+    height:14px;
+    margin:0;
+}
+
+.comparison th{
+    text-align:center;
+    background: #ccc;
+    border: 1px solid #777;
+}
+
+.comparison th.selected{
+    color:red;
+}
+
+.comparison th.over{
+    background: rgb(255, 255, 204);
+}
+
+.comparison tr.collapsed{
+    display: none;
+}
+
+.comparison .hiddenAsNestedQuality{
+    display:none;
+}
+
+.comparison .emvalueEq{
+    color: #bbb;
+}
+
+.comparison .field-item.bool, .comparison .field-item.boolclafer {
+    background: #F0E68C;
+}
+
+.comparison td.field-item.emabstract {
+    background-color: #ebebeb;
+}
+
+.comparison td.field-item{
+    background-color: #f9f9f9;    
+}
+
+.comparison .em{
+    background-color: #ebebeb;
+    border-right: none;
+    border-left: none;
+}
+

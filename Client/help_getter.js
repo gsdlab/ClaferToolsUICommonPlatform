@@ -1,20 +1,85 @@
+/*
+Copyright (C) 2012 - 2014 Alexander Murashkin, Neil Redman <http://gsd.uwaterloo.ca>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 function helpGetter(host){
 	this.host = host;
 }
 
-helpGetter.method("getInitial", function (title, version){
-	var content = '<div class="fadeOverlay"></div>';
-	content += '<div id="help" class="help" style="top:50px; left:100px;">';
-	content += '<iframe id="helpContainer" name="helpContainer" class="help" src="/Client/help_pages/intro.html?title=' + title + '&version=' + version + '">';
-	content += '</iframe></div>';
-	content += '<form id="helpForm" target="helpContainer" method="get">';
-	content += '<input type="hidden" name="title" value="' + title + '"/>';
-	content += '<input type="hidden" name="version" value="' + version + '"/>';
-	content += '</form>';
-	return $(content);
+helpGetter.method("createWindow", function(){
+    var x = $.newWindow({
+        id: "help",
+        title: "Help",
+        width: 700,
+        height: 500,
+        posx: 100,
+        posy: 100,
+        content: '<iframe id="helpFrame" border="0"></iframe>',
+        type: "iframe",
+        statusBar: true,
+        minimizeButton: true,
+        maximizeButton: true,
+        closeButton: true,
+        draggable: true,
+        resizeable: true,
+        modal: true
+    });  
+
+	this.setListeners();
+
+});
+
+helpGetter.method("initialize", function (title, version){
+	this.title = title;
+	this.version = version;
+
+    var displayHelp = getCookie("displayIntroHelp");
+    if (displayHelp == null)
+    {
+		this.createWindow();
+		$.updateWindowContentWithAjax("help", '/Client/help_pages/intro.html?title=' + this.title + '&version=' + this.version);
+	}
 });
 
 helpGetter.method("setListeners", function(){
+
+	$("#helpFrame")[0].onload = function(){
+		if ($("#helpFrame").contents().find("#noIDEHelpChoice").length > 0)
+		{
+			$("#helpFrame").contents().find("#noIDEHelpChoice").on('click', function(event) { 
+				if ($(this).is(":checked"))
+				{
+					setCookie("displayIntroHelp", "no", 5);
+				} 
+				else
+				{
+//					alert("not checked");	
+				}
+			});
+		}
+	};
+
+//	alert(length);//.contents().find("#noIDEHelpChoice").length);
+//	$("#helpFrame").contents().find("#noIDEHelpChoice").on('click', function(event) { alert('test'); });
+/*
 	$(".fadeOverlay").click(function(){
 		$("#help").hide(500);
 		$(".fadeOverlay").hide(500);
@@ -24,13 +89,13 @@ helpGetter.method("setListeners", function(){
 			}
 		}
 	});
+*/
 });
 
-helpGetter.method("getHelp", function (moduleName){
-	$("#helpForm").attr("action", "/Client/help_pages/" + moduleName + ".html");
-    $("#helpForm").submit();
-    $("#help").show(500);
-    $(".fadeOverlay").show(500);
+helpGetter.method("getHelp", function (moduleName)
+{
+	this.createWindow();
+	$.updateWindowContentWithAjax("help", '/Client/help_pages/' + moduleName + '.html?title=' + this.title + '&version=' + this.version);
 });
 
 helpGetter.method("getHelpButton", function(moduleName){

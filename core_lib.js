@@ -1,3 +1,24 @@
+/*
+Copyright (C) 2012 - 2014 Alexander Murashkin, Neil Redman <http://gsd.uwaterloo.ca>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 var fs = require("fs");
 var config = require('./../config.json');
 var backendConfig = require('./../Backends/backends.json');
@@ -109,10 +130,36 @@ processRemoveOlder = function (key)
     }
 };
 
+var defaultProcess = function (process)
+{   
+    process.toRemoveCompletely = false; 
+    process.tool = null;
+    process.freshData = ""; 
+    process.scopes = "";
+    process.clafer_compiler = null;
+    process.mode = "compiler"; 
+    process.freshError = "";
+    return process;
+};
+
+var resetProcessToCompilerMode = function (process)
+{   
+    timeoutProcessClearPing(process); // we need to clear the timeout, because it will be replaced by compilation process' timeout
+    process.toRemoveCompletely = false; 
+//    process.tool = null;
+//    process.freshData = ""; 
+    process.scopes = "";
+//    process.clafer_compiler = null;
+    process.mode = "compiler"; 
+//    process.freshError = "";
+    return process;
+};
+
 var addProcess = function (process)
-{    
+{   
     processRemoveOlder(process.windowKey);
-    processes.push(process);
+    processes.push(defaultProcess(process));
+    return getProcess(process.windowKey);
 };
 
 var pingTimeoutFunc = function (process)
@@ -177,9 +224,9 @@ var getDependencyVersionsText = function(callback)
     return dependencyVersions;
 };
 
-var addDependency = function(path, args, title)
+var addDependency = function(path, args, title, isVitallyImportant)
 {
-    dependencies.push({path : path, args : args, title : title, id: dependencies.length, tool_version: ""});
+    dependencies.push({path : path, args : args, title : title, id: dependencies.length, tool_version: "", vitallyImportant: isVitallyImportant});
 };
 
 function checkDependency(dependency, callback)
@@ -207,7 +254,15 @@ function checkDependency(dependency, callback)
         }
         else
         {
-            logNormal('ERROR: Non-zero return code of "' + dependency.title + '": "' + code + '". Please check whether it is installed and accessible.');
+            if (dependency.vitallyImportant)
+            {
+                logNormal('FATAL ERROR: Non-zero return code of "' + dependency.title + '": "' + code + '". Please check whether it is installed and accessible.');
+            }
+            else
+            {
+                logNormal('Warning: Non-zero return code of "' + dependency.title + '": "' + code + '". Please check whether it is installed and accessible. Proceeding anyway.');
+                dependency_ok(dependency, callback);
+            }
         }
     });
 }
@@ -416,9 +471,41 @@ var getVersion = function()
 var getTitle = function()
     {
         return packageConfig.name;
-    };                            
+    };                         
+
+
+var buildArg = function (args, config, value)
+    {
+        if (config && config.argument) 
+        {
+            var finalValue;
+
+            if (value)
+                finalValue = value;
+            else if (config.off_value)
+                finalValue = config.off_value;
+            else
+                return args;
+
+            var replacement = [
+                {
+                    "needle": "$value$", 
+                    "replacement": finalValue
+                }
+            ];
+
+            var curArg = replaceTemplate(config.argument, replacement);
+            args.push(curArg);
+            return args;
+        }
+        else
+            return args;
+
+    };
+
 
 module.exports.addProcess = addProcess;
+module.exports.resetProcessToCompilerMode = resetProcessToCompilerMode;
 module.exports.getProcess = getProcess;
 module.exports.timeoutProcessSetPing = timeoutProcessSetPing;
 module.exports.timeoutProcessClearPing = timeoutProcessClearPing;
@@ -445,3 +532,4 @@ module.exports.filterArgs = filterArgs;
 module.exports.getTitle = getTitle;
 module.exports.getVersion = getVersion;
 module.exports.getDependencyVersionsText = getDependencyVersionsText;
+module.exports.buildArg = buildArg;

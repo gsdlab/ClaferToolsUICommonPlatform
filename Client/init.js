@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2012, 2013 Alexander Murashkin <http://gsd.uwaterloo.ca>
+Copyright (C) 2012 - 2014 Alexander Murashkin, Neil Redman <http://gsd.uwaterloo.ca>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -70,6 +70,12 @@ var stringToFunction = function(str) {
   return  fn;
 };
 
+d3.selection.prototype.moveToFront = function() {
+  return this.each(function(){
+    this.parentNode.appendChild(this);
+  });
+};
+
  RegExp.quote = function(str) {
      return str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
  };
@@ -83,6 +89,17 @@ Array.prototype.remove = function(from, to) {
   this.length = from < 0 ? this.length + from : from;
   return this.push.apply(this, rest);
 };
+
+/* date-time extensions: http://stackoverflow.com/questions/10211145/getting-current-date-and-time-in-javascript*/
+// For todays date:
+Date.prototype.today = function () { 
+    return ((this.getDate() < 10)?"0":"") + this.getDate() +"/"+(((this.getMonth()+1) < 10)?"0":"") + (this.getMonth()+1) +"/"+ this.getFullYear();
+}
+
+// For the time now
+Date.prototype.timeNow = function () {
+     return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
+}
 
 function isNumeric(input)
 {
@@ -134,4 +151,32 @@ function setCookie(c_name,value,exdays)
   c_value = unescape(c_value.substring(c_start,c_end));
   }
   return c_value;
+}
+
+Array.prototype.insert = function(index) {
+    this.splice.apply(this, [index, 0].concat(
+        Array.prototype.slice.call(arguments, 1)));
+    return this;
+};
+
+/* escaping-unescaping html (and XML) Taken from stackoverflow */
+
+if (!String.prototype.encodeHTML) {
+  String.prototype.encodeHTML = function () {
+    return this.replace(/&/g, '&amp;')
+               .replace(/</g, '&lt;')
+               .replace(/>/g, '&gt;')
+               .replace(/"/g, '&quot;')
+               .replace(/'/g, '&apos;');
+  };
+}
+
+if (!String.prototype.decodeHTML) {
+  String.prototype.decodeHTML = function () {
+    return this.replace(/&apos;/g, "'")
+               .replace(/&quot;/g, '"')
+               .replace(/&gt;/g, '>')
+               .replace(/&lt;/g, '<')
+               .replace(/&amp;/g, '&');
+  };
 }

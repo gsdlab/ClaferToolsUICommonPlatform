@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2012 Neil Redman <http://gsd.uwaterloo.ca>
+Copyright (C) 2012 - 2014 Alexander Murashkin, Neil Redman <http://gsd.uwaterloo.ca>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -64,19 +64,18 @@ Control.method("getInitContent", function(){
 
     ret += '<tr id="defaultScopeSettings">';
 
-    ret += '<td style="padding: 0px 4px 0px 4px">All:</td>';
-    ret += '<td><input type="text" class="scopeInput" title="Enter the delta by which increase scopes" size="2" value="1" id="allScopesDelta"/><button id="incAllScopes" title="Increase all the scopes by the specified value">Inc</button></td>';
+    ret += '<td style="padding: 0px 4px 0px 4px" id="defaultScopeSettingsIncLabel">All:</td>';
+    ret += '<td><input type="text" class="scopeInput" title="Enter the delta by which increase scopes" size="2" value="1" id="allScopesDelta" name="allScopesDelta"/><button id="incAllScopes" title="Increase all the scopes by the specified value">Inc</button></td>';
 
-    ret += '<td style="padding: 0px 4px 0px 12px; border-left: 2px groove threedface;">Default:</td>';
-    ret += '<td ><input type="text" class="scopeInput" title="Enter the scope (an integer from 0 up to a number the backend can handle)" size="2" value="1" id="defaultScopeValue"/><button id="setDefaultScope" title="Set the default scope">Set</button></td>';
+    ret += '<td style="padding: 0px 4px 0px 12px; border-left: 2px groove threedface;" id="defaultScopeSettingsSetLabel">Default:</td>';
+    ret += '<td ><input type="text" class="scopeInput" title="Enter the scope (an integer from 0 up to a number the backend can handle)" size="2" value="1" id="defaultScopeValue" name="defaultScopeValue"/><button id="setDefaultScope" title="Set the default scope">Set</button></td>';
 
-    ret += '</tr>';
-
-    ret += '<tr><td colspan="4"><div style="border-bottom: 2px groove threedface; height:6px;"></div></td>';
     ret += '</tr>';
 
     ret += '</table>';
-    ret += '<table width="100%" border="0" cellspacing="0" cellpadding="0">'; 
+    ret += '<table width="100%" border="0" cellspacing="0" cellpadding="0" id="individualScopeSettings">'; 
+    ret += '<tr><td colspan="4"><div style="border-bottom: 2px groove threedface; height:6px;"></div></td>';
+    ret += '</tr>';
     ret += '<tr id="claferScopeSettings1">';
     ret += '<td style="padding: 0px 4px 0px 4px" width="60">Custom:</td>';
     ret += '<td colspan="3">';
@@ -109,9 +108,6 @@ Control.method("getInitContent", function(){
     ret += '<td><input type="text" class="scopeInput" size="2" value="63" id="intHighScopeValue" title="Enter the upper bound for unknown integers" name="intHighScopeValue"/>';
     ret += '<button id="setIntScope" title="Set the selected scope for integers">Set</button></td>';
     ret += '</tr>';
-
-//    ret += '<tr id="bitwidthSettings"><td style="padding-left:4px;padding-right:4px" width="60">Bitwidth:</td>';
-//    ret += '<td><input type="text" class="scopeInput" size="2" value="4" id="bitwidthValue" title="Enter the bitwidth for unknown integers"/><button id="setBitwidth" title="Set the selected bitwidth">Set</button></td></tr>';
 
     ret += '</table>';
     ret += '</fieldset>';
@@ -187,7 +183,6 @@ Control.method("onInitRendered", function()
     $("#setDefaultScope")[0].onclick = this.setDefaultScopeClick.bind(this);
     $("#setIndividualScope")[0].onclick = this.setIndividualScopeClick.bind(this);
     $("#setIntScope")[0].onclick = this.setIntScopeClick.bind(this);
-//    $("#setBitwidth")[0].onclick = this.setBitwidthClick.bind(this);
     $("#incAllScopes")[0].onclick = this.incAllScopesClick.bind(this);
     $("#incIndividualScope")[0].onclick = this.incIndividualScopeClick.bind(this);
  
@@ -204,25 +199,7 @@ Control.method("resetControls", function(){
     $("#RunStop").val("Run");
     $("#RunStop").attr("title", "Run the chosen instance generator");
 
-
-    var selectedId = $("#BackendId").val();
-    
-    for (var i = 0; i < this.backends.length; i++)
-    {
-        if (this.backends[i].id == selectedId)
-        {
-            if (this.backends[i].scope_options.set_int_scope.argument)
-            {
-                $("#intHighScopeValue").removeAttr("disabled");   
-            }
-            else 
-            {
-                $("#intHighScopeValue").attr("disabled", "disabled");   
-            }
-
-            break;
-        }
-    }
+    this.adjustBackendArgumentSettings();
     
 });
 
@@ -232,6 +209,7 @@ Control.method("runStopClick", function(){
         if (this.settings.onStart(this))
         {
             $("#ControlOp").val("run");
+            this.host.makeBusy(true);
             this.sessionActive = true; // activating IG session
             $("#ControlForm").submit();
         }
@@ -249,45 +227,33 @@ Control.method("runStopClick", function(){
 Control.method("setDefaultScopeClick", function(){
     $("#ControlOp").val("setDefaultScope");
     $("#ControlOpArg1").val($ ("#defaultScopeValue").val());
-//    $("#ControlForm").submit();
 });
 
 Control.method("incAllScopesClick", function(){
     $("#ControlOp").val("incAllScopes");
     $("#ControlOpArg1").val($ ("#allScopesDelta").val());
-//    $("#ControlForm").submit();
 });
 
 Control.method("setIndividualScopeClick", function(){
     $("#ControlOp").val("setIndividualScope");
     $("#ControlOpArg1").val($ ("#individualScopeValue").val());
     $("#ControlOpArg2").val($ ("#individualClafer").val());
-//    $("#ControlForm").submit();
 });
 
 Control.method("incIndividualScopeClick", function(){
     $("#ControlOp").val("incIndividualScope");
     $("#ControlOpArg1").val($ ("#individualScopeDelta").val());
     $("#ControlOpArg2").val($ ("#individualClafer").val());
-//    $("#ControlForm").submit();
 });
 
 Control.method("setIntScopeClick", function(){
     $("#ControlOp").val("setIntScope");
-//    $("#ControlOpArg1").val($ ("#intLowScopeValue").val());
     $("#ControlOpArg1").val($ ("#intHighScopeValue").val());
-//    $("#ControlForm").submit();
 });
-
-//Control.method("setBitwidthClick", function(){
-//    $("#ControlOp").val("setBitwidth");
-//    $("#ControlOpArg1").val($ ("#bitwidthValue").val());
-////    $("#ControlForm").submit();
-//});
 
 Control.method("enableRuntimeControls", function(){
     $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button").removeAttr("disabled");
-    $("#RunStop").val("Stop");
+    $("#RunStop").val("Kill");
     $("#RunStop").attr("title", "Force the running backend to stop");
 
     $("#setIndividualScope").removeAttr("disabled");
@@ -327,35 +293,11 @@ Control.method("disableRuntimeControls", function(){
     $("#individualScopeDelta").attr("disabled", "disabled");    
     $("#incAllScopes").attr("disabled", "disabled");
     $("#allScopesDelta").attr("disabled", "disabled");
-
-//    $("#intLowScopeValue").attr("disabled", "disabled");    
-
-
-    var selectedId = $("#BackendId").val();
-    
-    for (var i = 0; i < this.backends.length; i++)
-    {
-        if (this.backends[i].id == selectedId)
-        {
-            if (this.backends[i].scope_options.set_int_scope.argument)
-            {
-                $("#intHighScopeValue").removeAttr("disabled");   
-            }
-            else 
-            {
-                $("#intHighScopeValue").attr("disabled", "disabled");   
-            }
-
-            break;
-        }
-    }
-
-    $("#setIntScope").attr("disabled", "disabled");   
-
-//    $("#bitwidthValue").attr("disabled", "disabled");   
-//    $("#setBitwidth").attr("disabled", "disabled"); 
+    $("#setIntScope").attr("disabled", "disabled");
 
     $("#backend").removeAttr("disabled");
+
+    this.adjustBackendArgumentSettings();
 });
 
 Control.method("disableAll", function(){
@@ -373,32 +315,8 @@ Control.method("disableAll", function(){
     $("#incAllScopes").attr("disabled", "disabled"); 
     $("#allScopesDelta").attr("disabled", "disabled"); 
 
-//    $("#intLowScopeValue").attr("disabled", "disabled");    
-/*
-    var selectedId = $("#BackendId").val();
-    
-    for (var i = 0; i < this.backends.length; i++)
-    {
-        if (this.backends[i].id == selectedId)
-        {
-            if (this.backends[i].scope_options.set_int_scope.argument)
-            {
-                $("#intHighScopeValue").removeAttr("disabled");   
-            }
-            else 
-            {
-                $("#intHighScopeValue").attr("disabled", "disabled");   
-            }
-
-            break;
-        }
-    }
-*/
     $("#intHighScopeValue").attr("disabled", "disabled");   
     $("#setIntScope").attr("disabled", "disabled");   
-
-//    $("#bitwidthValue").attr("disabled", "disabled");   
-//    $("#setBitwidth").attr("disabled", "disabled"); 
 
     $("#backend").removeAttr("disabled");    
 });
@@ -431,10 +349,6 @@ Control.method("showResponse", function(responseText, statusText, xhr, $form)
     {
         this.settings.onIntScopeSet(this);
     }
-//    else if (responseText == "bitwidth_set" && this.settings.onBitwidthSet)
-//    {
-//        this.settings.onBitwidthSet(this);
-//    }        
     else if (responseText == "individual_scope_set" && this.settings.onIndividualScopeSet)
     {
         this.settings.onIndividualScopeSet(this);
@@ -461,17 +375,10 @@ Control.method("handleError", function(response, statusText, xhr)  {
     clearTimeout(this.pollingTimeoutObject);
     
     this.sessionActive = false;
-    
-    var er = document.getElementById("error_overlay");
-    er.style.display = "block"; 
-    var caption = this.settings.onError(this, statusText, response, xhr);
-
-    document.getElementById("error_report").innerHTML = ('<span id="close_error" alt="close">Close Message</span><p>' + caption + "</p>");
-    document.getElementById("close_error").onclick = function(){ 
-        document.getElementById("error_overlay").style.display = "none";
-    };
+    this.host.makeBusy(false);
 
     this.endQuery();
+    this.settings.onError(this, statusText, response, xhr);
     
 });
 
@@ -497,16 +404,11 @@ Control.method("onPoll", function(responseObject)
         this.settings.onCompleted(this, responseObject);
         this.disableRuntimeControls();
         this.sessionActive = false;
+        this.host.makeBusy(false);
     }
     else
     {
-//        if (responseObject.message.length >= 5 && responseObject.message.substring(0,5) == "Error")
-//        {
-//        }
-//        else
-//        {
-            this.pollingTimeoutObject = setTimeout(this.poll.bind(this), this.pollingDelay);
-//        }
+        this.pollingTimeoutObject = setTimeout(this.poll.bind(this), this.pollingDelay);
     }
 });        
 
@@ -566,14 +468,154 @@ Control.method("updateClaferList", function(jsonList){
     var left = this.posx + "px";
     var top = 0 + "px";
 
-    var height = this.host.findModule("mdCompiledFormats").height + "px";
-    var width = this.host.findModule("mdCompiledFormats").width + "px";
+    var height = "300" + "px";
+    var width = "300" + "px";
 
     $("#ClaferListCont .chosen-drop")[0].style.left = left;    
     $("#ClaferListCont .chosen-drop")[0].style.top = top;    
     $("#ClaferListCont .chosen-drop")[0].style.width = width;    
     $("#ClaferListCont .chosen-results")[0].style.maxHeight = height;    
 
+});
+
+
+Control.method("adjustBackendSettings", function(backend)
+{
+    var hasIntScopeSettings = false;
+
+    if (backend.scope_options.set_int_scope)
+    {
+        $("#intScopeSettings").show();
+        if (backend.scope_options.set_int_scope.default_value)
+        {
+            $("#intHighScopeValue").val(backend.scope_options.set_int_scope.default_value);
+        }
+
+        if (backend.scope_options.set_int_scope.argument)
+        {
+            $("#intHighScopeValue").removeAttr("disabled");   
+        }
+        else 
+        {
+            $("#intHighScopeValue").attr("disabled", "disabled");   
+        }                
+
+        hasIntScopeSettings = true;
+    }
+    else
+    {
+        $("#intScopeSettings").hide();                
+    }
+
+    if (backend.scope_options.set_individual_scope)
+    {
+        $("#individualScopeSettings").show();
+    }
+    else
+    {
+        $("#individualScopeSettings").hide();                
+    }
+
+    if (backend.scope_options.inc_all_scopes)
+    {
+        var label = "All:";
+        if (backend.scope_options.inc_all_scopes.label)
+        {
+            label = backend.scope_options.inc_all_scopes.label;
+        }
+        $("#defaultScopeSettingsIncLabel").html(label);
+
+        if (backend.scope_options.inc_all_scopes.argument)
+        {
+            $("#allScopesDelta").removeAttr("disabled");   
+        }
+        else 
+        {
+            $("#allScopesDelta").attr("disabled", "disabled");   
+        }                
+
+        if (backend.scope_options.inc_all_scopes.default_value)
+        {
+            $("#allScopesDelta").val(backend.scope_options.inc_all_scopes.default_value);
+        }
+    }
+
+    if (backend.scope_options.set_default_scope)
+    {
+
+        var label = "Default:";
+        if (backend.scope_options.set_default_scope.label)
+        {
+            label = backend.scope_options.set_default_scope.label;
+        }
+
+        $("#defaultScopeSettingsSetLabel").html(label);
+
+        if (backend.scope_options.set_default_scope.argument)
+        {
+            $("#defaultScopeValue").removeAttr("disabled");   
+        }
+        else 
+        {
+            $("#defaultScopeValue").attr("disabled", "disabled");   
+        }                
+
+        if (backend.scope_options.set_default_scope.default_value)
+        {
+            $("#defaultScopeValue").val(backend.scope_options.set_default_scope.default_value);
+        }
+    }
+
+
+    if (hasIntScopeSettings)
+    {
+        $("#intControl").show();        
+    }
+    else
+    {
+        $("#intControl").hide();        
+    }
+
+});
+
+Control.method("adjustBackendArgumentSettings", function()
+{
+    var selectedId = $("#BackendId").val();
+    
+    for (var i = 0; i < this.backends.length; i++)
+    {
+        if (this.backends[i].id == selectedId)
+        {
+            if (this.backends[i].scope_options && this.backends[i].scope_options.set_int_scope && this.backends[i].scope_options.set_int_scope.argument)
+            {
+                $("#intHighScopeValue").removeAttr("disabled");   
+            }
+            else 
+            {
+                $("#intHighScopeValue").attr("disabled", "disabled");   
+            }
+
+            if (this.backends[i].scope_options && this.backends[i].scope_options.set_default_scope && this.backends[i].scope_options.set_default_scope.argument)
+            {
+                $("#defaultScopeValue").removeAttr("disabled");   
+            }
+            else 
+            {
+                $("#defaultScopeValue").attr("disabled", "disabled");   
+            }            
+
+            if (this.backends[i].scope_options && this.backends[i].scope_options.inc_all_scopes && this.backends[i].scope_options.inc_all_scopes.argument)
+            {
+                $("#allScopesDelta").removeAttr("disabled");   
+            }
+            else 
+            {
+                $("#allScopesDelta").attr("disabled", "disabled");   
+            }            
+
+            break;
+        }
+    }
 });
 
 Control.method("onBackendChange", function()
@@ -587,51 +629,46 @@ Control.method("onBackendChange", function()
     $("#backendButtons").children("#" + selectedId + "_buttons")[0].style.display = "block";
 
     var result = null;
-    var found = false;
 
     for (var i = 0; i < this.backends.length; i++)
     {
         if (this.backends[i].id == selectedId)
         {
             result = this.backends[i];
-
-            if (this.backends[i].scope_options.set_int_scope)
-            {
-                $("#intScopeSettings").show();
-                if (this.backends[i].scope_options.set_int_scope.default_value)
-                {
-                    $("#intHighScopeValue").val(this.backends[i].scope_options.set_int_scope.default_value);
-                }
-
-                found = true;
-            }
-            else
-            {
-                $("#intScopeSettings").hide();                
-            }
-
-//            if (this.backends[i].scope_options.set_bitwidth)
-//            {
-//                $("#bitwidthSettings").show();
-//            }
-//            else
-//            {
-//                $("#bitwidthSettings").hide();                
-//            }
-//
-//            break;            
+            this.adjustBackendSettings(result);
+            break;
         }
-    }
-
-    if (found)
-    {
-        $("#intControl").show();        
-    }
-    else
-    {
-        $("#intControl").hide();        
     }
 
     if (this.settings.onBackendChange) 
         this.settings.onBackendChange(this, result);
+});
+
+Control.method("reload", function()
+{       
+    this.resumePolling();
+
+    var selectedId = $( "#backend option:selected" ).val();
+    var reloadButton = $("#" + selectedId + "-reload");
+
+    if ($(reloadButton).length > 0) // has reload button
+    {
+        reloadButton.click();
+        return true;
+    }
+    else
+    {
+        // no reload button
+        return false;
+    }
+});
+
+Control.method("pausePolling", function()
+{
+    clearTimeout(this.pollingTimeoutObject); // it's replaced with the compilation timeout 
+});
+
+Control.method("resumePolling", function()
+{
+    this.pollingTimeoutObject = setTimeout(this.poll.bind(this), this.pollingDelay); // start polling
 });

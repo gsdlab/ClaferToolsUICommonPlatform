@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2012, 2013 Alexander Murashkin, Neil Redman <http://gsd.uwaterloo.ca>
+Copyright (C) 2012 - 2014 Alexander Murashkin, Neil Redman <http://gsd.uwaterloo.ca>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -19,25 +19,33 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-//var mdComparisonTable;
-//var mdGoals;
-//var mdGraph;
-//var mdConsole;
-//var mdInput;
-
-var host = null;
 
 $(document).ready(function()
 {
     var configuration = getConfiguration();    
     
-    host = new Host(configuration.modules, configuration.settings);
+    new Host(configuration.modules, configuration.settings);
 
-    window.onbeforeunload = exitConfirmation;
+});
+
+Host.method("makeBusy", function(isOn)
+{
+    if (isOn)
+    {
+        $(window).bind("beforeunload", exitConfirmation);
+    }
+    else
+    {
+        $(window).unbind("beforeunload");
+    }
+
 });
 
 function exitConfirmation() {
-    return 'Are you sure you want to quit? The tool does not save any of results, so you are responsible for saving your results.';
+    return ['The tool is in the middle of something running now...\n',
+            'Are you sure you want to close the tool?\n',
+            'If you exit now, your session will be cleared. If you have some data unsaved, you may want to save it first.\n',
+            'Close the tool now?'].join("");
 }
 
 function getParameterByName(name) {
@@ -98,7 +106,7 @@ function Host(modules, settings)
         
         if (this.modules[i].resize)
         {
-            resize = this.modules[i].resize;
+            resize = this.modules[i].resize.bind(this.modules[i]);
         }
 
         var windowType = "normal";
@@ -155,35 +163,25 @@ function Host(modules, settings)
             var versions = data.versions;
             context.print(versions);            
             context.loaded(context);
-            context.displayHelp(data.title, data.version);
+            context.initHelp(data.title, data.version);
         }
     ).error(function() 
         { 
             alert("Could not get server initialization data. Could not print versions");
             context.loaded(context);
-            context.displayHelp(data.title, data.version);
+            context.initHelp(data.title, data.version);
         });
 }
 
-Host.method("displayHelp", function(title, version)
+Host.method("initHelp", function(title, version)
 {
-    var displayHelp=getCookie("displayIntroHelp");
-    if(displayHelp==null){
-        $("body").prepend(this.helpGetter.getInitial(title, version));
-        this.helpGetter.setListeners();
-    }else{
-        $("body").prepend(this.helpGetter.getInitial(title, version));
-        this.helpGetter.setListeners();
-        $("#help").hide();
-        $(".fadeOverlay").hide();
-    }
+    this.helpGetter.initialize(title, version);
 
     for (var i = 0; i < this.modules.length; i++)
     {
         var helpButton = this.getHelpButton(this.modules[i].id);
         $("#" + this.modules[i].id + " .window-titleBar").append(helpButton);   
     }
-
 });
 
 Host.method("loaded", function(module)
@@ -224,4 +222,31 @@ Host.method("getHelp", function(moduleName){
 
 Host.method("getHelpButton", function(moduleName){
     return this.helpGetter.getHelpButton(moduleName);
+});
+
+Host.method("errorWindow", function(errorRecord){
+
+    var htmlTitle = '<b>' + errorRecord.caption + '</b>'; 
+    var htmlTime = errorRecord.datetime; 
+    var htmlBody = errorRecord.body.replaceAll("\\n", "<br>").replaceAll("\\t", "&nbsp;&nbsp;").replaceAll("\\r", "").replaceAll("\\\"", "\"") + "<br><br>" + errorRecord.contact;
+    var content = htmlTime + '<br>' + htmlBody;
+
+    var x = $.newWindow({
+        id: "error",
+        title: errorRecord.caption,
+        width: 700,
+        height: 500,
+        posx: 100,
+        posy: 100,
+        content: content,
+        type: "normal",
+        statusBar: true,
+        minimizeButton: true,
+        maximizeButton: true,
+        closeButton: true,
+        draggable: true,
+        resizeable: true,
+        modal: true
+    });  
+
 });

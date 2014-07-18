@@ -1,3 +1,24 @@
+/*
+Copyright (C) 2012 - 2014 Alexander Murashkin, Neil Redman <http://gsd.uwaterloo.ca>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 //====================================================
 // Libraries and misc functions
 //====================================================
@@ -64,7 +85,7 @@ var getMainHTML = function()
     return contents;
 }
 
-var handleUploads = function(req, res, next, finalCallback)
+var handleUploads = function(req, res, next, finalCallback, reuseEnabled)
 	{
 
 		core.logSpecific("---Upload request initiated.", req.body.windowKey);
@@ -154,7 +175,7 @@ var handleUploads = function(req, res, next, finalCallback)
 	                core.logSpecific(err, req.body.windowKey);
 	            } else {
 	                core.logSpecific("The file was saved to ./uploads", req.body.windowKey);
-	                moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback);
+	                moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback, reuseEnabled);
 	            }
 	        });
 
@@ -181,50 +202,85 @@ var handleUploads = function(req, res, next, finalCallback)
 	            }).on('end', function(){
 	                file.end();
 	                core.logSpecific("File downloaded to ./uploads", req.body.windowKey);
-	                moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback);
+	                moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback, reuseEnabled);
 	            });
 	        });
 	    }
 	    else
 	    {
 	        if (req.body.exampleFlag != "2") 
-	        	moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback);
+	        	moveUploadedFile(req, res, next, uploadedFilePath, urlFile, finalCallback, reuseEnabled);
 	    }
 	};
 
-var moveUploadedFile = function (req, res, next, uploadedFilePath, urlFile, callback)
-	{                    
-	    var i = 0;
-	    while(fs.existsSync("./uploads/" + i + "tempfolder/")){
-	        i++;
-	    }
-	    core.logSpecific("Uploaded file: " + uploadedFilePath, req.body.windowKey);
-	    var pathTokens = "." + uploadedFilePath.split("Server")[1];
-	    core.logSpecific("Partial path: " + pathTokens, req.body.windowKey);
-	    
-	    var pathTokensLinux = pathTokens.split("/");
-	    var pathTokensWindows = pathTokens.split("\\");
-	    
-	    if (pathTokensWindows.length > pathTokensLinux.length)
-	        pathTokens = pathTokensWindows;
-	    else    
-	        pathTokens = pathTokensLinux;
-	    
-	    core.logSpecific('Path tokens: "' + pathTokens.join('; ') + '"', req.body.windowKey);
-	    var oldPath = uploadedFilePath;
-	    uploadedFilePath = ROOT + "/" + pathTokens[1] + "/" + i + "tempfolder/"; // this slash will work anyways
-	    fs.mkdir(uploadedFilePath, function (err){
-	        if (err) throw err;
-	        var uploadedFileDir = uploadedFilePath;
-	        uploadedFilePath += pathTokens[2];
-	        uploadedFilePath = uploadedFilePath.substring(0, uploadedFilePath.length - 4); // to remove the extention
+var generateTargetDirAndFilePath = function (oldPath, key)
+    {                    
+        var i = 0;
+        while(fs.existsSync("./uploads/" + i + "tempfolder/")){
+            i++;
+        }
+        core.logSpecific("Uploaded file: " + oldPath, key);
+        var pathTokens = "." + oldPath.split("Server")[1];
+        core.logSpecific("Partial path: " + oldPath, key);
+        
+        var pathTokensLinux = pathTokens.split("/");
+        var pathTokensWindows = pathTokens.split("\\");
+        
+        if (pathTokensWindows.length > pathTokensLinux.length)
+            pathTokens = pathTokensWindows;
+        else    
+            pathTokens = pathTokensLinux;
+        
+        core.logSpecific('Path tokens: "' + pathTokens.join('; ') + '"', key);
 
-	        fs.rename(oldPath, uploadedFilePath + req.body.fileExt, function (err){
-	            if (err) throw err;
-	            core.logSpecific("Proceeding with " + uploadedFilePath, req.body.windowKey);
-	            callback(uploadedFilePath, uploadedFileDir, urlFile);
-	        });
-	    });
+        var result = {};
+
+        result.folder = ROOT + "/" + pathTokens[1] + "/" + i + "tempfolder/"; // forward slash will work anyways
+        var targetFilePath = result.folder + pathTokens[2];
+        result.filePathWithoutExt = targetFilePath.substring(0, targetFilePath.length - 4); // we remove the extension to easy form other file paths (JS, HTML, etc.)
+        return result;
+    };
+
+var moveUploadedFile = function (req, res, next, oldPath, urlFile, callback, reuseEnabled)
+	{                    
+        // here we need to check whether we need to generate a new path, or to upload to the same one (reload)
+
+        var existingProcess = core.getProcess(req.body.windowKey);
+
+        if (existingProcess && (reuseEnabled === true))
+        {
+            console.log(existingProcess.file);
+            fs.rename(oldPath, existingProcess.file + req.body.fileExt, function (err){
+                if (err) throw err;
+                core.logSpecific("Proceeding with existing session file " + existingProcess.file, req.body.windowKey);
+                existingProcess.urlFile = urlFile;
+                callback(core.resetProcessToCompilerMode(existingProcess));
+            });
+        }
+        else
+        {
+            var generated = generateTargetDirAndFilePath(oldPath, req.body.windowKey);
+            var targetDir = generated.folder;
+            var targetFilePath = generated.filePathWithoutExt;
+
+            fs.mkdir(targetDir, function (err){
+                if (err) throw err;
+
+                fs.rename(oldPath, targetFilePath  + req.body.fileExt, function (err){
+                    if (err) throw err;
+                    core.logSpecific("Proceeding with a new session file " + targetFilePath, req.body.windowKey);
+                    var newProcess = core.addProcess({ 
+                        windowKey: req.body.windowKey, 
+                        folder: targetDir,
+                        urlFile: urlFile, 
+                        file: targetFilePath});    
+
+                    callback(newProcess);
+                });
+            });
+
+        }
+
 	};
 
 
@@ -384,7 +440,7 @@ var writeCommand = function(process, command)
     }
     catch(e)
     {
-        console.logSpecific("Error: Could not write the command '" + command + "'. Please report this error.", process.windowKey);
+        core.logSpecific("Error: Could not write the command '" + command + "'. Please report this error.", process.windowKey);
     }
 };
 
@@ -403,12 +459,18 @@ var handleControlRequest = function(req, res, settings){
         return false;
     }
 
+    process.mode = "ig"; // we are running the IG.
+
     if (req.body.operation == "run") // "Run" operation
     {
         core.logSpecific("Control: Run", req.body.windowKey);
 
         var backendId = req.body.backend;
         core.logSpecific("Backend: " + backendId, req.body.windowKey);
+/*
+    never happens actually, the UI denies this case
+    moreover, the ig would throw an error if something is not compiled yet
+
         if (process.mode != "ig")
         {
             core.logSpecific("Error: Not compiled yet", req.body.windowKey);
@@ -418,6 +480,7 @@ var handleControlRequest = function(req, res, settings){
         }
         else
         {
+*/            
             core.timeoutProcessClearInactivity(process); // reset the inactivity timeout
 
             // looking for a backend
@@ -475,6 +538,35 @@ var handleControlRequest = function(req, res, settings){
                 args.push(intArg);
             }
 
+            if (backend.scope_options && backend.scope_options.set_default_scope && backend.scope_options.set_default_scope.argument) 
+            {
+                var replacement = [
+                    {
+                        "needle": "$value$", 
+                        "replacement": req.body.defaultScopeValue
+                    }
+                ];
+
+                var intArg = core.replaceTemplate(backend.scope_options.set_default_scope.argument, replacement);
+
+                args.push(intArg);
+            }
+
+            if (backend.scope_options && backend.scope_options.inc_all_scopes && backend.scope_options.inc_all_scopes.argument) 
+            {
+                var replacement = [
+                    {
+                        "needle": "$value$", 
+                        "replacement": req.body.allScopesDelta
+                    }
+                ];
+
+                var intArg = core.replaceTemplate(backend.scope_options.inc_all_scopes.argument, replacement);
+
+                args.push(intArg);
+            }
+
+
             var toolPath = core.replaceTemplate(backend.tool, fileAndPathReplacement);
 
             core.logSpecific(args, req.body.windowKey);
@@ -517,7 +609,7 @@ var handleControlRequest = function(req, res, settings){
             res.writeHead(200, { "Content-Type": "text/html"});
             res.end("started");
 
-        }
+//        }
     }
     else if (req.body.operation == "stop") // "Stop" operation
     {
@@ -685,47 +777,6 @@ var handleControlRequest = function(req, res, settings){
         res.writeHead(200, { "Content-Type": "text/html"});
         res.end("int_scope_set");
     }
-/*
-    else if (req.body.operation == "setBitwidth") // "Set Bitwidth" operation
-    {
-        core.logSpecific("Control: setBitwidth", req.body.windowKey);
-
-        // looking for a backend
-        var backend = core.getBackend(req.body.backend);
-        if (!backend)
-        {
-            core.logSpecific("Error: Backend was not found", req.body.windowKey);
-            res.writeHead(400, { "Content-Type": "text/html"});
-            res.end("Error: Could not find the backend by its submitted id.");
-            return false;
-        }
-
-        core.logSpecific(backend.id + " " + req.body.operation_arg1, req.body.windowKey);
-
-        var replacements = [
-                {
-                    "needle": "$value$", 
-                    "replacement": req.body.operation_arg1
-                }
-            ];
-
-        var command = core.replaceTemplate(backend.scope_options.set_bitwidth.command, replacements);
-        process.tool.stdin.write(command);
-            
-        if (backend.scope_options.produce_scope_file)
-        {
-            process.tool.stdin.write(backend.scope_options.produce_scope_file.command);
-            process.producedScopes = false;
-        }
-        else
-        {
-            process.producedScopes = true;
-        }
-
-        res.writeHead(200, { "Content-Type": "text/html"});
-        res.end("bitwidth_set");
-    }
-*/
     else // else look for custom commands defined by backend config
     {
         var parts = req.body.operation.split("-");
@@ -778,7 +829,7 @@ var handleControlRequest = function(req, res, settings){
         writeCommand(process, operation.command);
 
         res.writeHead(200, { "Content-Type": "text/html"});
-        res.end("operation");
+        res.end(operation.id);
     }
 
     return true;

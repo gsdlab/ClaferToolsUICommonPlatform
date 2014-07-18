@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2012, 2013 Alexander Murashkin, Neil Redman <http://gsd.uwaterloo.ca>
+Copyright (C) 2012 - 2014 Alexander Murashkin, Neil Redman <http://gsd.uwaterloo.ca>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -90,7 +90,8 @@ Input.method("onInitRendered", function()
 
     if (this.settings.optimization_backend)
     {
-       $("#optimizationBackend")[0].onchange = this.onBackendChange.bind(this);    
+        $("#optimizationBackend")[0].onchange = this.onBackendChange.bind(this);    
+        $("#optimize")[0].onclick = this.onOptimizeChecked.bind(this);
     }
 
 
@@ -137,6 +138,8 @@ Input.method("beginQuery", function(formData, jqForm, options) {
         return false;
     }
 
+    this.host.makeBusy(true);
+
     $("#load_area #myform").hide();
     $("#load_area").append('<div id="preloader"><img id="preloader_img" src="/commons/Client/images/preloader.gif" alt="Loading..."/><span id="status_label">Loading and processing...</span><button id="cancel">Cancel</button></div>');   
     $("#cancel").click(this.cancelCall.bind(this));
@@ -150,6 +153,7 @@ Input.method("endQuery", function()  {
     $("#load_area #myform").show();
 
     $("#claferFileURL").val(""); // empty the URL
+    this.host.makeBusy(false);
     
     return true;
 });
@@ -215,16 +219,8 @@ Input.method("fileSent", function(responseText, statusText, xhr, $form)  {
 
 Input.method("handleError", function(response, statusText, xhr)  { 
     clearTimeout(this.pollingTimeoutObject);
-    var er = document.getElementById("error_overlay");
-    er.style.display = "block"; 
-    var caption = this.settings.onError(this, statusText, response, xhr);
-    
-    document.getElementById("error_report").innerHTML = ('<span id="close_error" alt="close">Close Message</span><p>' + caption + "</p>");
-    document.getElementById("close_error").onclick = function(){ 
-        document.getElementById("error_overlay").style.display = "none";
-    };
     this.endQuery();
-    
+    this.settings.onError(this, statusText, response, xhr);    
 });
 
 Input.method("onSubmit", function(){
@@ -254,65 +250,95 @@ Input.method("submitTextCall", function(){
     this.onSubmit();
 });
 
-Input.method("exampleChange", function(){
-    if ($("#exampleURL").val())
+
+Input.method("getCaptionsByFileExt", function(fileName)
+{
+    var optimizationEnabled = $("#optimize").is(":checked");
+    var flag = false;
+    if (!optimizationEnabled)
+        flag = "no-optimize";
+
+    for (var i = 0; i < this.settings.file_extensions.length; i++)
     {
-        var filename = $("#exampleURL").val();
-        for (var i = 0; i < this.settings.file_extensions.length; i++)
+        if (fileName.length > this.settings.file_extensions[i].ext.length && 
+            fileName.toLowerCase().substring(fileName.length - this.settings.file_extensions[i].ext.length) 
+            == this.settings.file_extensions[i].ext               
+            )
         {
-            if (filename.length > this.settings.file_extensions[i].ext.length && 
-                filename.toLowerCase().substring(filename.length - this.settings.file_extensions[i].ext.length) == this.settings.file_extensions[i].ext                
-                )
+            if (!flag || !this.settings.file_extensions[i].flag || flag == this.settings.file_extensions[i].flag)
             {
-                $("#submitExample").removeAttr("disabled");                    
-                $("#fileExtExample").val(this.settings.file_extensions[i].ext);                    
-                $("#submitExample").val(this.settings.file_extensions[i].button_example_caption);            
-
-                return;
+                return this.settings.file_extensions[i];
             }
-        }  
-
-        $("#submitExample").val("Unknown");
-        $("#submitExample").attr("disabled", "disabled");       
-        $("#fileExtExample").val("");                            
+        }
     }
-    else{ // no file
+
+    return false;
+});
+
+Input.method("exampleChange", function()
+{
+    var fileName = $("#exampleURL").val();
+
+    if (fileName)
+    {
+        var captions = this.getCaptionsByFileExt(fileName);
+        if (captions)
+        {
+            $("#submitExample").removeAttr("disabled");                    
+            $("#fileExtExample").val(captions.ext);                    
+            $("#submitExample").val(captions.button_example_caption);            
+        }  
+        else
+        {
+            $("#submitExample").val("Unknown");
+            $("#submitExample").attr("disabled", "disabled");       
+            $("#fileExtExample").val("");                           
+        } 
+    }
+    else
+    { // no example
+        fileName = "any.cfr";
         $("#submitExample").attr("disabled", "disabled");       
-        $("#submitExample").val(this.settings.file_extensions[0].button_example_caption);            
+        $("#submitExample").val(this.getCaptionsByFileExt(fileName).button_example_caption);            
         $("#fileExtExample").val("");                            
     }
 
 });
 
 Input.method("inputChange", function(){
-    var filename = $("#myform [type='file']").val();
+    var fileName = $("#myform [type='file']").val();
     
-    if (filename)
+    if (fileName)
     {
-        for (var i = 0; i < this.settings.file_extensions.length; i++)
+        var captions = this.getCaptionsByFileExt(fileName);
+        if (captions)
         {
-            if (filename.length > this.settings.file_extensions[i].ext.length && 
-                filename.toLowerCase().substring(filename.length - this.settings.file_extensions[i].ext.length) == this.settings.file_extensions[i].ext                
-                )
-            {
-                $("#submitFile").removeAttr("disabled");                    
-                $("#fileExtFile").val(this.settings.file_extensions[i].ext);                    
-                $("#submitFile").val(this.settings.file_extensions[i].button_file_caption);            
-
-                return;
-            }
+            $("#submitFile").removeAttr("disabled");                    
+            $("#fileExtFile").val(captions.ext);                    
+            $("#submitFile").val(captions.button_file_caption);            
         }  
-
-        $("#submitFile").val("Unknown");
-        $("#submitFile").attr("disabled", "disabled");       
-        $("#fileExtFile").val("");                            
+        else
+        {
+            $("#submitFile").val("Unknown");
+            $("#submitFile").attr("disabled", "disabled");       
+            $("#fileExtFile").val("");                            
+        }
     }
     else{ // no file
+        fileName = "any.cfr";
         $("#submitFile").attr("disabled", "disabled");       
-        $("#submitFile").val(this.settings.file_extensions[0].button_file_caption);            
+        $("#submitFile").val(this.getCaptionsByFileExt(fileName).button_file_caption);            
         $("#fileExtFile").val("");                            
     }
     
+});
+
+Input.method("editorChange", function()
+{
+    // using the default name
+    fileName = "any.cfr";
+    $("#submitText").val(this.getCaptionsByFileExt(fileName).button_editor_caption);            
+
 });
 
 Input.method("getInitContent", function()
@@ -332,13 +358,27 @@ Input.method("getInitContent", function()
     result += '<tr height="1em">';
     result += '<td><div style="width:100%"><input type="file" style="width:100%" name="claferFile" id="claferFile" title="If you want to upload your clafer file, select one here "/></div></td>';
     result += '<td width="60"><input id="submitFile" type="submit" value="' + this.settings.file_extensions[0].button_file_caption + '" title="' + this.settings.file_extensions[0].button_file_tooltip + '"/></td>';
-    result += '<td width="160"><input id="loadExampleInEditor" type="checkbox" name="loadExampleInEditor" value="unchecked" title="If checked, the editor window below will be loaded with a file or an example submitted">Load into editor</input></td>';
+    result += '<td width="160"><input id="loadExampleInEditor" type="checkbox" checked="checked" name="loadExampleInEditor" value="unchecked" title="If checked, the editor window below will be loaded with a file or an example submitted">Load into editor</input></td>';
     result += '</tr><tr height="1em">';
     result += '<td><div style="width:100%"><select id="exampleURL" style="width:100%" name="exampleURL" title="If you want, you can choose to compile an example clafer model from the list">';   
     
     result += '</select></div></td>';
     result += '<td><input id="submitExample" type="submit" value="' + this.settings.file_extensions[0].button_example_caption + '" title="' + this.settings.file_extensions[0].button_example_tooltip + '"></input></td>';
-    result += '<td></td>';
+
+
+    if (this.settings.optimization_backend)
+    {
+        result += '<td>';
+        var checked = "";
+
+        if (this.settings.input_default_cache)
+            checked = ' checked = "checked"';
+
+        result += '<input id="useCache" type="checkbox" name="useCache"' + checked + '/><span>Use cached results</span>';
+        result += '</td>';                
+    }
+
+//    result += '<td></td>';
 
     result += '</tr>'
     result += '<tr height="1em">';
@@ -346,9 +386,9 @@ Input.method("getInitContent", function()
     result += '<span id="input_editor_caption">Or enter your model:</span></td>';
     result += '<td style="border-top: 2px groove threedface; "><input id="submitText" type="submit" value="' + this.settings.file_extensions[0].button_editor_caption + '" title="' + this.settings.file_extensions[0].button_editor_tooltip + '"/></td>';
 
-    result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface"><div id="input_scopes">Scopes: <select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using finite scope reasoners">';
+    result += '<td style="padding: 0px 2px 0px 2px; border-top: 2px groove threedface; border-left: 2px groove threedface"><div id="input_scopes">Scopes:<select id="ss" name="ss" title="Choose a scope computing strategy. Scopes are used for instantiation using finite scope reasoners">';
 
-    result += '<option value="none" title="Disable scope computing strategy. All scopes are to be set to 1">Disabled</option>';
+    result += '<option value="none" title="Disable scope computing strategy. All scopes are to be set to 1">Disable</option>';
     result += '<option value="simple" selected="selected" title="Fast computation. Scopes are not precise, but this strategy works in most cases">Fast</option>';
     result += '<option value="full" title="Full computation. This method is very slow, but for small models works relatively fast">Full</option>';
 
@@ -359,7 +399,7 @@ Input.method("getInitContent", function()
     var padding = "";
     if (this.settings.optimization_backend)
     {
-        padding = 'padding-bottom:35px;';
+        padding = 'padding-bottom:60px;';
     }
 
     result += '</tr><tr height="100%"><td style="height:100%;border-top: 2px groove threedface;' + padding + '" colspan = "3"><div id="clafer_editor" style="height:100%">';
@@ -372,24 +412,88 @@ Input.method("getInitContent", function()
 
     if (this.settings.optimization_backend)
     {
-        result += '<div id="input_bottom_container" style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-20px; border: 2px groove threedface;">';
+        var checked = ' checked = "checked"';
+
+        result += '<div id="input_bottom_container" style="position:absolute;bottom:0; left:0;right:0;margin-bottom:-22px; border: 2px groove threedface;">';
 //        result += '<div style="height:2px; border-top: 2px groove threedface;"></div>';
 
-        result += '<table width="100%" height="100%" cellspacing="0" cellpadding="0"><tr><td>';
-        result += '<span id="input_backend_label">Backend: </span><select id="optimizationBackend" style="width:180px" name="optimizationBackend" title=""></select>';
+        result += '<table width="100%" height="100%" cellspacing="0" cellpadding="0"><tr><td style="border-right: 2px groove threedface">';
+        result += '<input id="optimize" type="checkbox" name="optimize" title="If you uncheck the box, you can run the model without optimization, and then add instances"' + checked + '></input>';
+        result += '<span id="input_backend_label">Run optimization </span>';
+        result += '</td>';
+
+        result += '<td>';
+
+        var checked = "";
+
+        if (this.settings.input_default_optimizer_scope)
+            checked = ' checked = "checked"';
+
+        result += '<div class="optimizationBackendSetting"><span id="optimizerScopeSettings">';
+        result += '<input id="optimizerScopeOverride" type="checkbox" name="optimizerScopeOverride" title="Override the global scope computed during the compilation process"' + checked + '></input>';
+        result += '<span id="optimizerScopeLabel" style="padding-left:4px;padding-right:4px;">Scope:</span>';
+        result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerScope" title="Enter the scope for optimization" name="optimizerScope"/>';
+        result += '</span></div>';
+        result += '</td>';        
 
         result += '</td><td>';
 
-        result += '<span id="optimizationIntScopeSettings">';
-        result += '<span style="padding-left:4px;padding-right:4px;">Max. Integers:</span>';
-        result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizationIntHighScopeValue" title="Enter the upper bound for unknown integers" name="optimizationIntHighScopeValue"/>';
-        result += '</span>';
-        result += '</td>';        
+        var checked = "";
 
-        result += '<td width="160">';
-        result += '<input id="useCache" type="checkbox" name="useCache" checked="' + this.settings.input_default_cache + '">Use Cache</input>';
-        result += '</td></tr></table>';
+        if (this.settings.input_default_optimizer_maxint)
+            checked = ' checked = "checked"';
 
+        result += '<div class="optimizationBackendSetting"><span id="optimizerMaxIntSettings">';
+        result += '<input id="optimizerMaxIntOverride" type="checkbox" name="optimizerMaxIntOverride" title="Override the maximum integer value computed during the compilation process"' + checked + '></input>';
+        result += '<span id="optimizerMaxIntLabel" style="padding-left:4px;padding-right:4px;">MaxInt:</span>';
+        result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerMaxInt" title="Enter the highest integer for optimization" name="optimizerMaxInt"/>';
+        result += '</span></div>';
+        result += '</td>';
+
+
+
+
+
+        result += '</tr>';
+
+        // second row
+
+        result += '<tr><td style="border-right: 2px groove threedface">';
+        result += '<select id="optimizationBackend" name="optimizationBackend" title=""></select>';
+        result += '</td>';
+
+
+
+
+
+
+        result += '<td>';
+        var checked = "";
+        if (this.settings.input_default_optimizer_limit)
+            checked = ' checked = "checked"';
+
+        result += '<div class="optimizationBackendSetting"><span id="optimizerLimitSettings">';
+        result += '<input id="optimizerLimitOverride" type="checkbox" name="optimizerLimitOverride" title="Limit the maximum number of instances produced"' + checked + '></input>';
+        result += '<span id="optimizerLimitLabel" style="padding-left:4px;padding-right:4px;">Limit instances:</span>';
+        result += '<input type="text" class="scopeInput" size="2" value="100" id="optimizerLimit" title="Enter the limit of instances for optimization" name="optimizerLimit"/>';
+        result += '</span></div>';
+        result += '</td>';  
+
+
+        result += '<td>';
+        var checked = "";
+
+        if (this.settings.input_default_optimizer_cores)
+            checked = ' checked = "checked"';
+
+        result += '<div class="optimizationBackendSetting"><span id="optimizerCoresSettings">';
+        result += '<input id="optimizerCoresOverride" type="checkbox" name="optimizerCoresOverride" title="Use parallel optimization with the specified number of cores"' + checked + '></input>';
+        result += '<span id="optimizerCoresLabel" style="padding-left:4px;padding-right:4px;">Number of cores:</span>';
+        result += '<input type="text" class="scopeInput" size="2" value="4" id="optimizerCores" title="Enter the number of cores to use for optimization" name="optimizerCores"/>';
+        result += '</span></div>';
+        result += '</td>';
+
+        result += '</tr></table>';
         result += '</div>';
 
         $.getJSON('/Backends/backends.json', 
@@ -494,29 +598,62 @@ function unescapeJSON(escaped)
 Input.method("onBackendChange", function()
 {
     var selectedId = $( "#optimizationBackend option:selected" ).val();
-    var found = false;
 
     for (var i = 0; i < this.backends.length; i++)
     {
-        if (this.backends[i].id == selectedId)
+        if (this.backends[i].id == selectedId && this.backends[i].optimization_options)
         {
-            if (this.backends[i].scope_options.set_int_scope)
-            {
-                $("#optimizationIntScopeSettings").show();
-                if (this.backends[i].scope_options.set_int_scope.default_value)
-                {
-                    $("#optimizationIntHighScopeValue").val(this.backends[i].scope_options.set_int_scope.default_value);
-                }
+            this.updateOptimizationSettings(this.backends[i].optimization_options.set_int_scope, "MaxInt");
+            this.updateOptimizationSettings(this.backends[i].optimization_options.set_default_scope, "Scope");
+            this.updateOptimizationSettings(this.backends[i].optimization_options.cores, "Cores");
+            this.updateOptimizationSettings(this.backends[i].optimization_options.limit, "Limit");
 
-                found = true;
-            }
-            else
-            {
-                $("#optimizationIntScopeSettings").hide();                
-            }           
+            break;
+
         }
     }
 
     if (this.settings.onBackendChange) 
         this.settings.onBackendChange(this, result);
+});
+
+Input.method("updateOptimizationSettings", function(config, id)
+{
+    $("#optimizer" + id + "Override").unbind("change");
+
+    $("#optimizer" + id + "Override").change(function(){
+        $("#optimizer" + id).prop("disabled", !$("#optimizer" + id + "Override").is(":checked"));
+    });
+
+    if (config && config.argument)
+    {
+        $("#optimizer" + id + "Settings").show();
+        if (config.default_value)
+        {
+            $("#optimizer" + id).val(config.default_value);
+        }
+        if (config.label)
+        {
+            $("#optimizer" + id + "Label").html(config.label);
+        }
+
+        $("#optimizer" + id + "Override").change();
+    }
+    else
+    {
+        $("#optimizer" + id + "Settings").hide();        
+        $("#optimizer" + id).prop("disabled", true);
+    }           
+});
+
+Input.method("onOptimizeChecked", function(){
+    var value = $("#optimize").is(":checked");
+    $('#optimizationBackend').attr('disabled', !value);
+    $('.optimizationBackendSetting').toggle(value);
+    $('#useCache').toggle(value);
+    $('#useCache').next("span").toggle(value);
+
+    this.inputChange();      
+    this.exampleChange();
+    this.editorChange();
 });
