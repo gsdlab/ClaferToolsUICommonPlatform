@@ -24,7 +24,7 @@ The platform should be installed as a Git submodule into `Server/commons` folder
 1. in the root folder of the host project, execute
 	* `git submodule init`
 	* `git submodule update`
-	* `git submodule foreach checkout master`
+	* `git submodule foreach git checkout master`
 
 2. in the host project's source files, you can use the capabilities, components and functions of the platform. See files named `Server/Client/configuration.js` of the three listed projects as examples.
 
@@ -32,7 +32,7 @@ Upgrading to the latest platform
 --------------------------------
 
 * In your project folder, execute
-	* `git submodule foreach pull`
+	* `git submodule foreach git pull`
 
 The changes will be pulled and merged into your local repository.
 
@@ -42,9 +42,9 @@ Commiting changes made to the platform
 If you make changes to the files in `Server/commons` folder, you can save them into the platform.
 
 * In your project folder, execute
-	* `git submodule foreach add .`
-	* `git submodule foreach commit -m "<commit message>"` 
-	* `git submodule foreach push`
+	* `git submodule foreach git add .`
+	* `git submodule foreach git commit -m "<commit message>"` 
+	* `git submodule foreach git push`
 
 After that, your chagnes to the platform will be saved online. Then, you can propagate changes to the rest of the tools by following the `Upgrading to the latest platform` steps described above.
 
