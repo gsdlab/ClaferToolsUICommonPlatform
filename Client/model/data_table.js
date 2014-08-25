@@ -69,6 +69,9 @@ DataTable.method("loadFromXMLDataSource", function()
     this.instanceCount = this.instanceProcessor.getInstanceCount();
     this.instanceShown = this.instanceCount;
 
+    this.instanceIds = [];
+    this.matrix = [];
+
     this.abstractClaferOutput = new Array();
     var current = this.abstractClaferTree;
     this.traverse(current, -1, []); // traversing the xml to get the clafer model tree

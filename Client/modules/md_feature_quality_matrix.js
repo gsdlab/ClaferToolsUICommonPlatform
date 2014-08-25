@@ -128,6 +128,29 @@ FeatureQualityMatrix.method("addControlPanel", function()
 
 });
 
+FeatureQualityMatrix.method("refresh", function()
+{
+    this.tableVisualizer.refresh(this.data);    
+
+
+    $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
+    $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
+
+//    this.filter.resetFilters(this.SavedFilters, this.permahidden);
+
+    //fire the scroll handler to align table after half a second (fixes chrome bug)
+
+//    if ($("#tBody").length > 0)
+//        $("#tBody").colResizable();
+
+    var h1 = $("#mdFeatureQualityMatrix #table").outerHeight();
+    var h2 = $("#mdFeatureQualityMatrix #matrix-panel").outerHeight();
+    var h3 = $("#mdFeatureQualityMatrix .window-titleBar").outerHeight();
+
+    $.resizeWindow(this.id, this.width, h1 + h2 + h3); // resize the table to fit everything
+
+});
+
 FeatureQualityMatrix.method("onRendered", function()
 {
     var context = this;
@@ -156,26 +179,8 @@ FeatureQualityMatrix.method("onRendered", function()
 
     });
 
-    this.tableVisualizer.refresh(this.data);    
-
-    this.addControlPanel();
-
-    $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
-    $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
-
-//    this.filter.resetFilters(this.SavedFilters, this.permahidden);
-
-    //fire the scroll handler to align table after half a second (fixes chrome bug)
-
-//    if ($("#tBody").length > 0)
-//        $("#tBody").colResizable();
-
-    var h1 = $("#mdFeatureQualityMatrix #table").outerHeight();
-    var h2 = $("#mdFeatureQualityMatrix #matrix-panel").outerHeight();
-    var h3 = $("#mdFeatureQualityMatrix .window-titleBar").outerHeight();
-
-    $.resizeWindow(this.id, this.width, h1 + h2 + h3); // resize the table to fit everything
-    
+    this.addControlPanel();    
+    this.refresh(this.data);    
 });
 
 FeatureQualityMatrix.method("getContent", function()
@@ -408,6 +413,7 @@ FeatureQualityMatrix.method("onFiltered", function(data)
 {
     this.tableVisualizer.filter(data);
     $('#instanceshown').html(this.data._instanceShown);    
+    $('#instancecount').html(this.data.instanceCount);    
 });
 
 FeatureQualityMatrix.method("makeHighlighted", function(pid)
