@@ -67,7 +67,7 @@ DataTable.method("loadFromDataSource", function(ds)
 DataTable.method("loadFromXMLDataSource", function()
 {
     this.instanceCount = this.instanceProcessor.getInstanceCount();
-    this.instanceShown = this.instanceCount;
+    this.instanceMatch = this.instanceCount;
 
     this.instanceIds = [];
     this.matrix = [];

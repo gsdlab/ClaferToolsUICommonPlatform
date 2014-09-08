@@ -51,7 +51,7 @@ FeatureQualityMatrix.method("resize", function() // not attached to the window a
 FeatureQualityMatrix.method("onDataLoaded", function(data){
 
     this.data = data;
-    var instanceCount = this.data.instanceCount;
+//    var instanceCount = this.data.instanceCount;
     this.toggled = false;    
     this.currentRow = 1;
 });
@@ -62,7 +62,7 @@ FeatureQualityMatrix.method("addControlPanel", function()
 
 // Add search bar 
     var panel = $('<div id="matrix-panel"></div>');
-    var vl = $('<div class="verticalLine">&nbsp;</div>');
+    var vl = '<div class="verticalLine">&nbsp;</div>';
     $(panel).append('Search: <input type="text" id="search" class="text_input" placeholder="search" style="width: 100px">');
     $(panel).append(vl);
 // Adding buttons for comparison table
@@ -73,7 +73,9 @@ FeatureQualityMatrix.method("addControlPanel", function()
 //    $(panel).append('<button id="saveAll">Save all variants</button>');
     $(panel).append('<input type="button" id="saveAll" value="Save all variants">');
     $(panel).append(vl);
-    $(panel).append('<span id="instanceshown"></span> out of <span id="instancecount"></span> variant(s) satisfy the criteria');
+    $(panel).append('<span><span id="instancematch">0</span> out of <span id="instancecount">0</span> variant(s) satisfy the criteria</span>');
+    $(panel).append(vl);
+    $(panel).append('<span id="instanceshown"></span>');
     $(panel).append(vl);
     $(panel).append('<input type="checkbox" id="showQualities" checked="checked"/> Show nested quality attributes');
     $(panel).append('<form id="saveAllForm" action="/saveinstances" method="post" enctype="multipart/form-data">' + '<input type="hidden" name="data" id="saveAllData" value=""/>' + '<input type="hidden" name="windowKey" value="' + this.host.key + '"/>' + '</form>');
@@ -123,15 +125,13 @@ FeatureQualityMatrix.method("addControlPanel", function()
 
     $('#saveAll').click(this.saveAll.bind(this)).css("cursor", "pointer");
 
-    $('#instanceshown').html(this.data.instanceCount);
-    $('#instancecount').html(this.data.instanceCount);
-
 });
 
 FeatureQualityMatrix.method("refresh", function()
 {
     this.tableVisualizer.refresh(this.data);    
 
+    this.updateIndicators();
 
     $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
     $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
@@ -411,9 +411,26 @@ FeatureQualityMatrix.method("saveAll", function(){
 // this function is called every time a user filters by features or quality values
 FeatureQualityMatrix.method("onFiltered", function(data)
 {
-    this.tableVisualizer.filter(data);
-    $('#instanceshown').html(this.data._instanceShown);    
-    $('#instancecount').html(this.data.instanceCount);    
+    if (this.tableVisualizer)
+    {
+        this.tableVisualizer.filter(data);
+        this.updateIndicators();
+    }
+});
+
+FeatureQualityMatrix.method("updateIndicators", function(data)
+{
+    $('#instancematch').html(this.data.instanceMatch);
+    $('#instancecount').html(this.data.instanceCount);
+
+    if (this.data.instanceMatch <= this.tableVisualizer.displayLimit)
+    {
+        $('#instanceshown').html("Shown all matching");
+    }
+    else
+    {
+        $('#instanceshown').html("<b>Shown first " + this.tableVisualizer.displayLimit + " matching</b>");
+    }
 });
 
 FeatureQualityMatrix.method("makeHighlighted", function(pid)

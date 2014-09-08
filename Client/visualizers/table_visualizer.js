@@ -24,6 +24,16 @@ function TableVisualizer(nodeId, options, chartListeners)
 {
     this.nodeId = nodeId;
     this.options = options;
+
+    if (this.options.displayLimit) // how many instances to show maximum
+    {
+    	this.displayLimit = this.options.displayLimit;
+    }
+    else
+    {
+    	this.displayLimit = 100;
+    }
+
     var context = this;
     context.chartListeners = chartListeners;
 
@@ -266,6 +276,8 @@ TableVisualizer.method("refresh", function(sdata)
 		                typeLabel.classed("filter_normal", true)
 		                	.style("cursor", "pointer");
 
+		                typeLabel.on("click", null);
+
 		                typeLabel.on("click", function(d){
 		                	var row = d3.select(d3.select(this).node().parentNode.parentNode);
 		                    var arg = d3.select(d3.select(this).node().parentNode).select(".path").text();
@@ -358,8 +370,10 @@ TableVisualizer.method("refresh", function(sdata)
 
 
 //		alert(typeLabel);
-/*
-      	typeLabel.attr("class", "typelabel " + field.type);
+
+//		typeLabel.attr("class", "typelabel " + field.type);
+
+  		var col = me.select(".field-item");
 
 		if (field.em !== null)
 		{
@@ -369,44 +383,53 @@ TableVisualizer.method("refresh", function(sdata)
 	    	{
 	    		var b = (field.card != "");
 
-				me.select(".emvalueEq").text(' = ').style("display", b ? null : "none");
-		      	me.select(".emvalue").attr("class", "emvalue " + mappedObject.tdClass).html(
+				col.select(".emvalueEq").text(' = ').style("display", b ? null : "none");
+		      	col.select(".emvalue").attr("class", "emvalue " + mappedObject.tdClass).html(
 
 					(mappedObject.tdClass.indexOf("no") >= 0) ? "no" : "yes" 
 	      			).style("display", b ? null : "none");
 	    	}
 	    	else
 	    	{
-				me.select(".emvalueEq").text(' = ');
-	      		me.select(".emvalue").attr("class", "emvalue " + mappedObject.tdClass).html(mappedObject.elemContent);		    		
+				col.select(".emvalueEq").text(' = ');
+	      		col.select(".emvalue").attr("class", "emvalue " + mappedObject.tdClass).html(mappedObject.elemContent);		    		
 	    	}
 
-			me.classed("emabstract", true);
+			col.classed("emabstract", true);
 		}
-
-		if (context.options.filtering)
+		else
 		{
-		  	if (typeLabel.classed("bool") || typeLabel.classed("boolclafer"))
-		  	{
-		  		me.attr("FilterStatus", "none");
-	            var emValueNode = me.select(".emvalue");
-	            if (!emValueNode.empty()) // is effectively  mandatory
-	            {
-	                if (emValueNode.classed("no"))
-	                {
-	                    typeLabel.classed("filter_unchecked", true);
-	                }
-	                else
-	                {
-	                    typeLabel.classed("filter_checked", true);
-	                }                    
-	            }
-	            else
-	            {
-	                typeLabel.classed("filter_normal", true)
-	                	.style("cursor", "pointer");
+			col.select(".emvalueEq").remove();
+			col.select(".emvalue").remove();
 
-	                typeLabel.on("click", null);
+			var wasEM = col.classed("emabstract");
+
+			col.classed("emabstract", false);
+
+			if (context.options.filtering)
+			{
+			  	if (typeLabel.classed("bool") || typeLabel.classed("boolclafer"))
+			  	{
+			  		if (!me.attr("FilterStatus"))
+			  		{
+				  		me.attr("FilterStatus", "none");
+				  	}
+
+					var oldFilterClass = "filter_normal ";
+
+					if (!wasEM)
+					{
+						if (typeLabel.classed("filter_unchecked")){
+							oldFilterClass = "filter_unchecked ";
+						}
+						if (typeLabel.classed("filter_checked")){
+							oldFilterClass = "filter_checked ";
+						}
+					}
+
+			      	typeLabel.attr("class", "typelabel " + oldFilterClass + field.type)
+				      	.style("cursor", "pointer");
+
 	                typeLabel.on("click", function(d){
 	                	var row = d3.select(d3.select(this).node().parentNode.parentNode);
 	                    var arg = d3.select(d3.select(this).node().parentNode).select(".path").text();
@@ -433,13 +456,9 @@ TableVisualizer.method("refresh", function(sdata)
 
 
 	                });
-	            }
-	        }
-	    }
-*/
-
-
-
+				}
+			}
+		}
   });
 /*
   	context.rows.each(function(tr, i){
@@ -635,10 +654,11 @@ TableVisualizer.method("preprocessData", function(sdata)
 {
 	console.log(sdata);
 	var filteredInstanceIds = new Array();
+	var context = this;
 
 	var filteredMatrix = sdata.matrix.reduce(function(prev, cur){
 //		console.log(cur["_hidden"]);
-		if (cur["_hidden"] === undefined || cur["_hidden"] === false)
+		if ((prev.length < context.displayLimit) && (cur["_hidden"] === undefined || cur["_hidden"] === false))
 		{
 			prev.push(cur);
 			filteredInstanceIds.push(cur["id"]);
@@ -649,7 +669,7 @@ TableVisualizer.method("preprocessData", function(sdata)
 	// warning: a potential memory leak here!!!
 	var newData = jQuery.extend(true, {}, sdata);	
 	newData.matrix = filteredMatrix;
-	newData.instancesShown = filteredInstanceIds.length;
+	newData.instanceMatch = filteredInstanceIds.length;
 	newData.instanceIds = filteredInstanceIds;
 	console.log(newData);
 
