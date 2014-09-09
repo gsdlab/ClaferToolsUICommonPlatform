@@ -193,7 +193,15 @@ TableVisualizer.method("refresh", function(sdata)
 			me.attr("width", context.firstColWidth)
 				.style("min-width", context.firstColWidth + "px")
 				.style("max-width", context.firstColWidth + "px");
-      		me.append("span").attr("class", "texttosearch").html(d.title.replaceAll(' ', '&nbsp;&nbsp;'));
+
+		    if (context.options.useFullyQualified) // how many instances to show maximum
+		    {
+	      		me.append("span").attr("class", "texttosearch").html(context.prettifyPath(d.path));
+	      	}
+	      	else
+	      	{
+	      		me.append("span").attr("class", "texttosearch").html(d.title.replaceAll(' ', '&nbsp;&nbsp;'));
+	      	}
       		me.append("span").attr("class", "path").style("display", "none").html(d.path);
       		me.append("span").attr("class", "super").style("display", "none").html(d.super);
       		me.append("span").attr("class", "id").style("display", "none").html(d.id);
@@ -497,6 +505,10 @@ TableVisualizer.method("filterClaferValue", function(s){
 	return s.replace(/c[0-9]*_/g, "").replaceAll("$0", "");
 });
 
+TableVisualizer.method("prettifyPath", function(s){
+	return s.replace(/c[0-9]*_/g, "").replaceAll("-", ".").substring(5);
+});
+
 TableVisualizer.method("prettifyClaferSet", function(s){
 	return this.filterClaferValue(s.replace("{", "").replace("}", "").replaceAll(";", "<br/>"));
 });
@@ -550,12 +562,20 @@ TableVisualizer.method("mapValue", function(field, sVal, denyEMCheck)
 			result.elemClass = 'no';
 			result.tdClass = 'bool no';
 		}
+/*		else
+		{
+			result.hint = field.id + ' is present';
+			result.elem = 'img';
+			result.elemClass = 'tick';
+			result.tdClass = 'bool tick';
+		}
+*/		
 		else
 		{
 			result.hint = field.id + ' is present as ' + this.trimValue(this.filterClaferValue(sVal));
 			result.elem = 'img';
 			result.elemClass = 'tick';
-			result.tdClass = 'bool tick clafer';
+			result.tdClass = 'bool tick';
 		}
 	}
 	else if (type == "int")
@@ -609,11 +629,16 @@ TableVisualizer.method("mapValue", function(field, sVal, denyEMCheck)
 			else
 			{
 				result.hint = field.id + ' is present as ' + this.trimValue(this.filterClaferValue(sVal));
+				result.elem = 'span';
+				result.elemContent = this.trimValue(this.filterClaferValue(sVal));
+				result.elemClass = 'string texttosearch';
+/*
+				result.hint = field.id + ' is present as ' + this.trimValue(this.filterClaferValue(sVal));
 				result.elem = 'img';
 				result.elemClass = 'tickMan';
 				result.tdClass = 'bool tick';
+*/
 			}
-
 		}
 		else
 		{
