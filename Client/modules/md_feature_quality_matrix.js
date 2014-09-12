@@ -133,8 +133,8 @@ FeatureQualityMatrix.method("refresh", function()
 
     this.updateIndicators();
 
-    $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
-    $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
+//    $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
+//    $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
 
 //    this.filter.resetFilters(this.SavedFilters, this.permahidden);
 
