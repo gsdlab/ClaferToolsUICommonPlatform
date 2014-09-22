@@ -195,9 +195,12 @@ Control.method("onInitRendered", function()
 });
 
 Control.method("resetControls", function(){
-    $("#RunStop").removeAttr("disabled");
-    $("#RunStop").val("Run");
-    $("#RunStop").attr("title", "Run the chosen instance generator");
+    $("#RunStop").removeAttr("disabled")
+                    .val("Run")
+                    .attr("title", "Run the chosen instance generator");
+
+    $('#getInstances').prop('disabled', true);
+
 
     this.adjustBackendArgumentSettings();
     
@@ -276,6 +279,9 @@ Control.method("enableRuntimeControls", function(){
 
     $("#backend").attr("disabled", "disabled");
 
+    $('#getInstances').prop('disabled', false);
+
+
 });
 
 Control.method("disableRuntimeControls", function(){
@@ -296,6 +302,10 @@ Control.method("disableRuntimeControls", function(){
     $("#setIntScope").attr("disabled", "disabled");
 
     $("#backend").removeAttr("disabled");
+
+    $('#getInstances').prop('disabled', true);
+
+
 
     this.adjustBackendArgumentSettings();
 });
