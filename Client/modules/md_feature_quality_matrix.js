@@ -175,6 +175,9 @@ FeatureQualityMatrix.method("onRendered", function()
         },
         "onMouseOut": function(i){
             context.settings.onMouseOut(context, getPID(i));
+        },
+        "onFilterChanged": function(path, val){
+            context.settings.onFilterChanged(context, path, val);
         }
 
     });

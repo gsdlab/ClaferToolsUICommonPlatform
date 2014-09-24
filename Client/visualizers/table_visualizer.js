@@ -208,7 +208,8 @@ TableVisualizer.method("refresh", function(sdata)
       		var typeLabel = me.append("span").attr("class", "typelabel " + d.type);
       		me.append("span").attr("class", "card").html(d.card != "" ? "&nbsp;" + d.card : "");
 
-			if (d.em !== null)
+
+			if (d.em !== null) // all values are equal
 			{
 		    	var mappedObject = context.mapValue(d, d.em, true);
 
@@ -229,6 +230,14 @@ TableVisualizer.method("refresh", function(sdata)
 		    	}
 
 				me.classed("emabstract", true);
+			}
+			else {
+				     if(d.type == "clafer"){
+		      			me.append("input").attr("type", "text").attr("class", "filter-input").on('change', function(d){
+				            context.chartListeners.onFilterChanged(d.path,this.value);
+						});
+		      		}
+      		
 			}
 
 		    if (context.options.sorting && typeLabel.classed("int"))
