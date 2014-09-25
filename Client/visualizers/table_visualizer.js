@@ -233,7 +233,7 @@ TableVisualizer.method("refresh", function(sdata)
 			}
 			else {
 				     if(d.type == "clafer"){
-		      			me.append("input").attr("type", "text").attr("class", "filter-input").on('change', function(d){
+		      			me.append("input").attr("type", "text").attr("class", "filter-input").attr('placeholder', 'Search...').on('change', function(d){
 				            context.chartListeners.onFilterChanged(d.path,this.value);
 						});
 		      		}
