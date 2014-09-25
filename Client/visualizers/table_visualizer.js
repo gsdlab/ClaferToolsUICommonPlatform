@@ -95,14 +95,29 @@ TableVisualizer.method("addSortingFeature", function(elem){
 			}
 
 			if (context.chartListeners.onSorted)
-				context.chartListeners.onSorted(d.id, sortFlag);
+				
+				context.chartListeners.onSorted(d.path, sortFlag);
 		});
 
 });
 
+
+// CC: remove instance from the table
+TableVisualizer.method("removeAllInstances", function() {
+
+	
+	this.body.selectAll("td:not(.field-item)").remove();
+	this.head.selectAll("th").remove();
+
+	
+	
+});
+
 TableVisualizer.method("refresh", function(sdata)
 {
+
 	var data = this.preprocessData(sdata);
+
 	this.data = data;
 	var context = this;
 
@@ -117,7 +132,8 @@ TableVisualizer.method("refresh", function(sdata)
 	if (context.options.sorting)
 		context.addSortingFeature(titleNode);
 
-	var cat0 = context.head.selectAll("th.instance-id").data(data.instanceIds, function(d){return d;});
+
+	var cat0 = context.head.selectAll("th.instance-id").data(data.instanceIds, function(d){ return d;});
 
 	cat0.exit().remove();
 
@@ -330,6 +346,7 @@ TableVisualizer.method("refresh", function(sdata)
   			prev.push({"value": cur[path], "id": cur.id});
   			return prev;
   		}, []);
+
 
       	var typeLabel = me.select(".typelabel");
 

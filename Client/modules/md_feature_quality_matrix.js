@@ -175,12 +175,56 @@ FeatureQualityMatrix.method("onRendered", function()
         },
         "onMouseOut": function(i){
             context.settings.onMouseOut(context, getPID(i));
+        },
+        "onSorted": function(path, sortFlag){
+            context.sort(path, sortFlag);
         }
 
     });
 
     this.addControlPanel();    
     this.refresh(this.data);    
+});
+
+FeatureQualityMatrix.method("sort", function(path, sortFlag)
+{
+    // TODO: Add sort feature for "Model\Variants" title
+  
+    var data = this.data;
+        
+
+    this.tableVisualizer.removeAllInstances(); // remove instances from the table
+
+    var groups = _.partition(data.matrix, function(obj){ return typeof obj[path] == 'number' ; }); // groups[0] - numeric values, group[1] - string values 
+   
+
+    switch(sortFlag) {
+        case 'asc' : {
+            data.matrix =  _(groups[0]).sortBy(function(obj){ return +obj[path] });
+            if(groups.length>1){
+                data.matrix = _.union(groups[1], data.matrix);
+            }
+            break;
+        }
+
+        case 'desc' : {
+            data.matrix =  _(groups[0]).sortBy(function(obj){ return -obj[path] });
+            if(groups.length>1){
+                data.matrix = _.union(data.matrix, groups[1]);
+            }
+            break
+        }
+
+        case 'none' : {
+            data.matrix =  _(data.matrix).sortBy(function(obj){ return +obj['id'] });
+            break;
+        }
+    }
+
+
+
+    this.tableVisualizer.refresh(data); 
+    
 });
 
 FeatureQualityMatrix.method("getContent", function()
