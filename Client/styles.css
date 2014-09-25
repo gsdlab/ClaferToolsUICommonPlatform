@@ -226,3 +226,9 @@ textarea.child {height:100%;}
     border-left: none;
 }
 
+.filter-input {
+    float: right;
+    width: 120px;
+    padding: 3px 5px;
+}
+
