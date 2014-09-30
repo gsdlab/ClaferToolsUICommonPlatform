@@ -49,7 +49,9 @@ DataTable.method("computeRanges", function()
 
 DataTable.method("loadFromDataSource", function(ds)
 {
-    console.log(ds.instancesXML);
+    //console.log(ds.instancesXML);
+    
+
     this.instanceProcessor = new InstanceProcessor(ds.instancesXML);
     this.claferProcessor = new ClaferProcessor(ds.claferXML);
     this.abstractClaferTree = this.claferProcessor.getTopClaferTree('root');
@@ -61,7 +63,7 @@ DataTable.method("loadFromDataSource", function(ds)
     this.loadFromXMLDataSource(this.instanceProcessor, this.abstractClaferTree);
     this.computeRanges();
 
-    console.log(this);
+    //console.log(this);
 });
 
 DataTable.method("loadFromXMLDataSource", function()
@@ -94,7 +96,7 @@ DataTable.method("loadFromXMLDataSource", function()
         field.pathAsArray = output[i].claferPath;
         field.level = field.pathAsArray.length;
         field.path = output[i].claferPath.join("-");
-        console.log(field.path);
+        //console.log(field.path);
         field.id = output[i].claferId;
         field.super = output[i].super; 
         field.type = output[i].type;

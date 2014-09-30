@@ -232,3 +232,92 @@ textarea.child {height:100%;}
     padding: 3px 5px;
 }
 
+
+/* SIDEBAR */
+    .sidemenu {
+        position: absolute;
+        left: 0;
+        top: 50px;
+        overflow: hidden;
+        padding: 5px 25px 5px 0;
+    }
+
+    .sm-content {
+        position: relative;
+        left: 1px;
+        top: 0;
+        z-index: 999;
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        width: 150px;
+        
+        -webkit-transition: all 0.4s;   
+           -moz-transition: all 0.4s;   
+            -ms-transition: all 0.4s;   
+             -o-transition: all 0.4s;   
+                transition: all 0.4s; 
+        
+        -webkit-transform: translate(-100%, 0);
+             -moz-transform: translate(-100%, 0);
+              -ms-transform: translate(-100%, 0);
+               -o-transform: translate(-100%, 0);
+                  transform: translate(-100%, 0);  
+    }
+
+    .sm-content.active {
+        left: 0;
+        -webkit-transform: translate(0,0);
+           -moz-transform: translate(0,0);
+            -ms-transform: translate(0,0);
+             -o-transform: translate(0,0);
+                transform: translate(0,0);
+    }
+
+
+    .sm-content .sm-open {
+        width: 20px;
+        height: 30px;
+        line-height: 28px;
+        text-align: center;
+        color: #7f7f7f;
+        border: 1px solid #ccc;
+        border-width: 1px 1px 1px 0;
+        background: #fff;
+        position: absolute;
+        top: -1px;
+        left: 100%;
+        text-decoration: none;
+        font-size: 10px;
+        
+        
+    }
+
+    
+
+    .sm-content .sm-open:after {
+        content: '>';
+        display: block;
+        text-align: center;
+        -webkit-transition: color 0.3s;
+           -moz-transition: color 0.3s;
+            -ms-transition: color 0.3s;
+             -o-transition: color 0.3s;
+                transition: color 0.3s;
+        -webkit-transform: scaleY(2);
+           -moz-transform: scaleY(2);
+            -ms-transform: scaleY(2);
+             -o-transform: scaleY(2);
+                transform: scaleY(2);
+    }
+
+    .sm-content .sm-open:hover:after {
+        color: #000;
+    }
+
+    .sm-content.active .sm-open:after {
+        content: "<";
+    }
+
+
+/* END SIDEBAR */
