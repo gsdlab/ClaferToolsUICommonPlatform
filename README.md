@@ -1,19 +1,19 @@
 ClaferToolsUICommonPlatform
 ===========================
 
-v0.3.6.15-04-2014
+v0.3.9
 
 A superset platform used as a submodule by all the three Clafer Web Tools: [ClaferIDE](https://github.com/gsdlab/ClaferIDE), [ClaferMooVisualizer](https://github.com/gsdlab/ClaferMooVisalizer) and [ClaferConfigurator](https://github.com/gsdlab/ClaferConfigurator).
 
 Contributors
 ------------
 
-* [Alexandr Murashkin](http://gsd.uwaterloo.ca/amurashk), MMath Candidate. Main developer.
+* [Alexandr Murashkin](http://gsd.uwaterloo.ca/amurashk), MMath. Main developer.
 
 Getting Clafer Tools
 --------------------
 
-Binary distributions of the release 0.3.6 of Clafer Tools for Windows, Mac, and Linux, 
+Binary distributions of the release 0.3.9 of Clafer Tools for Windows, Mac, and Linux, 
 can be downloaded from [Clafer Tools - Binary Distributions](http://http://gsd.uwaterloo.ca/clafer-tools-binary-distributions). 
 
 Installation
@@ -41,8 +41,8 @@ Commiting changes made to the platform
 If you make changes to the files in `Server/commons` folder, you can save them into the platform.
 
 1. in your project folder, execute
-	* `git submodule foreach add .`
-	* `git submodule foreach commit` and write a commit message
+	* `git submodule foreach add <filename>`
+	* `git submodule foreach commit -m "<message>"`
 	* `git submodule foreach push`
 
 After that, your chagnes to the platform will be saved online. Then, you can propagate changes to the rest of the tools by following the `Upgrading to the latest platform` steps described above.
@@ -57,12 +57,5 @@ Development versions from branches `develop` should work well together but this 
 
 Need help?
 ==========
-* See [language's website](http://clafer.org) for news, technical reports and more
-  * Check out a [Clafer tutorial](http://t3-necsis.cs.uwaterloo.ca:8091/Tutorial/Intro)
-  * Try a live instance of [ClaferWiki](http://t3-necsis.cs.uwaterloo.ca:8091)
-  * Try a live instance of [ClaferIDE](http://t3-necsis.cs.uwaterloo.ca:8094)
-  * Try a live instance of [ClaferConfigurator](http://t3-necsis.cs.uwaterloo.ca:8093)
-  * Try a live instance of [ClaferMooVisualizer](http://t3-necsis.cs.uwaterloo.ca:8092)
-* Take a look at (incomplete) [Clafer wiki](https://github.com/gsdlab/clafer/wiki)
-* Browse example models in the [test suite](https://github.com/gsdlab/clafer/tree/master/test/positive) and [MOO examples](https://github.com/gsdlab/clafer/tree/master/spl_configurator/dataset)
-* Post questions, report bugs, suggest improvements [GSD Lab Bug Tracker](http://gsd.uwaterloo.ca:8888/questions/). Tag your entries with `clafer` (so that we know what they are related to) and with `jimmy-liang` or `michal` (so that Jimmy or Michał gets a notification).
+* Visit [language's website](http://clafer.org).
+* Report issues to [issue tracker](https://github.com/gsdlab/ClaferToolsUICommonPlatform/issues)
