@@ -22,6 +22,7 @@ The platform should be installed as a Git submodule into `Server/commons` folder
 ```
 git submodule init
 git submodule update
+git submodule foreach git checkout master
 ```
 
 Now, in the host project's source files, you can use the capabilities, components and functions of the platform. See files named `Server/Client/configuration.js` of the three listed projects as examples.
