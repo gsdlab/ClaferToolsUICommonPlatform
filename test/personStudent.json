@@ -1,0 +1,1029 @@
+{
+  "mName": "",
+  "mDecls": [
+    {
+      "tag": "IEClafer",
+      "iClafer": {
+        "glCard": [
+          0,
+          -1
+        ],
+        "ident": "Person",
+        "elements": [
+          {
+            "tag": "IEClafer",
+            "iClafer": {
+              "glCard": [
+                0,
+                -1
+              ],
+              "ident": "age",
+              "elements": [],
+              "cinPos": null,
+              "parentUID": "c0_Person",
+              "card": [
+                1,
+                1
+              ],
+              "isAbstract": false,
+              "uid": "c0_age",
+              "gcard": {
+                "interval": [
+                  0,
+                  -1
+                ],
+                "isKeyword": false
+              },
+              "reference": {
+                "isSet": true,
+                "ref": {
+                  "pid": "",
+                  "inPos": null,
+                  "exp": {
+                    "sident": "integer",
+                    "binding": "integer",
+                    "tag": "IClaferId",
+                    "isTop": true,
+                    "modName": ""
+                  }
+                }
+              }
+            }
+          },
+          {
+            "tag": "IEClafer",
+            "iClafer": {
+              "glCard": [
+                0,
+                -1
+              ],
+              "ident": "spouse",
+              "elements": [],
+              "cinPos": null,
+              "parentUID": "c0_Person",
+              "card": [
+                0,
+                1
+              ],
+              "isAbstract": false,
+              "uid": "c0_spouse",
+              "gcard": {
+                "interval": [
+                  0,
+                  -1
+                ],
+                "isKeyword": false
+              },
+              "reference": {
+                "isSet": true,
+                "ref": {
+                  "pid": "",
+                  "inPos": null,
+                  "exp": {
+                    "sident": "c0_Person",
+                    "binding": "c0_Person",
+                    "tag": "IClaferId",
+                    "isTop": false,
+                    "modName": ""
+                  }
+                }
+              }
+            }
+          },
+          {
+            "tag": "IEClafer",
+            "iClafer": {
+              "glCard": [
+                0,
+                -1
+              ],
+              "ident": "Head",
+              "elements": [],
+              "cinPos": null,
+              "parentUID": "c0_Person",
+              "card": [
+                0,
+                -1
+              ],
+              "isAbstract": true,
+              "uid": "c0_Head",
+              "gcard": {
+                "interval": [
+                  0,
+                  -1
+                ],
+                "isKeyword": false
+              }
+            }
+          }
+        ],
+        "cinPos": null,
+        "parentUID": "root",
+        "card": [
+          0,
+          -1
+        ],
+        "isAbstract": true,
+        "uid": "c0_Person",
+        "gcard": {
+          "interval": [
+            0,
+            -1
+          ],
+          "isKeyword": false
+        }
+      }
+    },
+    {
+      "tag": "IEClafer",
+      "iClafer": {
+        "glCard": [
+          0,
+          -1
+        ],
+        "ident": "Student",
+        "elements": [],
+        "cinPos": null,
+        "parentUID": "root",
+        "card": [
+          0,
+          -1
+        ],
+        "isAbstract": true,
+        "uid": "c0_Student",
+        "gcard": {
+          "interval": [
+            0,
+            -1
+          ],
+          "isKeyword": false
+        },
+        "super": {
+          "pid": "",
+          "inPos": null,
+          "exp": {
+            "sident": "c0_Person",
+            "binding": "c0_Person",
+            "tag": "IClaferId",
+            "isTop": true,
+            "modName": ""
+          },
+          "iType": {
+            "tag": "TClafer",
+            "contents": [
+              "c0_Person"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tag": "IEClafer",
+      "iClafer": {
+        "glCard": [
+          1,
+          1
+        ],
+        "ident": "Alice",
+        "elements": [
+          {
+            "tag": "IEConstraint",
+            "isHard": true,
+            "cpexp": {
+              "pid": "e0_",
+              "inPos": null,
+              "exp": {
+                "exps": [
+                  {
+                    "pid": "e1_",
+                    "inPos": null,
+                    "exp": {
+                      "exps": [
+                        {
+                          "pid": "",
+                          "inPos": null,
+                          "exp": {
+                            "sident": "this",
+                            "binding": "c0_Alice",
+                            "tag": "IClaferId",
+                            "isTop": true,
+                            "modName": ""
+                          },
+                          "iType": {
+                            "tag": "TClafer",
+                            "contents": [
+                              "c0_Alice"
+                            ]
+                          }
+                        },
+                        {
+                          "pid": "",
+                          "inPos": null,
+                          "exp": {
+                            "exps": [
+                              {
+                                "pid": "",
+                                "inPos": null,
+                                "exp": {
+                                  "sident": "c0_age",
+                                  "binding": "c0_age",
+                                  "tag": "IClaferId",
+                                  "isTop": false,
+                                  "modName": ""
+                                },
+                                "iType": {
+                                  "tag": "TClafer",
+                                  "contents": [
+                                    "c0_age"
+                                  ]
+                                }
+                              },
+                              {
+                                "pid": "",
+                                "inPos": null,
+                                "exp": {
+                                  "sident": "ref",
+                                  "binding": null,
+                                  "tag": "IClaferId",
+                                  "isTop": true,
+                                  "modName": ""
+                                },
+                                "iType": {
+                                  "tag": "TInteger",
+                                  "contents": []
+                                }
+                              }
+                            ],
+                            "op": ".",
+                            "tag": "IFunExp"
+                          },
+                          "iType": {
+                            "tag": "TInteger",
+                            "contents": []
+                          }
+                        }
+                      ],
+                      "op": ".",
+                      "tag": "IFunExp"
+                    },
+                    "iType": {
+                      "tag": "TInteger",
+                      "contents": []
+                    }
+                  },
+                  {
+                    "pid": "e2_",
+                    "inPos": null,
+                    "exp": {
+                      "iint": 20,
+                      "tag": "IInt"
+                    },
+                    "iType": {
+                      "tag": "TInteger",
+                      "contents": []
+                    }
+                  }
+                ],
+                "op": "=",
+                "tag": "IFunExp"
+              },
+              "iType": {
+                "tag": "TBoolean",
+                "contents": []
+              }
+            }
+          },
+          {
+            "tag": "IEConstraint",
+            "isHard": true,
+            "cpexp": {
+              "pid": "e3_",
+              "inPos": null,
+              "exp": {
+                "exps": [
+                  {
+                    "pid": "e4_",
+                    "inPos": null,
+                    "exp": {
+                      "exps": [
+                        {
+                          "pid": "",
+                          "inPos": null,
+                          "exp": {
+                            "sident": "this",
+                            "binding": "c0_Alice",
+                            "tag": "IClaferId",
+                            "isTop": true,
+                            "modName": ""
+                          },
+                          "iType": {
+                            "tag": "TClafer",
+                            "contents": [
+                              "c0_Alice"
+                            ]
+                          }
+                        },
+                        {
+                          "pid": "",
+                          "inPos": null,
+                          "exp": {
+                            "exps": [
+                              {
+                                "pid": "",
+                                "inPos": null,
+                                "exp": {
+                                  "sident": "c0_spouse",
+                                  "binding": "c0_spouse",
+                                  "tag": "IClaferId",
+                                  "isTop": false,
+                                  "modName": ""
+                                },
+                                "iType": {
+                                  "tag": "TClafer",
+                                  "contents": [
+                                    "c0_spouse"
+                                  ]
+                                }
+                              },
+                              {
+                                "pid": "",
+                                "inPos": null,
+                                "exp": {
+                                  "sident": "ref",
+                                  "binding": null,
+                                  "tag": "IClaferId",
+                                  "isTop": true,
+                                  "modName": ""
+                                },
+                                "iType": {
+                                  "tag": "TClafer",
+                                  "contents": [
+                                    "c0_Person"
+                                  ]
+                                }
+                              }
+                            ],
+                            "op": ".",
+                            "tag": "IFunExp"
+                          },
+                          "iType": {
+                            "tag": "TClafer",
+                            "contents": [
+                              "c0_Person"
+                            ]
+                          }
+                        }
+                      ],
+                      "op": ".",
+                      "tag": "IFunExp"
+                    },
+                    "iType": {
+                      "tag": "TClafer",
+                      "contents": [
+                        "c0_Person"
+                      ]
+                    }
+                  },
+                  {
+                    "pid": "e5_",
+                    "inPos": null,
+                    "exp": {
+                      "sident": "c0_Bob",
+                      "binding": "c0_Bob",
+                      "tag": "IClaferId",
+                      "isTop": true,
+                      "modName": ""
+                    },
+                    "iType": {
+                      "tag": "TClafer",
+                      "contents": [
+                        "c0_Bob"
+                      ]
+                    }
+                  }
+                ],
+                "op": "=",
+                "tag": "IFunExp"
+              },
+              "iType": {
+                "tag": "TBoolean",
+                "contents": []
+              }
+            }
+          },
+          {
+            "tag": "IEClafer",
+            "iClafer": {
+              "glCard": [
+                1,
+                1
+              ],
+              "ident": "studentId",
+              "elements": [],
+              "cinPos": null,
+              "parentUID": "c0_Alice",
+              "card": [
+                1,
+                1
+              ],
+              "isAbstract": false,
+              "uid": "c0_studentId",
+              "gcard": {
+                "interval": [
+                  0,
+                  -1
+                ],
+                "isKeyword": false
+              },
+              "reference": {
+                "isSet": true,
+                "ref": {
+                  "pid": "",
+                  "inPos": null,
+                  "exp": {
+                    "sident": "string",
+                    "binding": "string",
+                    "tag": "IClaferId",
+                    "isTop": true,
+                    "modName": ""
+                  }
+                }
+              }
+            }
+          },
+          {
+            "tag": "IEConstraint",
+            "isHard": true,
+            "cpexp": {
+              "pid": "e6_",
+              "inPos": null,
+              "exp": {
+                "exps": [
+                  {
+                    "pid": "e7_",
+                    "inPos": null,
+                    "exp": {
+                      "bpexp": {
+                        "pid": "e8_",
+                        "inPos": null,
+                        "exp": {
+                          "exps": [
+                            {
+                              "pid": "",
+                              "inPos": null,
+                              "exp": {
+                                "sident": "this",
+                                "binding": "c0_Alice",
+                                "tag": "IClaferId",
+                                "isTop": true,
+                                "modName": ""
+                              },
+                              "iType": {
+                                "tag": "TClafer",
+                                "contents": [
+                                  "c0_Alice"
+                                ]
+                              }
+                            },
+                            {
+                              "pid": "",
+                              "inPos": null,
+                              "exp": {
+                                "sident": "c0_studentId",
+                                "binding": "c0_studentId",
+                                "tag": "IClaferId",
+                                "isTop": false,
+                                "modName": ""
+                              },
+                              "iType": {
+                                "tag": "TClafer",
+                                "contents": [
+                                  "c0_studentId"
+                                ]
+                              }
+                            }
+                          ],
+                          "op": ".",
+                          "tag": "IFunExp"
+                        },
+                        "iType": {
+                          "tag": "TClafer",
+                          "contents": [
+                            "c0_studentId"
+                          ]
+                        }
+                      },
+                      "oDecls": [],
+                      "quant": "ISome",
+                      "tag": "IDeclPExp"
+                    },
+                    "iType": {
+                      "tag": "TBoolean",
+                      "contents": []
+                    }
+                  },
+                  {
+                    "pid": "e9_",
+                    "inPos": null,
+                    "exp": {
+                      "exps": [
+                        {
+                          "pid": "e10_",
+                          "inPos": null,
+                          "exp": {
+                            "exps": [
+                              {
+                                "pid": "",
+                                "inPos": null,
+                                "exp": {
+                                  "sident": "this",
+                                  "binding": "c0_Alice",
+                                  "tag": "IClaferId",
+                                  "isTop": true,
+                                  "modName": ""
+                                },
+                                "iType": {
+                                  "tag": "TClafer",
+                                  "contents": [
+                                    "c0_Alice"
+                                  ]
+                                }
+                              },
+                              {
+                                "pid": "",
+                                "inPos": null,
+                                "exp": {
+                                  "exps": [
+                                    {
+                                      "pid": "",
+                                      "inPos": null,
+                                      "exp": {
+                                        "sident": "c0_studentId",
+                                        "binding": "c0_studentId",
+                                        "tag": "IClaferId",
+                                        "isTop": false,
+                                        "modName": ""
+                                      },
+                                      "iType": {
+                                        "tag": "TClafer",
+                                        "contents": [
+                                          "c0_studentId"
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "pid": "",
+                                      "inPos": null,
+                                      "exp": {
+                                        "sident": "ref",
+                                        "binding": null,
+                                        "tag": "IClaferId",
+                                        "isTop": true,
+                                        "modName": ""
+                                      },
+                                      "iType": {
+                                        "tag": "TString",
+                                        "contents": []
+                                      }
+                                    }
+                                  ],
+                                  "op": ".",
+                                  "tag": "IFunExp"
+                                },
+                                "iType": {
+                                  "tag": "TString",
+                                  "contents": []
+                                }
+                              }
+                            ],
+                            "op": ".",
+                            "tag": "IFunExp"
+                          },
+                          "iType": {
+                            "tag": "TString",
+                            "contents": []
+                          }
+                        },
+                        {
+                          "pid": "e11_",
+                          "inPos": null,
+                          "exp": {
+                            "istr": "\"s586kd0\"",
+                            "tag": "IStr"
+                          },
+                          "iType": {
+                            "tag": "TString",
+                            "contents": []
+                          }
+                        }
+                      ],
+                      "op": "=",
+                      "tag": "IFunExp"
+                    },
+                    "iType": {
+                      "tag": "TBoolean",
+                      "contents": []
+                    }
+                  }
+                ],
+                "op": "=\u003e",
+                "tag": "IFunExp"
+              },
+              "iType": {
+                "tag": "TBoolean",
+                "contents": []
+              }
+            }
+          },
+          {
+            "tag": "IEClafer",
+            "iClafer": {
+              "glCard": [
+                1,
+                1
+              ],
+              "ident": "head",
+              "elements": [],
+              "cinPos": null,
+              "parentUID": "c0_Alice",
+              "card": [
+                1,
+                1
+              ],
+              "isAbstract": false,
+              "uid": "c0_head",
+              "gcard": {
+                "interval": [
+                  0,
+                  -1
+                ],
+                "isKeyword": false
+              },
+              "super": {
+                "pid": "",
+                "inPos": null,
+                "exp": {
+                  "sident": "c0_Head",
+                  "binding": "c0_Head",
+                  "tag": "IClaferId",
+                  "isTop": false,
+                  "modName": ""
+                },
+                "iType": {
+                  "tag": "TClafer",
+                  "contents": [
+                    "c0_Head"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "cinPos": null,
+        "parentUID": "root",
+        "card": [
+          1,
+          1
+        ],
+        "isAbstract": false,
+        "uid": "c0_Alice",
+        "gcard": {
+          "interval": [
+            0,
+            -1
+          ],
+          "isKeyword": false
+        },
+        "super": {
+          "pid": "",
+          "inPos": null,
+          "exp": {
+            "sident": "c0_Student",
+            "binding": "c0_Student",
+            "tag": "IClaferId",
+            "isTop": true,
+            "modName": ""
+          },
+          "iType": {
+            "tag": "TClafer",
+            "contents": [
+              "c0_Student"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tag": "IEClafer",
+      "iClafer": {
+        "glCard": [
+          1,
+          1
+        ],
+        "ident": "Bob",
+        "elements": [
+          {
+            "tag": "IEConstraint",
+            "isHard": true,
+            "cpexp": {
+              "pid": "e12_",
+              "inPos": null,
+              "exp": {
+                "exps": [
+                  {
+                    "pid": "e13_",
+                    "inPos": null,
+                    "exp": {
+                      "exps": [
+                        {
+                          "pid": "",
+                          "inPos": null,
+                          "exp": {
+                            "sident": "this",
+                            "binding": "c0_Bob",
+                            "tag": "IClaferId",
+                            "isTop": true,
+                            "modName": ""
+                          },
+                          "iType": {
+                            "tag": "TClafer",
+                            "contents": [
+                              "c0_Bob"
+                            ]
+                          }
+                        },
+                        {
+                          "pid": "",
+                          "inPos": null,
+                          "exp": {
+                            "exps": [
+                              {
+                                "pid": "",
+                                "inPos": null,
+                                "exp": {
+                                  "sident": "c0_age",
+                                  "binding": "c0_age",
+                                  "tag": "IClaferId",
+                                  "isTop": false,
+                                  "modName": ""
+                                },
+                                "iType": {
+                                  "tag": "TClafer",
+                                  "contents": [
+                                    "c0_age"
+                                  ]
+                                }
+                              },
+                              {
+                                "pid": "",
+                                "inPos": null,
+                                "exp": {
+                                  "sident": "ref",
+                                  "binding": null,
+                                  "tag": "IClaferId",
+                                  "isTop": true,
+                                  "modName": ""
+                                },
+                                "iType": {
+                                  "tag": "TInteger",
+                                  "contents": []
+                                }
+                              }
+                            ],
+                            "op": ".",
+                            "tag": "IFunExp"
+                          },
+                          "iType": {
+                            "tag": "TInteger",
+                            "contents": []
+                          }
+                        }
+                      ],
+                      "op": ".",
+                      "tag": "IFunExp"
+                    },
+                    "iType": {
+                      "tag": "TInteger",
+                      "contents": []
+                    }
+                  },
+                  {
+                    "pid": "e14_",
+                    "inPos": null,
+                    "exp": {
+                      "iint": 21,
+                      "tag": "IInt"
+                    },
+                    "iType": {
+                      "tag": "TInteger",
+                      "contents": []
+                    }
+                  }
+                ],
+                "op": "=",
+                "tag": "IFunExp"
+              },
+              "iType": {
+                "tag": "TBoolean",
+                "contents": []
+              }
+            }
+          },
+          {
+            "tag": "IEConstraint",
+            "isHard": true,
+            "cpexp": {
+              "pid": "e15_",
+              "inPos": null,
+              "exp": {
+                "exps": [
+                  {
+                    "pid": "e16_",
+                    "inPos": null,
+                    "exp": {
+                      "exps": [
+                        {
+                          "pid": "",
+                          "inPos": null,
+                          "exp": {
+                            "sident": "this",
+                            "binding": "c0_Bob",
+                            "tag": "IClaferId",
+                            "isTop": true,
+                            "modName": ""
+                          },
+                          "iType": {
+                            "tag": "TClafer",
+                            "contents": [
+                              "c0_Bob"
+                            ]
+                          }
+                        },
+                        {
+                          "pid": "",
+                          "inPos": null,
+                          "exp": {
+                            "exps": [
+                              {
+                                "pid": "",
+                                "inPos": null,
+                                "exp": {
+                                  "sident": "c0_spouse",
+                                  "binding": "c0_spouse",
+                                  "tag": "IClaferId",
+                                  "isTop": false,
+                                  "modName": ""
+                                },
+                                "iType": {
+                                  "tag": "TClafer",
+                                  "contents": [
+                                    "c0_spouse"
+                                  ]
+                                }
+                              },
+                              {
+                                "pid": "",
+                                "inPos": null,
+                                "exp": {
+                                  "sident": "ref",
+                                  "binding": null,
+                                  "tag": "IClaferId",
+                                  "isTop": true,
+                                  "modName": ""
+                                },
+                                "iType": {
+                                  "tag": "TClafer",
+                                  "contents": [
+                                    "c0_Person"
+                                  ]
+                                }
+                              }
+                            ],
+                            "op": ".",
+                            "tag": "IFunExp"
+                          },
+                          "iType": {
+                            "tag": "TClafer",
+                            "contents": [
+                              "c0_Person"
+                            ]
+                          }
+                        }
+                      ],
+                      "op": ".",
+                      "tag": "IFunExp"
+                    },
+                    "iType": {
+                      "tag": "TClafer",
+                      "contents": [
+                        "c0_Person"
+                      ]
+                    }
+                  },
+                  {
+                    "pid": "e17_",
+                    "inPos": null,
+                    "exp": {
+                      "sident": "c0_Alice",
+                      "binding": "c0_Alice",
+                      "tag": "IClaferId",
+                      "isTop": true,
+                      "modName": ""
+                    },
+                    "iType": {
+                      "tag": "TClafer",
+                      "contents": [
+                        "c0_Alice"
+                      ]
+                    }
+                  }
+                ],
+                "op": "=",
+                "tag": "IFunExp"
+              },
+              "iType": {
+                "tag": "TBoolean",
+                "contents": []
+              }
+            }
+          },
+          {
+            "tag": "IEClafer",
+            "iClafer": {
+              "glCard": [
+                1,
+                1
+              ],
+              "ident": "head",
+              "elements": [],
+              "cinPos": null,
+              "parentUID": "c0_Bob",
+              "card": [
+                1,
+                1
+              ],
+              "isAbstract": false,
+              "uid": "c1_head",
+              "gcard": {
+                "interval": [
+                  0,
+                  -1
+                ],
+                "isKeyword": false
+              },
+              "super": {
+                "pid": "",
+                "inPos": null,
+                "exp": {
+                  "sident": "c0_Head",
+                  "binding": "c0_Head",
+                  "tag": "IClaferId",
+                  "isTop": false,
+                  "modName": ""
+                },
+                "iType": {
+                  "tag": "TClafer",
+                  "contents": [
+                    "c0_Head"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "cinPos": null,
+        "parentUID": "root",
+        "card": [
+          1,
+          1
+        ],
+        "isAbstract": false,
+        "uid": "c0_Bob",
+        "gcard": {
+          "interval": [
+            0,
+            -1
+          ],
+          "isKeyword": false
+        },
+        "super": {
+          "pid": "",
+          "inPos": null,
+          "exp": {
+            "sident": "c0_Person",
+            "binding": "c0_Person",
+            "tag": "IClaferId",
+            "isTop": true,
+            "modName": ""
+          },
+          "iType": {
+            "tag": "TClafer",
+            "contents": [
+              "c0_Person"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

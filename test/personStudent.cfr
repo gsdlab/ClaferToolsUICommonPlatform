@@ -1,0 +1,17 @@
+abstract Person
+    age -> integer
+    spouse -> Person ?
+    abstract Head
+
+abstract Student : Person
+
+Alice : Student
+    [ age = 20 ]
+    [ spouse = Bob ]
+    studentId -> string = "s586kd0"
+    head : Head
+
+Bob : Person
+    [ age = 21 ]
+    [ spouse = Alice ]
+    head : Head
