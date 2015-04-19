@@ -49,7 +49,7 @@ ClaferAPI = {
 
 	getProperty: function(clafer, property, defValue) {
 		var result = null,
-				pathes = {
+				paths = {
 					//Clafers
 					'isAbstract' 		: 'isAbstract',
 					'card'					: 'card',
@@ -57,7 +57,15 @@ ClaferAPI = {
 					'ident'					: 'ident',
 					'superClafer'		: 'super.exp.sident',
 					'supers'				: 'super.iType.contents',
-					'reference'			: 'reference.ref.exp.sident',
+					'reference'			: (function(clafer){
+															var p =  'reference.ref.exp.sident';
+															if( _.hasPath(clafer, p)) {
+																return p;
+															} else {
+																
+																return 'reference.ref.exp';
+															}
+														})(),
 					//Goals
 					'goalOperation' : 'op',
 					'goalExpId'			: 'sident',
@@ -65,8 +73,8 @@ ClaferAPI = {
 					'goalExp'				: 'exp'
 				};
 
-		if(pathes[property] && _.hasPath(clafer, pathes[property])) {
-			result = _.getPath(clafer, pathes[property]);
+		if(paths[property] && _.hasPath(clafer, paths[property])) {
+			result = _.getPath(clafer, paths[property]);
 		}
 
 	
