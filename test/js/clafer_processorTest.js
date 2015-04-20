@@ -257,3 +257,26 @@ ClaferProcessor.method("operationFilter", function(s)
 
 	return result;
 });
+
+
+ClaferProcessor.method("getFeaturesWithChildren", function(tree){
+	var list = [];
+	if(tree.subclafers!=null){
+		for (var i = 0; i<tree.subclafers.length; i++){
+			list = list.concat(this.recursiveHasChildrenCheck(tree.subclafers[i]));
+		}
+		return list;
+	} else
+		return [];
+});
+
+ClaferProcessor.method("recursiveHasChildrenCheck", function(root){
+	var list = []
+	if (root.subclafers.length > 0){
+		list.push(root.claferId);
+		for (var i = 0; i<root.subclafers.length; i++){
+			list = list.concat(this.recursiveHasChildrenCheck(root.subclafers[i]));
+		}
+	}
+	return list;
+});

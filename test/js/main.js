@@ -27,6 +27,7 @@ $(document).ready(function(){
 											'<div class="model-viewer">'+
 							          '<div class="m-v-header clearfix">'+
 							              '<div class="time"></div>'+
+							              '<button class="btn btn-primary btn-xs full" data-toggle="modal" data-target=".bs-example-modal-lg">Open</button>'+
 							              '<button class="btn btn-primary btn-xs collapseBtn">Collapse All</button>'+
 							              '<button class="btn btn-primary btn-xs tab-btn" data-tab="tree">Tree</button>'+
 							              '<button class="btn btn-primary btn-xs tab-btn" data-tab="goals">Goals</button>'+
@@ -49,6 +50,7 @@ $(document).ready(function(){
 					resTree = process(tests[i], 'getTopTree');
 					testItem.find('.tree .json').JSONView(resTree[0]);
 					testItem.find('.time').text(resTree[1] + ' ms.');
+					testItem.data('tree', resTree[0]);
 				}	
 				catch(e) {
 					testItem.find('.tree .json').append('<div class="alert alert-danger" role="alert">'+e+'</div>');
@@ -57,6 +59,7 @@ $(document).ready(function(){
 				try {
 					resGoals = process(tests[i], 'getGoals');
 					testItem.find('.goals .json').JSONView(resGoals[0]);
+					testItem.data('goals', resGoals[0]);
 				}	
 				catch(e) {
 					testItem.find('.goals .json').append('<div class="alert alert-danger" role="alert">'+e+'</div>');
@@ -75,6 +78,7 @@ $(document).ready(function(){
 						model = $(this).find('.model-ta'),
 						time = $(this).find('.time'),
 						collapsBtn = $(this).find('.collapseBtn'),
+						openBtn = $(this).find('.full'),
 						result = $(this).find('.json');
 
 				processBtn.click(function(e){
@@ -102,6 +106,13 @@ $(document).ready(function(){
 						result.JSONView('collapse');
 						$(this).addClass('is-collapsed').text('Expand All');
 					}
+				});
+
+				openBtn.click(function(){
+					var modalJSON = $('<div class="json"></div>');
+					var tree = $(this).closest('.test-item').data('tree');
+					$('.modal-json').empty().append(modalJSON);
+					modalJSON.JSONView(tree);
 				});
 
 
