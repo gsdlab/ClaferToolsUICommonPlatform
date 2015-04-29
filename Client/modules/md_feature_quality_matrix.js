@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 function FeatureQualityMatrix(host, settings)
-{ 
+{
     this.id = "mdFeatureQualityMatrix";
     this.settings = settings;
     this.title = this.settings.title;

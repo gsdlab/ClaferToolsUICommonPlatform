@@ -24,7 +24,7 @@ SOFTWARE.
 
 function InstanceConverter(source)
 {
-	this.instances = source;
+	this.instances = source.replaceAll("claferIG> ","");
 	this.residualText = "";
 }
 

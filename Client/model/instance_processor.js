@@ -24,8 +24,6 @@ SOFTWARE.
 
 function InstanceProcessor (sourceXML) {
     this.source = (new XMLHelper()).stringToXML(sourceXML);
-    console.log('########### Instances');
-    console.log(this.source.getElementsByTagName("instance").length);
     this.xmlHelper = new XMLHelper();
 }
 

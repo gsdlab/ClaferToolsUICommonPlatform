@@ -285,7 +285,7 @@ var moveUploadedFile = function (req, res, next, oldPath, urlFile, callback, reu
 
 
 var runClaferCompiler = function(key, specifiedArgs, genericArgs, onComplete)
-{
+{ 
     var formatModeArgs = [];
     var process = core.getProcess(key);
 

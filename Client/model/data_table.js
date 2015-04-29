@@ -52,8 +52,8 @@ DataTable.method("loadFromDataSource", function(ds)
     //console.log(ds.instancesXML);
     
 
-    this.instanceProcessor = new InstanceProcessor(ds.instancesXML);
-    this.claferProcessor = new ClaferProcessor(ds.claferXML);
+    this.instanceProcessor = new InstanceProcessor(ds.instancesXML);   
+    this.claferProcessor = new ClaferProcessor(ds.claferJSON);
     this.abstractClaferTree = this.claferProcessor.getTopClaferTree('root');
     this.unparsedInstances = ds.unparsedInstances;
 

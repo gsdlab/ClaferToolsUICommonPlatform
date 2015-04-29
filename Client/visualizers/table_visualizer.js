@@ -703,7 +703,7 @@ TableVisualizer.method("filter", function(data)
 
 TableVisualizer.method("preprocessData", function(sdata)
 {
-	console.log(sdata);
+
 	var filteredInstanceIds = new Array();
 	var context = this;
 
@@ -722,7 +722,6 @@ TableVisualizer.method("preprocessData", function(sdata)
 	newData.matrix = filteredMatrix;
 	newData.instanceMatch = filteredInstanceIds.length;
 	newData.instanceIds = filteredInstanceIds;
-	console.log(newData);
 
 	return newData;
 
