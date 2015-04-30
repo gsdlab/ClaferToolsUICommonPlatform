@@ -86,7 +86,7 @@ ClaferProcessor.method("calcClaferType", function(clafer) {
 
 	if (clafer.claferCardMin == 0 && clafer.claferCardMax == 1)
 	{
-		if (clafer.superClafer == 'clafer') // TODO
+		if (clafer.superClafer == '' && clafer.reference == '') // TODO
 		{
 			return 'bool';
 		}

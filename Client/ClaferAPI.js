@@ -59,10 +59,10 @@ ClaferAPI = {
 					'card'					: 'card',
 					'uid'						: 'uid',
 					'ident'					: 'ident',
-					'superClafer'		: 'super.exp.sident',
+					'superClafer'		: 'super.exp.binding',
 					'supers'				: 'super.iType.contents',
 					'reference'			: (function(clafer){
-															var p =  'reference.ref.exp.sident';
+															var p =  'reference.ref.exp.binding';
 															if( _.hasPath(clafer, p)) {
 																return p;
 															} else {
@@ -72,13 +72,21 @@ ClaferAPI = {
 														})(),
 					//Goals
 					'goalOperation' : 'op',
-					'goalExpId'			: 'sident',
+					'goalExpId'			: 'binding',
 					'goalExps'			: 'exps',
 					'goalExp'				: 'exp'
 				};
 
 		if(paths[property] && _.hasPath(clafer, paths[property])) {
 			result = _.getPath(clafer, paths[property]);
+		}
+
+		// Reference to nested clafer
+		if(property === 'reference' && _.hasPath(result, 'exps')) {
+
+				var exps = JSON.search(result, '//exp');
+				console.log(exps);
+				result = _.last(result.exps);
 		}
 
 	
