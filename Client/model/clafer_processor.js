@@ -173,7 +173,7 @@ ClaferProcessor.method("getTopClaferTree", function(id) { // id can be either 'r
 
 	}
 	catch(e) {
-		console.log("Exception while searching for the top clafer: " + id);
+		console.error("Exception while searching for the top clafer: " + id);
 
 		return "";
 	}

@@ -61,7 +61,7 @@ ClaferAPI = {
 					'ident'					: 'ident',
 					'superClafer'		: 'super.exp.binding',
 					'supers'				: 'super.iType.contents',
-					'reference'			: (function(clafer){
+					'reference'			: (function(){
 															var p =  'reference.ref.exp.binding';
 															if( _.hasPath(clafer, p)) {
 																return p;
@@ -72,7 +72,14 @@ ClaferAPI = {
 														})(),
 					//Goals
 					'goalOperation' : 'op',
-					'goalExpId'			: 'binding',
+					'goalExpId'			: (function(){
+						
+															if( _.getPath(clafer, 'binding') === null && _.getPath(clafer, 'sident') ==='ref') {
+																return 'sident';
+															} else {
+																return 'binding';
+															}
+														})(),
 					'goalExps'			: 'exps',
 					'goalExp'				: 'exp'
 				};
@@ -82,10 +89,10 @@ ClaferAPI = {
 		}
 
 		// Reference to nested clafer
-		if(property === 'reference' && _.hasPath(result, 'exps')) {
+		if(property === 'reference' && typeof result === 'object' && _.hasPath(result, 'exps')) {
 
 				var exps = JSON.search(result, '//exp');
-				console.log(exps);
+
 				result = _.last(result.exps);
 		}
 
