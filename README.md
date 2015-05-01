@@ -1,14 +1,15 @@
 ClaferToolsUICommonPlatform
 ===========================
 
-v0.3.9
+v0.3.10
 
 A superset platform used as a submodule by all the three Clafer Web Tools: [ClaferIDE](https://github.com/gsdlab/ClaferIDE), [ClaferMooVisualizer](https://github.com/gsdlab/ClaferMooVisualizer) and [ClaferConfigurator](https://github.com/gsdlab/ClaferConfigurator).
 
 Contributors
 ------------
 
-* [Alexandr Murashkin](http://gsd.uwaterloo.ca/amurashk), Main developer.
+* [Alexandr Murashkin](http://gsd.uwaterloo.ca/amurashk). Main developer.
+* [Eldar Khalilov](http://gsd.uwaterloo.ca/ekhalilov). Developer. Upgrade to 0.3.10 (replace XML with JSON, test suites).
 
 Installation
 ------------
@@ -33,17 +34,13 @@ This installation procedure applies to all three web tools, which use the same b
 
 * Getting Binaries
 
-Binary distributions of the release 0.3.9 of Clafer Tools for Windows, Mac, and Linux, can be downloaded from [Clafer Tools - Binary Distributions](http://http://gsd.uwaterloo.ca/clafer-tools-binary-distributions). There you can get binaries for `Clafer Compiler`, `ClaferIG` and the `ClaferChocoIG` backend.
+Binary distributions of the release 0.3.10 of Clafer Tools for Windows, Mac, and Linux, can be downloaded from [Clafer Tools - Binary Distributions](http://http://gsd.uwaterloo.ca/clafer-tools-binary-distributions). There you can get binaries for `Clafer Compiler`, `ClaferIG` and the `ClaferChocoIG` backend.
 
 The fastest way is to unzip a binary distribution into the folder `<bin>`.
 
 * Install [ClaferIG](https://github.com/gsdlab/claferIG) following the installation instructions into `<bin>`.
 
 * Install [ClaferChocoIG](https://github.com/gsdlab/ClaferChocoIG) following the installation instructions into `<bin>`.
-
-* Install [ClaferSMT](https://github.com/gsdlab/ClaferSMT) following the installation instructions into `<bin>`.
-
-ClaferIDE calls the `claferSMT.sh` script, which has to be modified to point to `<bin>`.
 
 Upgrading to the latest platform
 --------------------------------
