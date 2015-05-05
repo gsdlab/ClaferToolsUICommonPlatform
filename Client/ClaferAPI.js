@@ -91,9 +91,12 @@ ClaferAPI = {
 		// Reference to nested clafer
 		if(property === 'reference' && typeof result === 'object' && _.hasPath(result, 'exps')) {
 
-				var exps = JSON.search(result, '//exp');
+				var exps = JSON.search(result, '//exp'),
+						last = _.last(result.exps);
 
-				result = _.last(result.exps);
+				if(_.hasPath(clafer, paths[property]))
+
+				result = _.getPath(_.last(result.exps), 'exp.binding');
 		}
 
 	

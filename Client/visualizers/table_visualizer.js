@@ -248,7 +248,8 @@ TableVisualizer.method("refresh", function(sdata)
 				me.classed("emabstract", true);
 			}
 			else {
-				     if(d.type == "clafer"){
+
+				     if(d.type == "clafer" && d.reference){
 		      			me.append("input").attr("type", "text").attr("class", "filter-input").attr('placeholder', 'Search...').on('change', function(d){
 				            context.chartListeners.onFilterChanged(d.path,this.value);
 						});

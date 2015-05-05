@@ -103,6 +103,10 @@ DataTable.method("loadFromXMLDataSource", function()
         field.card = output[i].card;
         field.em = null; // null means not effectively mandatory, else it has the common value for all the instances
 
+        if(output[i].reference) {
+           field.reference = output[i].reference;
+        }
+
         emCheckComplete.push(this.instanceCount <= 1 ? true : false);
  
         this.fields.push(field);      
@@ -153,6 +157,12 @@ DataTable.method("collector", function(clafer, spaceCount, path)
     unit.claferPath = path.slice(0); // cloning an array
     clafer.path = unit.claferPath; // NOT GOOD assignmend (by reference). TODO: make it a clone
     unit.type = clafer.type;
+
+    if (clafer.reference && clafer.reference.length) {
+        unit.reference = clafer.reference;
+    }
+
+
 
     var cardMin;
     var cardMax;
