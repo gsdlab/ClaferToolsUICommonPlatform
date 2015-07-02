@@ -195,8 +195,11 @@ TableVisualizer.method("refresh", function(sdata)
 
   var cat1 = context.body.selectAll("tr.field-row").data(data.fields, function(d){return d.path;});
 
-  context.rows = cat1.enter()
+ 
+	cat1.enter()
     .append("tr").attr("class", "field-row").attr("id", function (d) {return context.nodeId + "-" + d.path; });
+
+ 	context.rows = cat1;
 
   // adding fields
   context.fieldCells = context.rows.append("td")
@@ -250,7 +253,7 @@ TableVisualizer.method("refresh", function(sdata)
 			else {
 
 				     if(d.type == "clafer" && d.reference){
-		      			me.append("input").attr("type", "text").attr("class", "filter-input").attr('placeholder', 'Search...').on('change', function(d){
+		      			me.append("input").attr("type", "text").attr("class", "filter-input").attr('placeholder', 'Filter...').on('change', function(d){
 				            context.chartListeners.onFilterChanged(d.path,this.value);
 						});
 		      		}
