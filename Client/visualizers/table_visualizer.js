@@ -195,11 +195,9 @@ TableVisualizer.method("refresh", function(sdata)
 
   var cat1 = context.body.selectAll("tr.field-row").data(data.fields, function(d){return d.path;});
 
- 
-	cat1.enter()
+  context.rows = cat1.enter()
     .append("tr").attr("class", "field-row").attr("id", function (d) {return context.nodeId + "-" + d.path; });
 
- 	context.rows = cat1;
 
   // adding fields
   context.fieldCells = context.rows.append("td")
@@ -734,7 +732,8 @@ TableVisualizer.method("preprocessData", function(sdata)
 TableVisualizer.method("collapse", function(id)
 {
 	var context = this;
-	context.fieldCells.each(function(d){
+
+	context.body.selectAll("tr.field-row td.field-item").each(function(d){
 		if ((d.path.length > id.length) && (d.path.substring(0, id.length) == id))
 		{
 			d3.select(d3.select(this).node().parentNode).classed("collapsed", true);
@@ -748,7 +747,7 @@ TableVisualizer.method("collapse", function(id)
 TableVisualizer.method("expand", function(id)
 {
 	var context = this;
-	context.fieldCells.each(function(d){
+	context.body.selectAll("tr.field-row td.field-item").each(function(d){
 		if ((d.path.length > id.length) && (d.path.substring(0, id.length) == id))
 		{
 			d3.select(d3.select(this).node().parentNode).classed("collapsed", false);
