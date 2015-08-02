@@ -60,7 +60,7 @@ ClaferAPI = {
 					'uid'						: 'uid',
 					'ident'					: 'ident',
 					'superClafer'		: 'super.exp.binding',
-					'supers'				: 'super.iType.contents',
+					'supers'				: 'super.iType.hi',
 					'reference'			: (function(){
 															var p =  'reference.ref.exp.binding';
 															if( _.hasPath(clafer, p)) {
