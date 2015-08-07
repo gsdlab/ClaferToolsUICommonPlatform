@@ -40,9 +40,12 @@ DataTable.method("clear", function(){
 DataTable.method("computeRanges", function()
 {
     for (var o in this.objectives)
-    {
-        this.objectives[o].minValue = d3.min(this.matrix, function(d) { return d[o];} );
-        this.objectives[o].maxValue = d3.max(this.matrix, function(d) { return d[o];} );
+    {   
+
+        this.objectives[o].minValue = d3.min(this.matrix, function(d) { return parseFloat(d[o]);} );
+        this.objectives[o].maxValue = d3.max(this.matrix, function(d) { return parseFloat(d[o]);} );
+
+       
     }
 });
 
