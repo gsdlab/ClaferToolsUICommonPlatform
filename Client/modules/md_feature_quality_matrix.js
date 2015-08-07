@@ -116,11 +116,19 @@ FeatureQualityMatrix.method("addControlPanel", function()
     var context = this;
 
     $('#showQualities').click(function(){
+       
+        var objSource = context.data.claferProcessor.source.objectives,
+            attributes = _.filter(objSource.attributes, function(attr){
 
-        $("#table").find(".typelabel.int").parent().parent().each(function(){
-            if (Object.keys(context.data.objectives).indexOf($(this).find(".path").text()) == -1)
-                $(this).toggleClass("hiddenAsNestedQuality");
-        });
+                return attr.indexOf('total_') === -1;
+            });
+
+        console.log(attributes)
+
+        $("#table").find(".id").filter(function(){return attributes.indexOf($(this).text())!== -1})
+            .closest('tr').toggleClass("hiddenAsNestedQuality")
+
+       
     });
 
     $('#saveAll').click(this.saveAll.bind(this)).css("cursor", "pointer");
