@@ -1,10 +1,10 @@
 ClaferAPI = {
-	primitiveTypes: ['integer', 'clafer', 'string', 'real'],
+	primitiveTypes: ['integer', 'clafer', 'string', 'real', 'double'],
 
 	getClafers: function(clafer, options) {
 		if (clafer === undefined) {
 			return null;
-		} 
+		}
 
 		var iClafers = JSON.search(clafer, '//iClafer'),
 				opt = $.extend({}, options),
@@ -14,7 +14,7 @@ ClaferAPI = {
 		if(claferUID === undefined) {
 			claferUID = 'root';
 		}
-				
+
 		/*		for (var i = 0; i < source.length; i++) {
 			iClafers[source[i].uid] = source[i]; // TODO: replace uid by getProperty
 		};*/
@@ -41,7 +41,7 @@ ClaferAPI = {
 												return clafer.parentUID === claferUID;
 										});
 
-			
+
 		}
 
 		return iClafers;
@@ -66,15 +66,15 @@ ClaferAPI = {
 															if( _.hasPath(clafer, p)) {
 																return p;
 															} else {
-																
+
 																return 'reference.ref.exp';
 															}
 														})(),
 					//Goals
 					'goalOperation' : 'op',
 					'goalExpId'			: (function(){
-						
-															if( _.getPath(clafer, 'binding') === null && _.getPath(clafer, 'sident') ==='ref') {
+
+															if( _.getPath(clafer, 'binding') === null && _.getPath(clafer, 'sident') ==='dref') {
 																return 'sident';
 															} else {
 																return 'binding';
@@ -99,11 +99,10 @@ ClaferAPI = {
 				result = _.getPath(_.last(result.exps), 'exp.binding');
 		}
 
-	
+
 		return (result===null && defValue!==undefined)?defValue:result;
 	}
 
-	
+
 
 }
-
