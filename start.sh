@@ -1,7 +1,7 @@
 echo "Starting the server under the supervisor."
 clafer -V
 claferIG -V
-java ~/bin/claferchocoig.jar --version
+java /home/clafertools040/bin/claferchocoig.jar --version
 echo "Autorestarting on source code changes."
 echo "Polling for source code changes every minute."
 cd ..

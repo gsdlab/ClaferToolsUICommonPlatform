@@ -21,7 +21,7 @@ SOFTWARE.
 */
 function ClaferProcessor (sourceJSON) {
 
-    
+
     this.source = sourceJSON;
 
     this.claferTemplate =  {
@@ -59,18 +59,18 @@ ClaferProcessor.method("getAllChildren", function(clafer) {
 
 	var processor = this,
 			result =  _.filter(processor.clafers, function(cl){
-													return !cl.isAbstract && cl.parentUID === ClaferAPI.getProperty(clafer, 'uid'); 
+													return !cl.isAbstract && cl.parentUID === ClaferAPI.getProperty(clafer, 'uid');
 												});
 
 		_.each(ClaferAPI.getProperty(clafer, 'supers'), function(superUID){
-	
+
 			var superClafer = processor.getByUID(superUID)[0],
 					children = _.filter(processor.clafers, function(cl){
-																return !cl.isAbstract && cl.parentUID === ClaferAPI.getProperty(superClafer, 'uid'); 
+																return !cl.isAbstract && cl.parentUID === ClaferAPI.getProperty(superClafer, 'uid');
 															})
 
 			result = result.concat(children);
-		}); 
+		});
 
 		return result;
 });
@@ -123,11 +123,11 @@ ClaferProcessor.method("createClaferObject", function(clafer) {
 	// Type
 	result.type = this.calcClaferType(result);
 
-	//Subclafers 
+	//Subclafers
 	var subclafers = processor.getAllChildren(clafer);
 
-	result.subclafers = _.map(subclafers, function(subclafer){ 
-															return processor.createClaferObject(subclafer); 
+	result.subclafers = _.map(subclafers, function(subclafer){
+															return processor.createClaferObject(subclafer);
 														});
 	return result;
 
@@ -145,7 +145,7 @@ ClaferProcessor.method("getTopClaferTree", function(id) { // id can be either 'r
 
 			// Top level concrete clafers
 			var nodes = _.filter(processor.clafers, function(clafer){
-										return !clafer.isAbstract && clafer.parentUID === 'root'; 
+										return !clafer.isAbstract && clafer.parentUID === 'root';
 									});
 
 			var result = $.extend({}, processor.claferTemplate, {
@@ -228,11 +228,11 @@ ClaferProcessor.method("getGoals", function()
 	{
 		var builtExp = this.buildExp(xpGoals[i]);
 
-		
+
 
 		var parts = builtExp.split(" ");
 		var operation = parts[0];
-		var rest = builtExp.replace(/[^ ]* /, "").replace(".ref", "");
+		var rest = builtExp.replace(/[^ ]* /, "").replace(".dref", "");
 
 		var goal = new Object();
 		goal.operation = operation;

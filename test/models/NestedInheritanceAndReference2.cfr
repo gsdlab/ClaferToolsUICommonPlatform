@@ -10,7 +10,7 @@ abstract TemperatureConnector
         [ this.output ]
     to -> TemperaturePort
         [ this.input ]
-    [ to.ref.ref = from.ref.ref ] // the connector passes the same value
+    [ to.dref.dref = from.dref.dref ] // the connector passes the same value
 
 sensor : Component
     temperature : TemperaturePort
@@ -24,4 +24,4 @@ con1 : TemperatureConnector
     [ from = sensor.temperature ]
     [ to = controller.temperature ]
 
-assert [ controller.temperature.ref = sensor.temperature.ref ]
+assert [ controller.temperature.dref = sensor.temperature.dref ]
