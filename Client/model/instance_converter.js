@@ -24,7 +24,7 @@ SOFTWARE.
 
 function InstanceConverter(source)
 {
-	this.instances = source;
+	this.instances = source.replaceAll("claferIG> ","");
 	this.residualText = "";
 }
 
@@ -176,7 +176,7 @@ InstanceConverter.method("convertFromClaferMooOutputToXML", function(){
 			if (superClafer == "clafer")
 				superClafer = "";
 
-			value = lineMatch[3]; // value can be numeric or another instance clafer, it does not matter
+			value = lineMatch[3].trim(); // value can be numeric or another instance clafer, it does not matter
 			result += '\n<clafer id="' + claferId + '" counter="' + claferCounter + '">';
 			result += '<super>' + superClafer + '</super>';
 			result += '<value v="' + value.encodeHTML() + '"/>';

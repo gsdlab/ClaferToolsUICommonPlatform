@@ -24,6 +24,16 @@ function TableVisualizer(nodeId, options, chartListeners)
 {
     this.nodeId = nodeId;
     this.options = options;
+
+    if (this.options.displayLimit) // how many instances to show maximum
+    {
+    	this.displayLimit = this.options.displayLimit;
+    }
+    else
+    {
+    	this.displayLimit = 100;
+    }
+
     var context = this;
     context.chartListeners = chartListeners;
 
@@ -85,23 +95,47 @@ TableVisualizer.method("addSortingFeature", function(elem){
 			}
 
 			if (context.chartListeners.onSorted)
-				context.chartListeners.onSorted(d.id, sortFlag);
+				
+				context.chartListeners.onSorted(d.path, sortFlag);
 		});
 
 });
 
-TableVisualizer.method("refresh", function(data)
+
+// CC: remove instance from the table
+TableVisualizer.method("removeAllInstances", function() {
+
+	
+	this.body.selectAll("td:not(.field-item)").remove();
+	this.head.selectAll("th").remove();
+
+	
+	
+});
+
+TableVisualizer.method("refresh", function(sdata)
 {
+
+	var data = this.preprocessData(sdata);
+
 	this.data = data;
 	var context = this;
 
-	var titleNode = context.head.append("th").data([{"id" : "id"}])
+	var titleNode = context.head.selectAll("th.title").data([{"id" : "id"}]).enter()
+		.append("th")
+		.attr("class", "title")
 		.text(data.title)
 		.attr("width", context.firstColWidth)
 		.style("min-width", context.firstColWidth + "px")
 		.style("max-width", context.firstColWidth + "px");
 
-	var cat0 = context.head.selectAll("th.instance-id").data(data.instanceIds, function(d){return d;});
+	if (context.options.sorting)
+		context.addSortingFeature(titleNode);
+
+
+	var cat0 = context.head.selectAll("th.instance-id").data(data.instanceIds, function(d){ return d;});
+
+	cat0.exit().remove();
 
 	context.headers = cat0.enter()
 	    .append("th")
@@ -109,12 +143,11 @@ TableVisualizer.method("refresh", function(data)
 	    	.attr("id", function (d) {return context.nodeId + "-" + "th" + d; })
 			.attr("width", context.colWidth)
 	    	.text(function (d) {return d; });
-
-	context.head.append("th"); // extra col for the ease of resizing
-
-	if (context.options.sorting)
-		context.addSortingFeature(titleNode);
-
+/*
+	var emptyCell = context.head.selectAll("th.empty-cell").data([{"id" : "id"}]).enter()
+		.append("th") // extra col for the ease of resizing
+		.attr("class", "empty-cell"); // extra col for the ease of resizing
+*/
     if (context.options.buttonsForRemoval)
     {
 		var buttonsForRemoval = context.headers.append('img')
@@ -165,6 +198,7 @@ TableVisualizer.method("refresh", function(data)
   context.rows = cat1.enter()
     .append("tr").attr("class", "field-row").attr("id", function (d) {return context.nodeId + "-" + d.path; });
 
+
   // adding fields
   context.fieldCells = context.rows.append("td")
       .attr("class", "field-item").each(function(d){
@@ -176,14 +210,23 @@ TableVisualizer.method("refresh", function(data)
 			me.attr("width", context.firstColWidth)
 				.style("min-width", context.firstColWidth + "px")
 				.style("max-width", context.firstColWidth + "px");
-      		me.append("span").attr("class", "texttosearch").html(d.title.replaceAll(' ', '&nbsp;&nbsp;'));
+
+		    if (context.options.useFullyQualified) // how many instances to show maximum
+		    {
+	      		me.append("span").attr("class", "texttosearch").html(context.prettifyPath(d.path));
+	      	}
+	      	else
+	      	{
+	      		me.append("span").attr("class", "texttosearch").html(d.title.replaceAll(' ', '&nbsp;&nbsp;'));
+	      	}
       		me.append("span").attr("class", "path").style("display", "none").html(d.path);
       		me.append("span").attr("class", "super").style("display", "none").html(d.super);
       		me.append("span").attr("class", "id").style("display", "none").html(d.id);
       		var typeLabel = me.append("span").attr("class", "typelabel " + d.type);
       		me.append("span").attr("class", "card").html(d.card != "" ? "&nbsp;" + d.card : "");
 
-			if (d.em !== null)
+
+			if (d.em !== null) // all values are equal
 			{
 		    	var mappedObject = context.mapValue(d, d.em, true);
 
@@ -204,6 +247,15 @@ TableVisualizer.method("refresh", function(data)
 		    	}
 
 				me.classed("emabstract", true);
+			}
+			else {
+
+				     if(d.type == "clafer" && d.reference){
+		      			me.append("input").attr("type", "text").attr("class", "filter-input").attr('placeholder', 'Filter...').on('change', function(d){
+				            context.chartListeners.onFilterChanged(d.path,this.value);
+						});
+		      		}
+      		
 			}
 
 		    if (context.options.sorting && typeLabel.classed("int"))
@@ -236,12 +288,69 @@ TableVisualizer.method("refresh", function(data)
 	            }
 
       		}
-      });
+
+			if (context.options.filtering)
+			{
+			  	if (typeLabel.classed("bool") || typeLabel.classed("boolclafer"))
+			  	{
+			  		me.attr("FilterStatus", "none");
+		            var emValueNode = me.select(".emvalue");
+		            if (!emValueNode.empty()) // is effectively  mandatory
+		            {
+		                if (emValueNode.classed("no"))
+		                {
+		                    typeLabel.classed("filter_unchecked", true);
+		                }
+		                else
+		                {
+		                    typeLabel.classed("filter_checked", true);
+		                }                    
+		            }
+		            else
+		            {
+		                typeLabel.classed("filter_normal", true)
+		                	.style("cursor", "pointer");
+
+		                typeLabel.on("click", null);
+
+		                typeLabel.on("click", function(d){
+		                	var row = d3.select(d3.select(this).node().parentNode.parentNode);
+		                    var arg = d3.select(d3.select(this).node().parentNode).select(".path").text();
+
+		                    if (row.attr("FilterStatus") == "none"){
+		                        typeLabel.classed("filter_normal", false);
+		                        typeLabel.classed("filter_unchecked", false);
+		                        typeLabel.classed("filter_checked", true);
+		                        row.attr("FilterStatus", "require");
+		                        context.chartListeners.onFeatureChecked(arg, 1);
+		                    } else if (row.attr("FilterStatus") == "require"){
+		                        typeLabel.classed("filter_normal", false);
+		                        typeLabel.classed("filter_unchecked", true);
+		                        typeLabel.classed("filter_checked", false);
+		                        row.attr("FilterStatus", "exclude");
+		                        context.chartListeners.onFeatureChecked(arg, -1);
+		                    } else {
+		                        typeLabel.classed("filter_normal", true);
+		                        typeLabel.classed("filter_unchecked", false);
+		                        typeLabel.classed("filter_checked", false);
+		                        row.attr("FilterStatus", "none");
+		                        context.chartListeners.onFeatureChecked(arg, 0);                    
+		                    }
+
+
+		                });
+		            }
+		        }
+		    }
+
+      	});
 
   // adding values
-  context.rows.each(function(tr, i){
+  cat1.each(function(tr, i){
 
-  		var path = d3.select(this).attr("id").substring((context.nodeId + "-").length);
+  		var me = d3.select(this);
+
+  		var path = me.attr("id").substring((context.nodeId + "-").length);
   		var field = context.data.fields.filter(function(el){return el.path == path})[0];
 
   		var reducedData = context.data.matrix.reduce(function(prev, cur){
@@ -249,34 +358,14 @@ TableVisualizer.method("refresh", function(data)
   			return prev;
   		}, []);
 
-  		var cat2 = d3.select(this).selectAll("td.content-cell").data(reducedData, function(d) {return d.id;});
+
+      	var typeLabel = me.select(".typelabel");
+
+  		var cat2 = me.selectAll("td.content-cell").data(reducedData, function(d) {return d.id;});
 
   		cat2.enter()
-		    .append("td").each(function(d){
-
-		    	var mappedObject = context.mapValue(field, d.value);
-		    	if (mappedObject.elem == 'img')
-		    	{
-		    		var src = 'commons/Client/images/' + mappedObject.elemClass + '.png';
-
-		    		d3.select(this)
-		    			.attr("class", "content-cell " + mappedObject.tdClass)
-		    			.attr("title", mappedObject.hint)
-		    				.append("img")
-				    			.attr("class", mappedObject.elemClass)
-		    					.attr("src", src);
-		    	}
-		    	else
-		    	{
-		    		d3.select(this)
-		    			.attr("class", "content-cell " + mappedObject.tdClass)
-		    			.attr("title", mappedObject.hint)
-		    				.append(mappedObject.elem)
-				    			.attr("class", mappedObject.elemClass)
-		    					.html(mappedObject.elemContent);		    		
-		    	}
-
-		    	d3.select(this).attr("width", context.colWidth)
+		    .append("td")
+				.attr("width", context.colWidth)
 		    	.style("max-width", context.colWidth + "px")
 
 	      		.on("mouseover", function(d){
@@ -286,72 +375,133 @@ TableVisualizer.method("refresh", function(data)
 	      		});
 
 
+  		cat2.exit()
+		    .remove();
 
-		    });
+		cat2.each(function(d){
 
-  });
+		    	var mappedObject = context.mapValue(field, d.value);
+		    	if (mappedObject.elem == 'img')
+		    	{
+		    		var src = 'commons/Client/images/' + mappedObject.elemClass + '.png';
 
-  	context.rows.each(function(tr, i){
-	  	d3.select(this).append("td").attr("class", "extra-cell").html("&nbsp;"); // extra td for ease of resizing
+		    		d3.select(this).html("")
+		    			.attr("class", "content-cell " + mappedObject.tdClass)
+		    			.attr("title", mappedObject.hint)
+		    				.append("img")
+				    			.attr("class", mappedObject.elemClass)
+		    					.attr("src", src);
+		    	}
+		    	else
+		    	{
+		    		d3.select(this).html("")
+		    			.attr("class", "content-cell " + mappedObject.tdClass)
+		    			.attr("title", mappedObject.hint)
+		    				.append(mappedObject.elem)
+				    			.attr("class", mappedObject.elemClass)
+		    					.html(mappedObject.elemContent);		    		
+		    	}
 
-	});
+		});
 
-	if (this.options.filtering)
-	{
-	  	context.rows.each(function(tr, i){
-		  	var me = d3.select(this);
-			var typeLabelNode = me.select(".typelabel");
-		  	if (typeLabelNode.classed("bool") || typeLabelNode.classed("boolclafer"))
-		  	{
-		  		me.attr("FilterStatus", "none");
-	            var emValueNode = me.select(".emvalue");
-	            if (!emValueNode.empty()) // is effectively  mandatory
-	            {
-	                if (emValueNode.classed("no"))
-	                {
-	                    typeLabelNode.classed("filter_unchecked", true);
-	                }
-	                else
-	                {
-	                    typeLabelNode.classed("filter_checked", true);
-	                }                    
-	            }
-	            else
-	            {
-	                typeLabelNode.classed("filter_normal", true)
-	                	.style("cursor", "pointer");
 
-	                typeLabelNode.on("click", function(d){
+//		alert(typeLabel);
+
+//		typeLabel.attr("class", "typelabel " + field.type);
+
+  		var col = me.select(".field-item");
+
+		if (field.em !== null)
+		{
+	    	var mappedObject = context.mapValue(field, field.em, true);
+
+	    	if (mappedObject.elem == 'img')
+	    	{
+	    		var b = (field.card != "");
+
+				col.select(".emvalueEq").text(' = ').style("display", b ? null : "none");
+		      	col.select(".emvalue").attr("class", "emvalue " + mappedObject.tdClass).html(
+
+					(mappedObject.tdClass.indexOf("no") >= 0) ? "no" : "yes" 
+	      			).style("display", b ? null : "none");
+	    	}
+	    	else
+	    	{
+				col.select(".emvalueEq").text(' = ');
+	      		col.select(".emvalue").attr("class", "emvalue " + mappedObject.tdClass).html(mappedObject.elemContent);		    		
+	    	}
+
+			col.classed("emabstract", true);
+		}
+		else
+		{
+			col.select(".emvalueEq").remove();
+			col.select(".emvalue").remove();
+
+			var wasEM = col.classed("emabstract");
+
+			col.classed("emabstract", false);
+
+			if (context.options.filtering)
+			{
+			  	if (typeLabel.classed("bool") || typeLabel.classed("boolclafer"))
+			  	{
+			  		if (!me.attr("FilterStatus"))
+			  		{
+				  		me.attr("FilterStatus", "none");
+				  	}
+
+					var oldFilterClass = "filter_normal ";
+
+					if (!wasEM)
+					{
+						if (typeLabel.classed("filter_unchecked")){
+							oldFilterClass = "filter_unchecked ";
+						}
+						if (typeLabel.classed("filter_checked")){
+							oldFilterClass = "filter_checked ";
+						}
+					}
+
+			      	typeLabel.attr("class", "typelabel " + oldFilterClass + field.type)
+				      	.style("cursor", "pointer");
+
+	                typeLabel.on("click", function(d){
 	                	var row = d3.select(d3.select(this).node().parentNode.parentNode);
 	                    var arg = d3.select(d3.select(this).node().parentNode).select(".path").text();
 
 	                    if (row.attr("FilterStatus") == "none"){
-	                        typeLabelNode.classed("filter_normal", false);
-	                        typeLabelNode.classed("filter_unchecked", false);
-	                        typeLabelNode.classed("filter_checked", true);
+	                        typeLabel.classed("filter_normal", false);
+	                        typeLabel.classed("filter_unchecked", false);
+	                        typeLabel.classed("filter_checked", true);
 	                        row.attr("FilterStatus", "require");
 	                        context.chartListeners.onFeatureChecked(arg, 1);
 	                    } else if (row.attr("FilterStatus") == "require"){
-	                        typeLabelNode.classed("filter_normal", false);
-	                        typeLabelNode.classed("filter_unchecked", true);
-	                        typeLabelNode.classed("filter_checked", false);
+	                        typeLabel.classed("filter_normal", false);
+	                        typeLabel.classed("filter_unchecked", true);
+	                        typeLabel.classed("filter_checked", false);
 	                        row.attr("FilterStatus", "exclude");
 	                        context.chartListeners.onFeatureChecked(arg, -1);
 	                    } else {
-	                        typeLabelNode.classed("filter_normal", true);
-	                        typeLabelNode.classed("filter_unchecked", false);
-	                        typeLabelNode.classed("filter_checked", false);
+	                        typeLabel.classed("filter_normal", true);
+	                        typeLabel.classed("filter_unchecked", false);
+	                        typeLabel.classed("filter_checked", false);
 	                        row.attr("FilterStatus", "none");
 	                        context.chartListeners.onFeatureChecked(arg, 0);                    
 	                    }
 
 
 	                });
-	            }
+				}
+			}
+		}
+  });
+/*
+  	context.rows.each(function(tr, i){
+	  	d3.select(this).append("td").attr("class", "extra-cell").html("&nbsp;"); // extra td for ease of resizing
 
-		  	}
-		});
-	}
+	});
+*/
 });
 
 /*
@@ -380,11 +530,15 @@ TableVisualizer.method("unselect", function(d)
 
 
 TableVisualizer.method("filterClaferValue", function(s){
-	return s.replace(/c[0-9]*_/g, "").replace("$0", "");
+	return s.replace(/c[0-9]*_/g, "").replaceAll("$0", "");
+});
+
+TableVisualizer.method("prettifyPath", function(s){
+	return s.replace(/c[0-9]*_/g, "").replaceAll("-", ".").substring(5);
 });
 
 TableVisualizer.method("prettifyClaferSet", function(s){
-	return s.replace("{", "{<br/>").replace("}", "<br/>}").replaceAll(";", "<br/>");
+	return this.filterClaferValue(s.replace("{", "").replace("}", "").replaceAll(";", "<br/>"));
 });
 
 TableVisualizer.method("trimValue", function(s)
@@ -436,12 +590,20 @@ TableVisualizer.method("mapValue", function(field, sVal, denyEMCheck)
 			result.elemClass = 'no';
 			result.tdClass = 'bool no';
 		}
+/*		else
+		{
+			result.hint = field.id + ' is present';
+			result.elem = 'img';
+			result.elemClass = 'tick';
+			result.tdClass = 'bool tick';
+		}
+*/		
 		else
 		{
 			result.hint = field.id + ' is present as ' + this.trimValue(this.filterClaferValue(sVal));
 			result.elem = 'img';
 			result.elemClass = 'tick';
-			result.tdClass = 'bool tick clafer';
+			result.tdClass = 'bool tick';
 		}
 	}
 	else if (type == "int")
@@ -495,11 +657,16 @@ TableVisualizer.method("mapValue", function(field, sVal, denyEMCheck)
 			else
 			{
 				result.hint = field.id + ' is present as ' + this.trimValue(this.filterClaferValue(sVal));
+				result.elem = 'span';
+				result.elemContent = this.trimValue(this.filterClaferValue(sVal));
+				result.elemClass = 'string texttosearch';
+/*
+				result.hint = field.id + ' is present as ' + this.trimValue(this.filterClaferValue(sVal));
 				result.elem = 'img';
 				result.elemClass = 'tickMan';
 				result.tdClass = 'bool tick';
+*/
 			}
-
 		}
 		else
 		{
@@ -513,7 +680,7 @@ TableVisualizer.method("mapValue", function(field, sVal, denyEMCheck)
 			{
 				result.hint = field.id + ' = ' + this.prettifyClaferSet(sVal);
 				result.elem = 'span';
-				result.elemContent = this.trimValue(this.filterClaferValue(sVal));
+				result.elemContent = this.prettifyClaferSet(sVal);
 				result.elemClass = 'clafer texttosearch';
 			}
 		}
@@ -533,21 +700,40 @@ TableVisualizer.method("mapValue", function(field, sVal, denyEMCheck)
 
 TableVisualizer.method("filter", function(data)
 {
-	var context = this;
-	context.headers.each(function(d){
-		d3.select(this).style("display", data.matrix.some(function(el){ return (el.id == d) && (el["_hidden"] === true);}) ? "none" : null);
-	});
+	this.refresh(data);
+});
 
-	context.rows.selectAll("td.content-cell").each(function(d){
-		d3.select(this).style("display", data.matrix.some(function(el){ return (el.id == d.id) && (el["_hidden"] === true);}) ? "none" : null);
-	});
+TableVisualizer.method("preprocessData", function(sdata)
+{
+
+	var filteredInstanceIds = new Array();
+	var context = this;
+
+	var filteredMatrix = sdata.matrix.reduce(function(prev, cur){
+//		console.log(cur["_hidden"]);
+		if ((prev.length < context.displayLimit) && (cur["_hidden"] === undefined || cur["_hidden"] === false))
+		{
+			prev.push(cur);
+			filteredInstanceIds.push(cur["id"]);
+		}
+		return prev;
+	}, []);
+
+	// warning: a potential memory leak here!!!
+	var newData = jQuery.extend(true, {}, sdata);	
+	newData.matrix = filteredMatrix;
+	newData.instanceMatch = filteredInstanceIds.length;
+	newData.instanceIds = filteredInstanceIds;
+
+	return newData;
 
 });
 
 TableVisualizer.method("collapse", function(id)
 {
 	var context = this;
-	context.fieldCells.each(function(d){
+
+	context.body.selectAll("tr.field-row td.field-item").each(function(d){
 		if ((d.path.length > id.length) && (d.path.substring(0, id.length) == id))
 		{
 			d3.select(d3.select(this).node().parentNode).classed("collapsed", true);
@@ -561,7 +747,7 @@ TableVisualizer.method("collapse", function(id)
 TableVisualizer.method("expand", function(id)
 {
 	var context = this;
-	context.fieldCells.each(function(d){
+	context.body.selectAll("tr.field-row td.field-item").each(function(d){
 		if ((d.path.length > id.length) && (d.path.substring(0, id.length) == id))
 		{
 			d3.select(d3.select(this).node().parentNode).classed("collapsed", false);

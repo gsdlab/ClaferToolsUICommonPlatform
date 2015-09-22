@@ -1,0 +1,324 @@
+
+/* DEMO */
+html,
+body {
+  height: 100%;
+}
+
+#wrap {
+  position: relative;
+}
+
+.menu-btn {
+  border: none;
+  background: #47a3da;
+  color: #fff;
+  padding: 10px 20px;
+  display: block;
+  cursor: pointer;
+  margin: 10px 0 20px 20px;
+}
+
+a:hover,
+a:active,
+a:focus {text-decoration: none;}
+
+
+.model-viewer {
+  position: relative;
+  padding: 10px;
+  width: 100%;
+}
+
+.tests .model-viewer .name {
+  overflow: hidden;
+  font-size: 18px;
+  line-height: 23px;
+}
+
+.tests .model-viewer .btn {
+  float: right;
+  margin-left: 10px;
+}
+
+.tests .model-viewer .time {
+  float: right;
+  margin-left: 10px;
+  line-height: 21px;
+}
+
+
+.model-viewer .json {
+  overflow: auto;
+
+  height: 600px;
+  
+  padding: 10px;
+
+  border: 1px solid #ddd;
+}
+
+.tests .model-viewer .json {
+  margin-top: 15px;
+}
+
+
+.time {
+  line-height: 34px;
+
+  float: right;
+}
+
+.model-ta {
+  width: 100%;
+  height: 100%;
+
+  border: 1px solid #ddd;
+}
+
+
+/* FULL SIZE */
+
+.model-viewer.full {
+  width: 100%;
+  height: 100%;
+  padding: 40px;
+}
+
+.model-viewer > .row,
+.model-viewer > .row > .col-xs-6 {
+  position: relative;
+
+  height: 100%;
+}
+
+.model-viewer > .row > .col-xs-6 {
+  padding-top: 40px;
+}
+
+.model-viewer.full .m-v-header {
+  position: absolute;
+  top: 0;
+  right: 15px;
+  left: 15px;
+}
+
+
+
+.model-viewer.full .json {
+  width: 100%;
+  height: 100%;
+}
+
+/* END DEMO*/
+
+
+/* TABS */
+  .tab {display: none;}
+
+  .tab.active{display: block;}
+  
+/* END TABS*/
+
+.modal-open {
+  overflow: visible;
+  padding-right: 0 !important;
+}
+
+.modal-dialog {
+  position: absolute !important;
+  top: 10px !important;
+  left: 10px !important;
+  bottom: 10px !important;
+  right: 10px !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+
+.modal-content {
+  height: 100%;
+}
+
+button.close {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+}
+
+.modal-json {
+  width: 100%;
+  height: 100%;
+  padding-top: 20px;
+  overflow: auto;
+  padding: 10px;
+}
+
+.modal-content {
+  padding: 30px;
+}
+
+.jsonview {
+  font-family: monospace;
+  font-size: 1.1em;
+
+  white-space: pre-wrap;
+}
+.jsonview .prop {
+  font-weight: bold;
+}
+.jsonview .null {
+  color: red;
+}
+.jsonview .bool {
+  color: blue;
+}
+.jsonview .num {
+  color: blue;
+}
+.jsonview .string {
+  white-space: pre-wrap;
+
+  color: green;
+}
+.jsonview .string.multiline {
+  display: inline-block;
+
+  vertical-align: text-top;
+}
+.jsonview .collapser {
+  position: absolute;
+  left: -1em;
+
+  cursor: pointer;
+}
+.jsonview .collapsible {
+  transition: height 1.2s;
+  transition: width 1.2s;
+}
+.jsonview .collapsible.collapsed {
+  display: inline-block;
+  overflow: hidden;
+
+  width: 1em;
+  height: .8em;
+  margin: 0;
+}
+.jsonview .collapsible.collapsed:before {
+  width: 1em;
+  margin-left: .2em;
+
+  content: '…';
+}
+.jsonview .collapser.collapsed {
+  transform: rotate(0deg);
+}
+.jsonview .q {
+  display: inline-block;
+
+  width: 0;
+
+  color: transparent;
+}
+.jsonview li {
+  position: relative;
+}
+.jsonview ul {
+  margin: 0 0 0 2em;
+  padding: 0;
+
+  list-style: none;
+}
+.jsonview h1 {
+  font-size: 1.2em;
+}
+
+/* General styles for all menus */
+.cbp-spmenu {
+  background: #47a3da;
+  position: fixed;
+}
+
+.cbp-spmenu h3 {
+  color: #afdefa;
+  font-size: 1.9em;
+  padding: 20px;
+  margin: 0;
+  font-weight: 300;
+  background: #0d77b6;
+}
+
+.cbp-spmenu a {
+  display: block;
+  color: #fff;
+  font-size: 1.1em;
+  font-weight: 300;
+}
+
+.cbp-spmenu a:hover {
+  background: #258ecd;
+}
+
+.cbp-spmenu a:active {
+  background: #afdefa;
+  color: #47a3da;
+}
+
+/* Orientation-dependent styles for the content of the menu */
+
+.cbp-spmenu-vertical {
+  width: 240px;
+  height: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+.cbp-spmenu-vertical a {
+  border-bottom: 1px solid #258ecd;
+  padding: 1em;
+}
+
+
+/* Vertical menu that slides from the left or right */
+
+.cbp-spmenu-left {
+  left: -240px;
+}
+
+.cbp-spmenu-right {
+  right: -240px;
+}
+
+.cbp-spmenu-left.cbp-spmenu-open {
+  left: 0px;
+}
+
+.cbp-spmenu-right.cbp-spmenu-open {
+  right: 0px;
+}
+
+/* Push classes applied to the body */
+
+.cbp-spmenu-push {
+  overflow-x: hidden;
+  position: relative;
+  left: 0;
+}
+
+.cbp-spmenu-push-toright {
+  left: 240px;
+}
+
+.cbp-spmenu-push-toleft {
+  left: -240px;
+}
+
+
+/* Transitions */
+
+.cbp-spmenu,
+.cbp-spmenu-push {
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}

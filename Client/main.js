@@ -250,3 +250,15 @@ Host.method("errorWindow", function(errorRecord){
     });  
 
 });
+
+(function($){
+  $(document).ready(function(){
+     $(document).delegate('.sidemenu .sm-open','click',function(e){
+      // TODO: fix sidemenu z-index bug
+      e.preventDefault();
+      
+      $(this).closest('.sm-content').toggleClass('active');
+    })
+    
+  });
+})(jQuery);

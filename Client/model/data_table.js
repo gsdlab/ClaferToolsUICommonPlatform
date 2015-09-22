@@ -40,18 +40,23 @@ DataTable.method("clear", function(){
 DataTable.method("computeRanges", function()
 {
     for (var o in this.objectives)
-    {
-        this.objectives[o].minValue = d3.min(this.matrix, function(d) { return d[o];} );
-        this.objectives[o].maxValue = d3.max(this.matrix, function(d) { return d[o];} );
+    {   
+
+        this.objectives[o].minValue = d3.min(this.matrix, function(d) { return parseFloat(d[o]);} );
+        this.objectives[o].maxValue = d3.max(this.matrix, function(d) { return parseFloat(d[o]);} );
+
+       
     }
 });
 
 
 DataTable.method("loadFromDataSource", function(ds)
 {
-    console.log(ds.instancesXML);
-    this.instanceProcessor = new InstanceProcessor(ds.instancesXML);
-    this.claferProcessor = new ClaferProcessor(ds.claferXML);
+    //console.log(ds.instancesXML);
+    
+
+    this.instanceProcessor = new InstanceProcessor(ds.instancesXML);   
+    this.claferProcessor = new ClaferProcessor(ds.claferJSON);
     this.abstractClaferTree = this.claferProcessor.getTopClaferTree('root');
     this.unparsedInstances = ds.unparsedInstances;
 
@@ -61,13 +66,16 @@ DataTable.method("loadFromDataSource", function(ds)
     this.loadFromXMLDataSource(this.instanceProcessor, this.abstractClaferTree);
     this.computeRanges();
 
-    console.log(this);
+    //console.log(this);
 });
 
 DataTable.method("loadFromXMLDataSource", function()
 {
     this.instanceCount = this.instanceProcessor.getInstanceCount();
-    this.instanceShown = this.instanceCount;
+    this.instanceMatch = this.instanceCount;
+
+    this.instanceIds = [];
+    this.matrix = [];
 
     this.abstractClaferOutput = new Array();
     var current = this.abstractClaferTree;
@@ -91,11 +99,16 @@ DataTable.method("loadFromXMLDataSource", function()
         field.pathAsArray = output[i].claferPath;
         field.level = field.pathAsArray.length;
         field.path = output[i].claferPath.join("-");
+        //console.log(field.path);
         field.id = output[i].claferId;
         field.super = output[i].super; 
         field.type = output[i].type;
         field.card = output[i].card;
         field.em = null; // null means not effectively mandatory, else it has the common value for all the instances
+
+        if(output[i].reference) {
+           field.reference = output[i].reference;
+        }
 
         emCheckComplete.push(this.instanceCount <= 1 ? true : false);
  
@@ -147,6 +160,12 @@ DataTable.method("collector", function(clafer, spaceCount, path)
     unit.claferPath = path.slice(0); // cloning an array
     clafer.path = unit.claferPath; // NOT GOOD assignmend (by reference). TODO: make it a clone
     unit.type = clafer.type;
+
+    if (clafer.reference && clafer.reference.length) {
+        unit.reference = clafer.reference;
+    }
+
+
 
     var cardMin;
     var cardMax;

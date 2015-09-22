@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 function FeatureQualityMatrix(host, settings)
-{ 
+{
     this.id = "mdFeatureQualityMatrix";
     this.settings = settings;
     this.title = this.settings.title;
@@ -51,7 +51,7 @@ FeatureQualityMatrix.method("resize", function() // not attached to the window a
 FeatureQualityMatrix.method("onDataLoaded", function(data){
 
     this.data = data;
-    var instanceCount = this.data.instanceCount;
+//    var instanceCount = this.data.instanceCount;
     this.toggled = false;    
     this.currentRow = 1;
 });
@@ -62,7 +62,7 @@ FeatureQualityMatrix.method("addControlPanel", function()
 
 // Add search bar 
     var panel = $('<div id="matrix-panel"></div>');
-    var vl = $('<div class="verticalLine">&nbsp;</div>');
+    var vl = '<div class="verticalLine">&nbsp;</div>';
     $(panel).append('Search: <input type="text" id="search" class="text_input" placeholder="search" style="width: 100px">');
     $(panel).append(vl);
 // Adding buttons for comparison table
@@ -73,7 +73,9 @@ FeatureQualityMatrix.method("addControlPanel", function()
 //    $(panel).append('<button id="saveAll">Save all variants</button>');
     $(panel).append('<input type="button" id="saveAll" value="Save all variants">');
     $(panel).append(vl);
-    $(panel).append('<span id="instanceshown"></span> out of <span id="instancecount"></span> variant(s) satisfy the criteria');
+    $(panel).append('<span><span id="instancematch">0</span> out of <span id="instancecount">0</span> variant(s) satisfy the criteria</span>');
+    $(panel).append(vl);
+    $(panel).append('<span id="instanceshown"></span>');
     $(panel).append(vl);
     $(panel).append('<input type="checkbox" id="showQualities" checked="checked"/> Show nested quality attributes');
     $(panel).append('<form id="saveAllForm" action="/saveinstances" method="post" enctype="multipart/form-data">' + '<input type="hidden" name="data" id="saveAllData" value=""/>' + '<input type="hidden" name="windowKey" value="' + this.host.key + '"/>' + '</form>');
@@ -114,17 +116,51 @@ FeatureQualityMatrix.method("addControlPanel", function()
     var context = this;
 
     $('#showQualities').click(function(){
+       
+        var objSource = context.data.claferProcessor.source.objectives;
 
-        $("#table").find(".typelabel.int").parent().parent().each(function(){
-            if (Object.keys(context.data.objectives).indexOf($(this).find(".path").text()) == -1)
-                $(this).toggleClass("hiddenAsNestedQuality");
-        });
+        if(objSource!==undefined) {
+
+
+            attributes = _.filter(objSource.attributes, function(attr){
+
+                return attr.indexOf('total_') === -1;
+            });
+
+        
+
+            $("#table").find(".id").filter(function(){return attributes.indexOf($(this).text())!== -1})
+                .closest('tr').toggleClass("hiddenAsNestedQuality", !($('#showQualities').prop('checked')));
+        } 
+
+       
     });
 
     $('#saveAll').click(this.saveAll.bind(this)).css("cursor", "pointer");
 
-    $('#instanceshown').html(this.data.instanceCount);
-    $('#instancecount').html(this.data.instanceCount);
+});
+
+FeatureQualityMatrix.method("refresh", function()
+{
+    this.tableVisualizer.refresh(this.data);    
+
+    this.updateIndicators();
+
+//    $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
+//    $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
+
+//    this.filter.resetFilters(this.SavedFilters, this.permahidden);
+
+    //fire the scroll handler to align table after half a second (fixes chrome bug)
+
+//    if ($("#tBody").length > 0)
+//        $("#tBody").colResizable();
+
+    var h1 = $("#mdFeatureQualityMatrix #table").outerHeight();
+    var h2 = $("#mdFeatureQualityMatrix #matrix-panel").outerHeight();
+    var h3 = $("#mdFeatureQualityMatrix .window-titleBar").outerHeight();
+
+    $.resizeWindow(this.id, this.width, h1 + h2 + h3); // resize the table to fit everything
 
 });
 
@@ -152,29 +188,59 @@ FeatureQualityMatrix.method("onRendered", function()
         },
         "onMouseOut": function(i){
             context.settings.onMouseOut(context, getPID(i));
+        },
+        "onFilterChanged": function(path, val){
+            context.settings.onFilterChanged(context, path, val);
+        },
+        "onSorted": function(path, sortFlag){
+            context.sort(path, sortFlag);
         }
+
 
     });
 
-    this.tableVisualizer.refresh(this.data);    
+    this.addControlPanel();    
+    this.refresh(this.data);    
+});
 
-    this.addControlPanel();
+FeatureQualityMatrix.method("sort", function(path, sortFlag)
+{
+    // TODO: Add sort feature for "Model\Variants" title
+  
+    var data = this.data;
+        
 
-    $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
-    $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
+    this.tableVisualizer.removeAllInstances(); // remove instances from the table
 
-//    this.filter.resetFilters(this.SavedFilters, this.permahidden);
+    var groups = _.partition(data.matrix, function(obj){ return typeof obj[path] == 'number' ; }); // groups[0] - numeric values, group[1] - string values 
+   
 
-    //fire the scroll handler to align table after half a second (fixes chrome bug)
+    switch(sortFlag) {
+        case 'asc' : {
+            data.matrix =  _(groups[0]).sortBy(function(obj){ return +obj[path] });
+            if(groups.length>1){
+                data.matrix = _.union(groups[1], data.matrix);
+            }
+            break;
+        }
 
-//    if ($("#tBody").length > 0)
-//        $("#tBody").colResizable();
+        case 'desc' : {
+            data.matrix =  _(groups[0]).sortBy(function(obj){ return -obj[path] });
+            if(groups.length>1){
+                data.matrix = _.union(data.matrix, groups[1]);
+            }
+            break
+        }
 
-    var h1 = $("#mdFeatureQualityMatrix #table").outerHeight();
-    var h2 = $("#mdFeatureQualityMatrix #matrix-panel").outerHeight();
-    var h3 = $("#mdFeatureQualityMatrix .window-titleBar").outerHeight();
+        case 'none' : {
+            data.matrix =  _(data.matrix).sortBy(function(obj){ return +obj['id'] });
+            break;
+        }
+    }
 
-    $.resizeWindow(this.id, this.width, h1 + h2 + h3); // resize the table to fit everything
+
+
+    this.tableVisualizer.refresh(data); 
     
 });
 
@@ -406,8 +472,26 @@ FeatureQualityMatrix.method("saveAll", function(){
 // this function is called every time a user filters by features or quality values
 FeatureQualityMatrix.method("onFiltered", function(data)
 {
-    this.tableVisualizer.filter(data);
-    $('#instanceshown').html(this.data._instanceShown);    
+    if (this.tableVisualizer)
+    {
+        this.tableVisualizer.filter(data);
+        this.updateIndicators();
+    }
+});
+
+FeatureQualityMatrix.method("updateIndicators", function(data)
+{
+    $('#instancematch').html(this.data.instanceMatch);
+    $('#instancecount').html(this.data.instanceCount);
+
+    if (this.data.instanceMatch <= this.tableVisualizer.displayLimit)
+    {
+        $('#instanceshown').html("Shown all matching");
+    }
+    else
+    {
+        $('#instanceshown').html("<b>Shown first " + this.tableVisualizer.displayLimit + " matching</b>");
+    }
 });
 
 FeatureQualityMatrix.method("makeHighlighted", function(pid)

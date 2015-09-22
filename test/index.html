@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/jquery-1.11.2.min.js"></script>
+        <script src="js/vendor/d3.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/vendor/jquery.jsonview.js"></script>
+        <script src="../Client/lodash.min.js"></script>
+        <script src="../Client/_.lodash-contrib.object.selectors.js"></script>
+        <script src="js/tests.js"></script>
+
+        <!-- NEW SCRIPTS -->
+            <script src="js/vendor/defiantjs.js"></script>
+            <script src="../Client/claferAPI.js"></script>
+        <!-- END NEW SCRIPTS -->
+        
+
+    </head>
+    <body class="cbp-spmenu-push">
+
+
+       <button id="showLeftPush" class="menu-btn">MENU</button>
+        <nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-left" id="cbp-spmenu-s1">
+            <h3>Menu</h3>
+            <a href="#" class="showTab" data-tab="tree">Show Trees</a>
+            <a href="#" class="showTab" data-tab="goals">Show Goals</a>
+            <a href="#" class="collapseAll">Collapse All</a>
+            <a href="#" class="expandAll">Expand All</a>
+        </nav>
+        
+        <div id="wrap">
+            <div class="tests">
+                  
+            </div>
+        </div>
+            
+        <!-- Modal -->
+        <!-- Large modal -->
+
+
+        <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+
+          <div class="modal-dialog modal-lg">
+
+            <div class="modal-content">
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+               <div class="modal-json"></div>
+            </div>
+          </div>
+        </div>
+
+
+      <script src="../Client/init.js"></script>
+      <script src="../Client/model/clafer_processor.js"></script>
+      <script src="js/main.js"></script>
+      
+       
+    </body>
+</html>

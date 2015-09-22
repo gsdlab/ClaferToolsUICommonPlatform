@@ -19,107 +19,74 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-function ClaferProcessor (sourceXML) {
-    this.source = (new XMLHelper()).stringToXML(sourceXML);
-    this.xmlHelper = new XMLHelper();
-    this.primitiveTypes = ['integer', 'clafer', 'string'];
+function ClaferProcessor (sourceJSON) {
+
+
+    this.source = sourceJSON;
+
+    this.claferTemplate =  {
+			subclafers: 	[],
+			claferId: 		"",
+			displayId: 		"",
+			claferValue: 	"", // TODO
+			superClafer: 	"",
+			reference: 		"",
+			super: 				"" // TODO: rename to supers
+		};
+
+
+
+
+		this.clafers = ClaferAPI.getClafers(this.source);
+
+
 }
 
 //returns claferid without the cXX_ extension
-ClaferProcessor.method("claferFilter", function(s)
-{
+ClaferProcessor.method("claferFilter", function(s) {
 	return s.replace(/c[0-9]*_/g, "");
 });
 
-ClaferProcessor.method("operationFilter", function(s)
-{
-	var result = "";
-	
-	if (s == "max")
-		result = "max" + " ";
-		
-	else if (s == "min")
-		result = "min" + " ";
-	else
-		result = s;
-		
-	return result;
+ClaferProcessor.method("getByUID", function(uid) {
+	var clafers = this.clafers;
+
+	return _.filter(clafers, function(clafer){
+						return ClaferAPI.getProperty(clafer, 'uid') === uid;
+					});
 });
 
-ClaferProcessor.method("buildExp", function(exp)
-{
-	var argCount = 0;
-	var operation = "";
-	
-	var renderedArgs = new Array();
-	
-	for (var i = 0; i < exp.childNodes.length; i++)
-	{
-		var current = exp.childNodes[i];
-		if (current.tagName == "argument")
-		{			
-			var expressions = current.getElementsByTagName("exp");
-			if (expressions.length != 0)
-				renderedArgs[argCount++] = this.buildExp(expressions[0]);
-		}
-		else if (current.tagName == "operation")
-		{
-			operation = this.operationFilter(current.childNodes[0].nodeValue);
-		}
-		else if (current.tagName == "id")
-		{
-			return current.childNodes[0].nodeValue;
-		}
-	}
-	
-	if (argCount == 1)
-		return operation + renderedArgs[0];
-	else
-		return renderedArgs.join(operation);
-	
+ClaferProcessor.method("getAllChildren", function(clafer) {
+
+	var processor = this,
+			result =  _.filter(processor.clafers, function(cl){
+													return !cl.isAbstract && cl.parentUID === ClaferAPI.getProperty(clafer, 'uid');
+												});
+
+		_.each(ClaferAPI.getProperty(clafer, 'supers'), function(superUID){
+
+			var superClafer = processor.getByUID(superUID)[0],
+					children = _.filter(processor.clafers, function(cl){
+																return !cl.isAbstract && cl.parentUID === ClaferAPI.getProperty(superClafer, 'uid');
+															})
+
+			result = result.concat(children);
+		});
+
+		return result;
 });
 
-ClaferProcessor.method("getGoals", function() 
-{
-	var xpGoals = this.xmlHelper.queryXML(this.source, "/module/declaration[@type='IGoal']/parentexp/exp");
-	var result = new Object();
 
-	for (var i = 0; i < xpGoals.length; i++) 
-	{
-		var builtExp = this.buildExp(xpGoals[i]);
-		
-		var parts = builtExp.split(" ");
-		var operation = parts[0];
-		var rest = builtExp.replace(/[^ ]* /, "").replace(".ref", "");
-		
-		var goal = new Object();
-		goal.operation = operation;
-		goal.arg = ("root." + rest).replaceAll(".", "-"); // cause . confuses HTML ids
-//		alert(goal.arg);
-//		rest = rest.replace(/[^.]*\./, "");
-		goal.label = this.claferFilter(rest);
-		
-//		alert("|" + rest + "|");
-		
-		result[goal.arg] = goal;
-	}
-	
-	return result;
-});
+ClaferProcessor.method("calcClaferType", function(clafer) {
 
-ClaferProcessor.method("calcClaferType", function(clafer)
-{
-//	console.log(clafer);
-
-	if (clafer.supers.indexOf('integer') >= 0)
+	if (clafer.superClafer === 'integer')
 		return 'int';
 
-	if (clafer.supers.indexOf('string') >= 0)
+	if (clafer.superClafer === 'string')
 		return 'string';
 
 	if (clafer.claferCardMin == 0 && clafer.claferCardMax == 1)
 	{
-		if (clafer.superClafer == 'clafer')
+		if (clafer.superClafer == '' && clafer.reference == '') // TODO
 		{
 			return 'bool';
 		}
@@ -130,137 +97,173 @@ ClaferProcessor.method("calcClaferType", function(clafer)
 
 });
 
-ClaferProcessor.method("getClaferTree", function(root, options)
-{
-	var subLength = 0;
-	var result = new Object();
-	result.subclafers = new Array();
-	result.claferId = "root";
-	result.displayId = "root";
-	result.claferValue = "";
-	result.superClafer = "";
-	result.supers = [];
+ClaferProcessor.method("createClaferObject", function(clafer) {
 
-	if (root.tagName != 'module' && root.getAttribute("type") != "IClafer")
-	{
+	var processor = this;
+
+	if(clafer === undefined || _.isEmpty(clafer) ) {
 		return null;
 	}
 
-	for (var j = 0; j < root.childNodes.length; j++)
-	{
-		var current = root.childNodes[j];
+	var result = $.extend({},processor.claferTemplate, {
+		claferId 			: ClaferAPI.getProperty(clafer, 'uid', ""),
+		displayId			: ClaferAPI.getProperty(clafer, 'ident', ""),
+		superClafer		: ClaferAPI.getProperty(clafer, 'superClafer', ""),
+		reference			: ClaferAPI.getProperty(clafer, 'reference', ""),
+		claferCardMin	: ClaferAPI.getProperty(clafer, 'card')[0],
+		claferCardMax	: ClaferAPI.getProperty(clafer, 'card')[1],
+	});
 
-		if (current.tagName == "value")
-			result.claferValue = current.firstChild.nodeValue;
-		else if (current.tagName == "uniqueid")
-			result.claferId = current.firstChild.nodeValue;
-		else if (current.tagName == "id")
-			result.displayId = current.firstChild.nodeValue;
-		else if (current.tagName == "card") // cardinality
-		{
-			result.claferCardMin = $($($(current).find("min")[0]).find("intliteral")[0]).text();
-			result.claferCardMax = $($($(current).find("max")[0]).find("intliteral")[0]).text();
-		}
-		else if (current.tagName == "declaration")
-		{
-			if ((options.omitAbstracts == true) && ($($(current).find("isabstract")[0]).text() == "true"))
-			{
-				continue;
-			}
-
-			var nextSubtree = this.getClaferTree(current, {});
-
-			if (nextSubtree != null)
-				result.subclafers[subLength++] = nextSubtree; 
-		} 
-		else if (current.tagName == "supers") // inheritance
-		{
-			if ($($(current).find("isoverlapping")[0]).text() == "false") // if NOT a reference
-			{
-				result.superClafer = $(current).find("id").text();
-				result.supers.push(result.superClafer);
-				var nextSubtree = this.getTopClaferTree(result.superClafer, {});
-				if (nextSubtree != null)
-				{
-					result.supers = result.supers.concat(nextSubtree.supers);
-					for (var i = 0; i < nextSubtree.subclafers.length; i++)
-						result.subclafers[subLength++] = nextSubtree.subclafers[i];		 
-				}
-			}
-			else // we have a reference
-			{
-				// we only process reference to primitive types
-				var superClaferId = $(current).find("id").text();
-
-				if (this.primitiveTypes.indexOf(superClaferId) >= 0)
-				{
-					if (result.superClafer != "")
-						result.superClafer = superClaferId;
-
-					result.supers.push(superClaferId);
-				}
-			}
-		}		
+	// Supers
+	var supers = ClaferAPI.getProperty(clafer, 'supers');
+	if(supers !== null) {
+		result.super = supers;
 	}
-	
+
+	// Type
 	result.type = this.calcClaferType(result);
 
-	if (result.claferId == "c0_q")
+	//Subclafers
+	var subclafers = processor.getAllChildren(clafer);
+
+	result.subclafers = _.map(subclafers, function(subclafer){
+															return processor.createClaferObject(subclafer);
+														});
+	return result;
+
+});
+
+ClaferProcessor.method("getTopClaferTree", function(id) { // id can be either 'root' or a top clafer required
+	var processor = this;
+	try {
+
+		if (ClaferAPI.primitiveTypes.indexOf(id) >= 0 || processor.clafers === null) { // a primitive type, will not be in the IR
+			return null;
+		}
+
+		if (id === 'root'){ // if we request the entire tree from the root
+
+			// Top level concrete clafers
+			var nodes = _.filter(processor.clafers, function(clafer){
+										return !clafer.isAbstract && clafer.parentUID === 'root';
+									});
+
+			var result = $.extend({}, processor.claferTemplate, {
+																				claferId 	: "root",
+																				displayId	: "root"
+																			});
+
+			for (var i = 0; i < nodes.length; i++) {
+				result.subclafers.push(processor.createClaferObject(nodes[i]));
+			};
+
+			return result;
+
+		} else {
+			var node = processor.getByUID(id)[0];
+
+			if (node === undefined) {
+				// clafer not found
+				console.log("The requested top clafer not found: " + id);
+				return null;
+			}
+
+			return this.createClaferObject(node);
+		}
+
+	}
+	catch(e) {
+		console.error("Exception while searching for the top clafer: " + id);
+
+		return "";
+	}
+
+});
+
+
+ClaferProcessor.method("buildExp", function(goal) {
+	var exp = ClaferAPI.getProperty(goal, 'goalExp',{});
+	var argCount = 0;
+	var operation = this.operationFilter(ClaferAPI.getProperty(exp, 'goalOperation', ""));
+
+	var renderedArgs = new Array();
+
+	var id = ClaferAPI.getProperty(exp, 'goalExpId');
+
+
+
+	if(id) {
+		return id;
+	}
+
+	var exps = ClaferAPI.getProperty(exp, 'goalExps', []);
+
+	for (var i = 0; i < exps.length; i++) {
+		var childExp = this.buildExp(exps[i]);
+
+		renderedArgs.push(childExp);
+	};
+
+	if (renderedArgs.length === 1){
+		return operation + renderedArgs[0];
+	}
+	else{
+		return renderedArgs.join(operation);
+	}
+
+
+});
+
+ClaferProcessor.method("getGoals", function()
+{
+
+
+	var xpGoals = ClaferAPI.getGoals(this.source);
+
+
+
+	var result = new Object();
+
+	for (var i = 0; i < xpGoals.length; i++)
 	{
-		console.log(result);
+		var builtExp = this.buildExp(xpGoals[i]);
+
+
+
+		var parts = builtExp.split(" ");
+		var operation = parts[0];
+		var rest = builtExp.replace(/[^ ]* /, "").replace(".dref", "");
+
+		var goal = new Object();
+		goal.operation = operation;
+		goal.arg = ("root." + rest).replaceAll(".", "-"); // cause . confuses HTML ids
+	//		alert(goal.arg);
+	//		rest = rest.replace(/[^.]*\./, "");
+		goal.label = this.claferFilter(rest);
+
+	//		alert("|" + rest + "|");
+
+		result[goal.arg] = goal;
 	}
 
 	return result;
 });
-//
-ClaferProcessor.method("getTopClaferTree", function(id) // id can be either 'root' or a top clafer required
+
+ClaferProcessor.method("operationFilter", function(s)
 {
-	try
-	{
-		var node = null;
-		var omitAbstracts = false;
-		
-		if (this.primitiveTypes.indexOf(id) >= 0) // a primitive type, will not be in the IR
-		{
-			return null;
-		}
+	var result = "";
 
-		if (id == 'root') // if we request the entire tree from the root
-		{
-			var declarations = this.xmlHelper.queryXML(this.source, '/module'); // IE8 cannot handle the entire path (with checking text value)
-			node = declarations[0];
-			omitAbstracts = true;
-		}
-		else
-		{
-			var uniqueIds = this.xmlHelper.queryXML(this.source, "/module/declaration/uniqueid"); // IE8 cannot handle the entire path (with checking text value)
-			
-			for (var i = 0; i < uniqueIds.length; i++)
-			{
-				if (uniqueIds[i].firstChild.nodeValue == id)
-				{
-					node = uniqueIds[i].parentNode;
-					break;
-				}
-			}
-		}
+	if (s == "max")
+		result = "max" + " ";
 
-		if (node == null)
-		{
-			// clafer not found
-			console.log("The requested top clafer not found: " + id);			
-			return null;
-		}
+	else if (s == "min")
+		result = "min" + " ";
+	else
+		result = s;
 
-		return this.getClaferTree(node, {"omitAbstracts" : omitAbstracts});
-	}
-	catch(e)
-	{
-		console.log("Exception while searching for the top clafer: " + id);			
-		return "";
-	}
-		
+	return result;
 });
+
 
 ClaferProcessor.method("getFeaturesWithChildren", function(tree){
 	var list = [];
@@ -269,7 +272,7 @@ ClaferProcessor.method("getFeaturesWithChildren", function(tree){
 			list = list.concat(this.recursiveHasChildrenCheck(tree.subclafers[i]));
 		}
 		return list;
-	} else 
+	} else
 		return [];
 });
 
