@@ -26,6 +26,8 @@ git submodule update
 git submodule foreach git checkout master
 ```
 
+When working with a branch other then `master`, you need to checkout that branch in the last command above.
+
 Now, in the host project's source files, you can use the capabilities, components and functions of the platform. See files named `Server/Client/configuration.js` of the three listed projects as examples.
 
 ### Backends
@@ -36,7 +38,8 @@ This installation procedure applies to all three web tools, which use the same b
 
 Binary distributions of the release 0.4.1 of Clafer Tools for Windows, Mac, and Linux, can be downloaded from [Clafer Tools - Binary Distributions](http://http://gsd.uwaterloo.ca/clafer-tools-binary-distributions). There you can get binaries for `Clafer Compiler`, `ClaferIG` and the `ClaferChocoIG` backend.
 
-The fastest way is to unzip a binary distribution into the folder `<bin>`.
+The fastest way is to unzip a binary distribution into the folder `<bin>`.  
+By default, `<bin>=/home/clafertools040`
 
 * Install [ClaferIG](https://github.com/gsdlab/claferIG) following the installation instructions into `<bin>`.
 
