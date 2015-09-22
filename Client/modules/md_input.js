@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 function Input(host, settings)
-{ 
+{
     this.id = "mdInput";
     this.settings = settings;
     this.title = this.settings.title;
@@ -35,11 +35,11 @@ function Input(host, settings)
     this.height = this.settings.layout.height;
     this.posx = this.settings.layout.posx;
     this.posy = this.settings.layout.posy;
-    
+
     this.host = host;
     this.serverAction = "/upload";
     this.serverOptimizeAction = "/optimize";
-    
+
     this.dataFileChosen = false;
 
     this.editor = null;
@@ -70,7 +70,7 @@ Input.method("onInitRendered", function()
 
     $("#submitFile").click(this.submitFileCall.bind(this));
     $("#submitExample").click(this.submitExampleCall.bind(this));
-    $("#submitText").click(this.submitTextCall.bind(this));    
+    $("#submitText").click(this.submitTextCall.bind(this));
     $("#submitExample").attr("disabled", "disabled");
 
     $("#submitFile").attr("disabled", "disabled");
@@ -86,11 +86,11 @@ Input.method("onInitRendered", function()
     options.error = this.handleError.bind(this);
     options.timeout = this.requestTimeout;
 
-    $('#myform').ajaxForm(options); 
+    $('#myform').ajaxForm(options);
 
     if (this.settings.optimization_backend)
     {
-        $("#optimizationBackend")[0].onchange = this.onBackendChange.bind(this);    
+        $("#optimizationBackend")[0].onchange = this.onBackendChange.bind(this);
         $("#optimize")[0].onclick = this.onOptimizeChecked.bind(this);
     }
 
@@ -99,14 +99,14 @@ Input.method("onInitRendered", function()
 //    options.error = this.handleError.bind(this);
 //    options.timeout = this.requestTimeout;
 
-//    $('#optimizeForm').ajaxForm(options); 
+//    $('#optimizeForm').ajaxForm(options);
 
 
 //    var optionsForFile = new Object();
 //    optionsForFile.success = this.saveSourceSuccess.bind(this);
 //    optionsForFile.error = this.handleError.bind(this);
 //    optionsForFile.timeout = this.requestTimeout;
-//    $('#saveSourceForm').ajaxForm(optionsForFile); 
+//    $('#saveSourceForm').ajaxForm(optionsForFile);
 
     this.editor = ace.edit("clafer_editor");
     this.editor.setTheme("ace/theme/eclipse");
@@ -121,7 +121,7 @@ Input.method("onInitRendered", function()
  * Cancel request
  */
 
-Input.method("cancelCall", function() 
+Input.method("cancelCall", function()
 {
     $("#cancel").hide();
     $("#status_label").html("Cancelling...");
@@ -141,20 +141,20 @@ Input.method("beginQuery", function(formData, jqForm, options) {
     this.host.makeBusy(true);
 
     $("#load_area #myform").hide();
-    $("#load_area").append('<div id="preloader"><img id="preloader_img" src="/commons/Client/images/preloader.gif" alt="Loading..."/><span id="status_label">Loading and processing...</span><button id="cancel">Cancel</button></div>');   
+    $("#load_area").append('<div id="preloader"><img id="preloader_img" src="/commons/Client/images/preloader.gif" alt="Loading..."/><span id="status_label">Loading and processing...</span><button id="cancel">Cancel</button></div>');
     $("#cancel").click(this.cancelCall.bind(this));
 
-    return true; 
+    return true;
 });
 
-// post-submit callback 
-Input.method("endQuery", function()  { 
+// post-submit callback
+Input.method("endQuery", function()  {
     $("#preloader").remove();
     $("#load_area #myform").show();
 
     $("#claferFileURL").val(""); // empty the URL
     this.host.makeBusy(false);
-    
+
     return true;
 });
 
@@ -172,12 +172,12 @@ Input.method("onPoll", function(responseObject)
     {
         this.pollingTimeoutObject = setTimeout(this.poll.bind(this), this.pollingDelay);
     }
-    else // finished 
-    {   
+    else // finished
+    {
         this.settings.onCompleted(this, responseObject);
         this.endQuery();
     }
-});        
+});
 
 Input.method("poll", function()
 {
@@ -189,14 +189,14 @@ Input.method("poll", function()
         options.data = {windowKey: this.host.key, command: "ping"};
     else
         options.data = {windowKey: this.host.key, command: "cancel"};
-    
+
     options.success = this.onPoll.bind(this);
     options.error = this.handleError.bind(this);
 
     $.ajax(options);
 });
 
-Input.method("fileSent", function(responseText, statusText, xhr, $form)  { 
+Input.method("fileSent", function(responseText, statusText, xhr, $form)  {
     this.toCancel = false;
 
     if (responseText == "error")
@@ -217,10 +217,10 @@ Input.method("fileSent", function(responseText, statusText, xhr, $form)  {
     }
 });
 
-Input.method("handleError", function(response, statusText, xhr)  { 
+Input.method("handleError", function(response, statusText, xhr)  {
     clearTimeout(this.pollingTimeoutObject);
     this.endQuery();
-    this.settings.onError(this, statusText, response, xhr);    
+    this.settings.onError(this, statusText, response, xhr);
 });
 
 Input.method("onSubmit", function(){
@@ -260,9 +260,9 @@ Input.method("getCaptionsByFileExt", function(fileName)
 
     for (var i = 0; i < this.settings.file_extensions.length; i++)
     {
-        if (fileName.length > this.settings.file_extensions[i].ext.length && 
-            fileName.toLowerCase().substring(fileName.length - this.settings.file_extensions[i].ext.length) 
-            == this.settings.file_extensions[i].ext               
+        if (fileName.length > this.settings.file_extensions[i].ext.length &&
+            fileName.toLowerCase().substring(fileName.length - this.settings.file_extensions[i].ext.length)
+            == this.settings.file_extensions[i].ext
             )
         {
             if (!flag || !this.settings.file_extensions[i].flag || flag == this.settings.file_extensions[i].flag)
@@ -284,60 +284,60 @@ Input.method("exampleChange", function()
         var captions = this.getCaptionsByFileExt(fileName);
         if (captions)
         {
-            $("#submitExample").removeAttr("disabled");                    
-            $("#fileExtExample").val(captions.ext);                    
-            $("#submitExample").val(captions.button_example_caption);            
-        }  
+            $("#submitExample").removeAttr("disabled");
+            $("#fileExtExample").val(captions.ext);
+            $("#submitExample").val(captions.button_example_caption);
+        }
         else
         {
             $("#submitExample").val("Unknown");
-            $("#submitExample").attr("disabled", "disabled");       
-            $("#fileExtExample").val("");                           
-        } 
+            $("#submitExample").attr("disabled", "disabled");
+            $("#fileExtExample").val("");
+        }
     }
     else
     { // no example
         fileName = "any.cfr";
-        $("#submitExample").attr("disabled", "disabled");       
-        $("#submitExample").val(this.getCaptionsByFileExt(fileName).button_example_caption);            
-        $("#fileExtExample").val("");                            
+        $("#submitExample").attr("disabled", "disabled");
+        $("#submitExample").val(this.getCaptionsByFileExt(fileName).button_example_caption);
+        $("#fileExtExample").val("");
     }
 
 });
 
 Input.method("inputChange", function(){
     var fileName = $("#myform [type='file']").val();
-    
+
     if (fileName)
     {
         var captions = this.getCaptionsByFileExt(fileName);
         if (captions)
         {
-            $("#submitFile").removeAttr("disabled");                    
-            $("#fileExtFile").val(captions.ext);                    
-            $("#submitFile").val(captions.button_file_caption);            
-        }  
+            $("#submitFile").removeAttr("disabled");
+            $("#fileExtFile").val(captions.ext);
+            $("#submitFile").val(captions.button_file_caption);
+        }
         else
         {
             $("#submitFile").val("Unknown");
-            $("#submitFile").attr("disabled", "disabled");       
-            $("#fileExtFile").val("");                            
+            $("#submitFile").attr("disabled", "disabled");
+            $("#fileExtFile").val("");
         }
     }
     else{ // no file
         fileName = "any.cfr";
-        $("#submitFile").attr("disabled", "disabled");       
-        $("#submitFile").val(this.getCaptionsByFileExt(fileName).button_file_caption);            
-        $("#fileExtFile").val("");                            
+        $("#submitFile").attr("disabled", "disabled");
+        $("#submitFile").val(this.getCaptionsByFileExt(fileName).button_file_caption);
+        $("#fileExtFile").val("");
     }
-    
+
 });
 
 Input.method("editorChange", function()
 {
     // using the default name
     fileName = "any.cfr";
-    $("#submitText").val(this.getCaptionsByFileExt(fileName).button_editor_caption);            
+    $("#submitText").val(this.getCaptionsByFileExt(fileName).button_editor_caption);
 
 });
 
@@ -354,14 +354,14 @@ Input.method("getInitContent", function()
     result += '<input type="hidden" id="windowKey" name="windowKey" value="' + this.host.key + '">';
     result += '<input id="claferText" name="claferText" type="hidden"/>';
 
-    result += '<table width="100%" height="100%" cellspacing="0" cellpadding="0">';    
+    result += '<table width="100%" height="100%" cellspacing="0" cellpadding="0">';
     result += '<tr height="1em">';
     result += '<td><div style="width:100%"><input type="file" style="width:100%" name="claferFile" id="claferFile" title="If you want to upload your clafer file, select one here "/></div></td>';
     result += '<td width="60"><input id="submitFile" type="submit" value="' + this.settings.file_extensions[0].button_file_caption + '" title="' + this.settings.file_extensions[0].button_file_tooltip + '"/></td>';
     result += '<td width="160"><input id="loadExampleInEditor" type="checkbox" checked="checked" name="loadExampleInEditor" value="unchecked" title="If checked, the editor window below will be loaded with a file or an example submitted">Load into editor</input></td>';
     result += '</tr><tr height="1em">';
-    result += '<td><div style="width:100%"><select id="exampleURL" style="width:100%" name="exampleURL" title="If you want, you can choose to compile an example clafer model from the list">';   
-    
+    result += '<td><div style="width:100%"><select id="exampleURL" style="width:100%" name="exampleURL" title="If you want, you can choose to compile an example clafer model from the list">';
+
     result += '</select></div></td>';
     result += '<td><input id="submitExample" type="submit" value="' + this.settings.file_extensions[0].button_example_caption + '" title="' + this.settings.file_extensions[0].button_example_tooltip + '"></input></td>';
 
@@ -375,7 +375,7 @@ Input.method("getInitContent", function()
             checked = ' checked = "checked"';
 
         result += '<input id="useCache" type="checkbox" name="useCache"' + checked + '/><span>Use cached results</span>';
-        result += '</td>';                
+        result += '</td>';
     }
 
 //    result += '<td></td>';
@@ -390,7 +390,6 @@ Input.method("getInitContent", function()
 
     result += '<option value="none" title="Disable scope computing strategy. All scopes are to be set to 1">Disable</option>';
     result += '<option value="simple" selected="selected" title="Fast computation. Scopes are not precise, but this strategy works in most cases">Fast</option>';
-    result += '<option value="full" title="Full computation. This method is very slow, but for small models works relatively fast">Full</option>';
 
     result += '</select></div></td>';
 
@@ -434,7 +433,7 @@ Input.method("getInitContent", function()
         result += '<span id="optimizerScopeLabel" style="padding-left:4px;padding-right:4px;">Scope:</span>';
         result += '<input type="text" class="scopeInput" size="2" value="127" id="optimizerScope" title="Enter the scope for optimization" name="optimizerScope"/>';
         result += '</span></div>';
-        result += '</td>';        
+        result += '</td>';
 
         result += '</td><td>';
 
@@ -477,7 +476,7 @@ Input.method("getInitContent", function()
         result += '<span id="optimizerLimitLabel" style="padding-left:4px;padding-right:4px;">Limit instances:</span>';
         result += '<input type="text" class="scopeInput" size="2" value="100" id="optimizerLimit" title="Enter the limit of instances for optimization" name="optimizerLimit"/>';
         result += '</span></div>';
-        result += '</td>';  
+        result += '</td>';
 
 
         result += '<td>';
@@ -496,11 +495,11 @@ Input.method("getInitContent", function()
         result += '</tr></table>';
         result += '</div>';
 
-        $.getJSON('/Backends/backends.json', 
+        $.getJSON('/Backends/backends.json',
             function(data)
             {
                 var backends = data.backends;
-                context.backends = data.backends;                
+                context.backends = data.backends;
                 var options = "";
 
                 var display = "block";
@@ -515,8 +514,8 @@ Input.method("getInitContent", function()
                 context.onBackendChange();
                 context.partLoaded();
             }
-        ).error(function() 
-            { 
+        ).error(function()
+            {
                 var options = '<option value="">(Could not load instance generators)</option>';
                 $("#optimizationBackend").html(options);
                 context.partLoaded();
@@ -533,12 +532,12 @@ Input.method("getInitContent", function()
 
     var context = this;
 
-    $.getJSON('/Examples/examples.json', 
+    $.getJSON('/Examples/examples.json',
         function(data)
         {
             var examples = data.examples;
             var options = "";
-        
+
             for (var i = 0; i < examples.length; i++)
             {
                 var optionClass = 'normal_option';
@@ -548,19 +547,19 @@ Input.method("getInitContent", function()
 
                 options += '<option class="' + optionClass + '" value="' + examples[i].url + '">' + examples[i].label + '</option>';
             }
-            
+
             $("#exampleURL").html(options);
 
             context.partLoaded();
 
         }
-    ).error(function() 
-        { 
+    ).error(function()
+        {
             var optionClass = 'first_option';
             var options = '<option class="' + optionClass + '" value="">Or Choose Example (Could not load examples)</option>';
             $("#exampleURL").html(options);
             context.partLoaded();
-            
+
         });
 
     return result;
@@ -582,7 +581,7 @@ Input.method("partLoaded", function()
     }
 });
 
-function unescapeJSON(escaped) 
+function unescapeJSON(escaped)
 {
     return escaped
         .replaceAll('\\\\', '\\')
@@ -592,7 +591,7 @@ function unescapeJSON(escaped)
         .replaceAll('\\f', '\f')
         .replaceAll('\\n', '\n')
         .replaceAll('\\r', '\r')
-        .replaceAll('\\t', '\t');                  
+        .replaceAll('\\t', '\t');
 }
 
 Input.method("onBackendChange", function()
@@ -613,7 +612,7 @@ Input.method("onBackendChange", function()
         }
     }
 
-    if (this.settings.onBackendChange) 
+    if (this.settings.onBackendChange)
         this.settings.onBackendChange(this, result);
 });
 
@@ -641,9 +640,9 @@ Input.method("updateOptimizationSettings", function(config, id)
     }
     else
     {
-        $("#optimizer" + id + "Settings").hide();        
+        $("#optimizer" + id + "Settings").hide();
         $("#optimizer" + id).prop("disabled", true);
-    }           
+    }
 });
 
 Input.method("onOptimizeChecked", function(){
@@ -653,7 +652,7 @@ Input.method("onOptimizeChecked", function(){
     $('#useCache').toggle(value);
     $('#useCache').next("span").toggle(value);
 
-    this.inputChange();      
+    this.inputChange();
     this.exampleChange();
     this.editorChange();
 });
