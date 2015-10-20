@@ -253,10 +253,10 @@ ClaferProcessor.method("operationFilter", function(s)
 {
 	var result = "";
 
-	if (s == "max")
+	if (s == "maximize")
 		result = "max" + " ";
 
-	else if (s == "min")
+	else if (s == "minimize")
 		result = "min" + " ";
 	else
 		result = s;
