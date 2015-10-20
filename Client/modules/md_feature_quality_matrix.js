@@ -172,7 +172,8 @@ FeatureQualityMatrix.method("onRendered", function()
         sorting: true,
         filtering: true,
         selectable: true,
-        collapsing: true
+        collapsing: true,
+        buttonsForRemoval: true
     }, {
         "onFeatureChecked": function(f, value){
             context.settings.onFeatureCheckedStateChange(context, f, value);
@@ -194,6 +195,11 @@ FeatureQualityMatrix.method("onRendered", function()
         },
         "onSorted": function(path, sortFlag){
             context.sort(path, sortFlag);
+        },
+        removeInstance: function(id, visualizer){
+
+            context.removeInstance(id);
+            context.settings.onInstanceRemove(context, id);
         }
 
 
@@ -201,6 +207,24 @@ FeatureQualityMatrix.method("onRendered", function()
 
     this.addControlPanel();    
     this.refresh(this.data);    
+});
+
+
+FeatureQualityMatrix.method('clearSelectionByID', function(id){
+    var context = this;
+    var selected = context.settings.getSelection(context);
+
+
+   
+
+    context.settings.onDeselected(context, getPID(id));
+    selected = _.without(selected, null);
+    selected = _.without(selected, getPID(id));
+    // console.log(selected);
+    // context.onSelectionChanged(selected);
+
+
+
 });
 
 FeatureQualityMatrix.method("sort", function(path, sortFlag)
