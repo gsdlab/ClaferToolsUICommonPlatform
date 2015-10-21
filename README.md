@@ -1,7 +1,7 @@
 ClaferToolsUICommonPlatform
 ===========================
 
-v0.4.2
+##### v0.4.2
 
 A superset platform used as a submodule by all the three Clafer Web Tools: [ClaferIDE](https://github.com/gsdlab/ClaferIDE), [ClaferMooVisualizer](https://github.com/gsdlab/ClaferMooVisualizer) and [ClaferConfigurator](https://github.com/gsdlab/ClaferConfigurator).
 
@@ -43,7 +43,7 @@ By default, `<bin>=/home/clafertools040`
 
 * Install [ClaferIG](https://github.com/gsdlab/claferIG) following the installation instructions into `<bin>`.
 
-* Install [ClaferChocoIG](https://github.com/gsdlab/ClaferChocoIG) following the installation instructions into `<bin>`.
+* Install [chocosolver](https://github.com/gsdlab/chocosolver) following the installation instructions into `<bin>`.
 
 Upgrading to the latest platform
 --------------------------------
