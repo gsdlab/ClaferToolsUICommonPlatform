@@ -113,8 +113,21 @@ TableVisualizer.method("removeAllInstances", function() {
 	
 });
 
+
+TableVisualizer.method("removeAllInstances", function() {
+
+	
+	this.body.selectAll("td:not(.field-item)").remove();
+	this.head.selectAll("th").remove();
+
+	
+	
+});
+
 TableVisualizer.method("refresh", function(sdata)
 {
+
+	console.log()
 
 	var data = this.preprocessData(sdata);
 
@@ -153,14 +166,20 @@ TableVisualizer.method("refresh", function(sdata)
 		var buttonsForRemoval = context.headers.append('img')
 			.attr("id", function(d){return context.nodeId + "-rem" + d;})
 			.attr("name", function(d){return context.nodeId + "-rem" + d;})
+			.attr("data-id", function(d){return d;})
 			.attr("src", "commons/Client/images/remove.png")
             .style("float", "left")
             .style("vertical-align", "middle")
             .style("cursor", "pointer")
             .on("click", function(d){
             	var me = d3.select(this);
-            	if (context.chartListeners.removeInstance)
-                	context.chartListeners.removeInstance(me.attr("name"));
+            	if (context.chartListeners.removeInstance){
+            		
+                context.chartListeners.removeInstance(me.attr("data-id"), context);
+       
+              }
+
+
             })
             .on("mouseover", function(d){
             	d3.select(this).attr("src", "/commons/Client/images/removeMouseOver.png");

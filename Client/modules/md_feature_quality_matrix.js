@@ -60,17 +60,17 @@ FeatureQualityMatrix.method("addControlPanel", function()
 {
     var context = this;
 
-// Add search bar 
+    // Add search bar 
     var panel = $('<div id="matrix-panel"></div>');
     var vl = '<div class="verticalLine">&nbsp;</div>';
     $(panel).append('Search: <input type="text" id="search" class="text_input" placeholder="search" style="width: 100px">');
     $(panel).append(vl);
-// Adding buttons for comparison table
-// Distinct button for greying out non-distinct features
+    // Adding buttons for comparison table
+    // Distinct button for greying out non-distinct features
     $(panel).append('<button id="toggle_link">Toggle</button>');
     $(panel).append('&nbsp;<button id="filter_reset">Toggle</button>');
     $(panel).append(vl);
-//    $(panel).append('<button id="saveAll">Save all variants</button>');
+    //    $(panel).append('<button id="saveAll">Save all variants</button>');
     $(panel).append('<input type="button" id="saveAll" value="Save all variants">');
     $(panel).append(vl);
     $(panel).append('<span><span id="instancematch">0</span> out of <span id="instancecount">0</span> variant(s) satisfy the criteria</span>');
@@ -88,11 +88,11 @@ FeatureQualityMatrix.method("addControlPanel", function()
         context.toggleDistinct();
     }).css("cursor", "pointer");
 
-// Reset button for reseting filters
+    // Reset button for reseting filters
 
     $('#filter_reset').html("Reset filters");
     $('#filter_reset').click(function(event){
-/*
+    /*
         context.filter.cleanFilters();
         context.filter.filterContent();
         context.settings.onReset(context);
@@ -101,16 +101,16 @@ FeatureQualityMatrix.method("addControlPanel", function()
             this.toggleDistinct(); //one to turn off distinct
             this.toggleDistinct(); //one to reapply it
         }
-*/
+    */
     }).css("cursor", "pointer");
 
-// add handler to search bar
+    // add handler to search bar
     $('#search').keyup(function(){
         context.applySearch();
     }); 
 
     $('#search').click(function(event){
-//        event.stopPropagation(); //to keep table from sorting by instance number
+    //        event.stopPropagation(); //to keep table from sorting by instance number
     });
 
     var context = this;
@@ -146,15 +146,15 @@ FeatureQualityMatrix.method("refresh", function()
 
     this.updateIndicators();
 
-//    $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
-//    $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
+    //    $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
+    //    $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
 
-//    this.filter.resetFilters(this.SavedFilters, this.permahidden);
+    //    this.filter.resetFilters(this.SavedFilters, this.permahidden);
 
-    //fire the scroll handler to align table after half a second (fixes chrome bug)
+        //fire the scroll handler to align table after half a second (fixes chrome bug)
 
-//    if ($("#tBody").length > 0)
-//        $("#tBody").colResizable();
+    //    if ($("#tBody").length > 0)
+    //        $("#tBody").colResizable();
 
     var h1 = $("#mdFeatureQualityMatrix #table").outerHeight();
     var h2 = $("#mdFeatureQualityMatrix #matrix-panel").outerHeight();
@@ -172,7 +172,8 @@ FeatureQualityMatrix.method("onRendered", function()
         sorting: true,
         filtering: true,
         selectable: true,
-        collapsing: true
+        collapsing: true,
+        buttonsForRemoval: true
     }, {
         "onFeatureChecked": function(f, value){
             context.settings.onFeatureCheckedStateChange(context, f, value);
@@ -194,6 +195,11 @@ FeatureQualityMatrix.method("onRendered", function()
         },
         "onSorted": function(path, sortFlag){
             context.sort(path, sortFlag);
+        },
+        removeInstance: function(id, visualizer){
+
+            context.removeInstance(id);
+            context.settings.onInstanceRemove(context, id);
         }
 
 
@@ -201,6 +207,24 @@ FeatureQualityMatrix.method("onRendered", function()
 
     this.addControlPanel();    
     this.refresh(this.data);    
+});
+
+
+FeatureQualityMatrix.method('clearSelectionByID', function(id){
+    var context = this;
+    var selected = context.settings.getSelection(context);
+
+
+   
+
+    context.settings.onDeselected(context, getPID(id));
+    selected = _.without(selected, null);
+    selected = _.without(selected, getPID(id));
+    // console.log(selected);
+    // context.onSelectionChanged(selected);
+
+
+
 });
 
 FeatureQualityMatrix.method("sort", function(path, sortFlag)
@@ -451,9 +475,19 @@ FeatureQualityMatrix.method("featureChecked", function (featurePath, state){
     this.settings.onFeatureCheckedStateChange(this, featurePath, state);
 });
 
-FeatureQualityMatrix.method("removeInstance", function(instanceNum){
-//    this.filter.removeInstance(instanceNum);
-//    this.settings.onInstanceRemove(this, instanceNum);
+FeatureQualityMatrix.method("removeInstance", function(id){
+    var context = this;
+    context.data.matrix =  _.without(context.data.matrix, _.findWhere(context.data.matrix, {id: parseInt(id)}));
+           
+    context.data.instanceIds =  _.without(context.data.instanceIds, id);
+    context.data.instanceCount =  context.data.instanceIds.length;
+    context.data.instanceMatch =  context.data.instanceIds.length;
+
+    context.tableVisualizer.refresh(context.data);    
+    context.updateIndicators();
+
+    // this.filter.removeInstance(instanceNum);
+    // this.settings.onInstanceRemove(this, instanceNum);
 });
 
 //saves all selected instances and downloads them to client
