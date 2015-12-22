@@ -1,7 +1,7 @@
 ClaferToolsUICommonPlatform
 ===========================
 
-##### v0.4.2
+##### v0.4.3
 
 A superset platform used as a submodule by all the three Clafer Web Tools: [ClaferIDE](https://github.com/gsdlab/ClaferIDE), [ClaferMooVisualizer](https://github.com/gsdlab/ClaferMooVisualizer) and [ClaferConfigurator](https://github.com/gsdlab/ClaferConfigurator).
 
@@ -36,7 +36,7 @@ This installation procedure applies to all three web tools, which use the same b
 
 * Getting Binaries
 
-Binary distributions of the release 0.4.2 of Clafer Tools for Windows, Mac, and Linux, can be downloaded from [Clafer Tools - Binary Distributions](http://http://gsd.uwaterloo.ca/clafer-tools-binary-distributions). There you can get binaries for `Clafer Compiler`, `ClaferIG` and the `ClaferChocoIG` backend.
+Binary distributions of the release 0.4.3 of Clafer Tools for Windows, Mac, and Linux, can be downloaded from [Clafer Tools - Binary Distributions](http://http://gsd.uwaterloo.ca/clafer-tools-binary-distributions). There you can get binaries for `Clafer Compiler`, `ClaferIG` and the `ClaferChocoIG` backend.
 
 The fastest way is to unzip a binary distribution into the folder `<bin>`.  
 By default, `<bin>=/home/clafertools040`
