@@ -78,10 +78,10 @@ ClaferProcessor.method("getAllChildren", function(clafer) {
 
 ClaferProcessor.method("calcClaferType", function(clafer) {
 
-	if (clafer.superClafer === 'integer')
+	if (clafer.reference == 'integer')
 		return 'int';
 
-	if (clafer.superClafer === 'string')
+	if (clafer.superClafer == 'string')
 		return 'string';
 
 	if (clafer.claferCardMin == 0 && clafer.claferCardMax == 1)
@@ -253,10 +253,10 @@ ClaferProcessor.method("operationFilter", function(s)
 {
 	var result = "";
 
-	if (s == "maximize")
+	if (s == "max")
 		result = "max" + " ";
 
-	else if (s == "minimize")
+	else if (s == "min")
 		result = "min" + " ";
 	else
 		result = s;
