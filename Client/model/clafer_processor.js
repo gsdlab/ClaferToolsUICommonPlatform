@@ -78,7 +78,7 @@ ClaferProcessor.method("getAllChildren", function(clafer) {
 
 ClaferProcessor.method("calcClaferType", function(clafer) {
 
-	if (clafer.superClafer === 'integer')
+	if (clafer.reference === 'integer')
 		return 'int';
 
 	if (clafer.superClafer === 'string')
