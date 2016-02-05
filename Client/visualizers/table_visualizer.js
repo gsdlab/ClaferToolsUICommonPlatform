@@ -253,17 +253,22 @@ TableVisualizer.method("refresh", function(sdata)
 		    	{
 		    		var b = (d.card != "");
 
-					me.append("span").attr("class", "emvalueEq").text(' = ').style("display", b ? null : "none");
-			      	me.append("span").attr("class", "emvalue " + mappedObject.tdClass).html(
+		    		var emvalue = (mappedObject.tdClass.indexOf("no") >= 0) ? "no" : "yes";
+		    		
+		    		//var emvalue = (mappedObject.tdClass.indexOf("no") >= 0) ? "no" : d.em;
 
-						(mappedObject.tdClass.indexOf("no") >= 0) ? "no" : "yes" 
-		      			).style("display", b ? null : "none");
+					me.append("span").attr("class", "emvalueEq").text(' = ').style("display", b ? null : "none");
+			      	me.append("span").attr("class", "emvalue " + mappedObject.tdClass).html(emvalue).style("display", b ? null : "none");
 		    	}
 		    	else
 		    	{
 					me.append("span").attr("class", "emvalueEq").text(' = ');
 		      		me.append("span").attr("class", "emvalue " + mappedObject.tdClass).html(mappedObject.elemContent);		    		
 		    	}
+
+		    	// if(d.type == "clafer" && d.reference) {
+		    	// 	me.classed('emClaferReference', true);
+		    	// }
 
 				me.classed("emabstract", true);
 			}
@@ -272,7 +277,10 @@ TableVisualizer.method("refresh", function(sdata)
 				     if(d.type == "clafer" && d.reference){
 		      			me.append("input").attr("type", "text").attr("class", "filter-input").attr('placeholder', 'Filter...').on('change', function(d){
 				            context.chartListeners.onFilterChanged(d.path,this.value);
-						});
+								});
+
+								
+		    				
 		      		}
       		
 			}
@@ -438,11 +446,12 @@ TableVisualizer.method("refresh", function(sdata)
 	    	{
 	    		var b = (field.card != "");
 
-				col.select(".emvalueEq").text(' = ').style("display", b ? null : "none");
-		      	col.select(".emvalue").attr("class", "emvalue " + mappedObject.tdClass).html(
+	    		var emvalue = (mappedObject.tdClass.indexOf("no") >= 0) ? "no" : context.filterClaferValue(field.em);
 
-					(mappedObject.tdClass.indexOf("no") >= 0) ? "no" : "yes" 
-	      			).style("display", b ? null : "none");
+	    	
+
+				col.select(".emvalueEq").text(' = ').style("display", b ? null : "none");
+		      	col.select(".emvalue").attr("class", "emvalue " + mappedObject.tdClass).html(emvalue).style("display", b ? null : "none");
 	    	}
 	    	else
 	    	{
@@ -712,8 +721,15 @@ TableVisualizer.method("mapValue", function(field, sVal, denyEMCheck)
 		result.elem = 'span';
 		result.elemContent = '&nbsp;';
 		result.tdClass += ' em';
+
+		/*if(field.type == "clafer" && field.reference!==undefined) {
+			result.tdClass += ' emClaferReference';
+			result.elemContent = field.em
+		}*/
+
+
 	}
-		
+	
 	return result;
 });
 
