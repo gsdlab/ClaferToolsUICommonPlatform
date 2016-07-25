@@ -311,7 +311,11 @@ TableVisualizer.method("refresh", function(sdata)
 	      						d3.select(this).html("&nbsp;\u21B4");
 	      						context.expand(d.path);
 	      					}
-      					})
+      					}).each(function(){
+      						$(this).filter(function(){
+      							return $(this).parent().find('.emvalue.no').length;
+      						}).click();
+      					});
 	            }
 
       		}

@@ -65,9 +65,10 @@ ClaferProcessor.method("getAllChildren", function(clafer) {
 		_.each(ClaferAPI.getProperty(clafer, 'supers'), function(superUID){
 
 			var superClafer = processor.getByUID(superUID)[0],
-					children = _.filter(processor.clafers, function(cl){
-																return !cl.isAbstract && cl.parentUID === ClaferAPI.getProperty(superClafer, 'uid');
-															})
+					children = processor.getAllChildren(superClafer);
+					// children = _.filter(processor.clafers, function(cl){
+					// 											return !cl.isAbstract && cl.parentUID === ClaferAPI.getProperty(superClafer, 'uid');
+					// 										})
 
 			result = result.concat(children);
 		});
