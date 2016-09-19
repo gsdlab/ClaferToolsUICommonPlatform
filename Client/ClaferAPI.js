@@ -62,12 +62,12 @@ ClaferAPI = {
 					'superClafer'		: 'super.exp.binding',
 					'supers'				: 'super.iType.hi',
 					'reference'			: (function(){
-															var p =  'reference.dref.exp.binding';
+															var p =  'reference.ref.exp.binding';
 															if( _.hasPath(clafer, p)) {
 																return p;
 															} else {
 
-																return 'reference.dref.exp';
+																return 'reference.ref.exp';
 															}
 														})(),
 					//Goals

@@ -241,7 +241,7 @@ FeatureQualityMatrix.method("sort", function(path, sortFlag)
 
     switch(sortFlag) {
         case 'asc' : {
-            data.matrix =  _(groups[0]).sortBy(function(obj){ return +obj[path] });
+            data.matrix =  _.sortBy(groups[0],function(obj){ return +obj[path] });
             if(groups.length>1){
                 data.matrix = _.union(groups[1], data.matrix);
             }
@@ -249,7 +249,7 @@ FeatureQualityMatrix.method("sort", function(path, sortFlag)
         }
 
         case 'desc' : {
-            data.matrix =  _(groups[0]).sortBy(function(obj){ return -obj[path] });
+            data.matrix =  _.sortBy(groups[0], function(obj){ return -obj[path] });
             if(groups.length>1){
                 data.matrix = _.union(data.matrix, groups[1]);
             }
@@ -257,7 +257,7 @@ FeatureQualityMatrix.method("sort", function(path, sortFlag)
         }
 
         case 'none' : {
-            data.matrix =  _(data.matrix).sortBy(function(obj){ return +obj['id'] });
+            data.matrix =  _.sortBy(data.matrix, function(obj){ return +obj['id'] });
             break;
         }
     }
