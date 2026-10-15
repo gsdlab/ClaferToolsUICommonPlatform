@@ -165,7 +165,7 @@ function Host(modules, settings)
             context.loaded(context);
             context.initHelp(data.title, data.version);
         }
-    ).error(function() 
+    ).fail(function() 
         { 
             alert("Could not get server initialization data. Could not print versions");
             context.loaded(context);

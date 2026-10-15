@@ -477,7 +477,7 @@ FeatureQualityMatrix.method("featureChecked", function (featurePath, state){
 
 FeatureQualityMatrix.method("removeInstance", function(id){
     var context = this;
-    context.data.matrix =  _.without(context.data.matrix, _.findWhere(context.data.matrix, {id: parseInt(id)}));
+    context.data.matrix =  _.without(context.data.matrix, _.find(context.data.matrix, {id: parseInt(id)}));
            
     context.data.instanceIds =  _.without(context.data.instanceIds, id);
     context.data.instanceCount =  context.data.instanceIds.length;

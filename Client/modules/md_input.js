@@ -514,7 +514,7 @@ Input.method("getInitContent", function()
                 context.onBackendChange();
                 context.partLoaded();
             }
-        ).error(function()
+        ).fail(function()
             {
                 var options = '<option value="">(Could not load instance generators)</option>';
                 $("#optimizationBackend").html(options);
@@ -553,7 +553,7 @@ Input.method("getInitContent", function()
             context.partLoaded();
 
         }
-    ).error(function()
+    ).fail(function()
         {
             var optionClass = 'first_option';
             var options = '<option class="' + optionClass + '" value="">Or Choose Example (Could not load examples)</option>';

@@ -157,7 +157,7 @@ CompiledFormats.method("onInitRendered", function()
             context.host.loaded(context); // notify about getting fully loaded            
 
         }
-    ).error(function() 
+    ).fail(function() 
         { 
             var options = '<option value="">(Could not load formats)</option>';
             $("#formats").html(options);
