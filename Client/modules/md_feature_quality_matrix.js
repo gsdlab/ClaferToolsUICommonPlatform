@@ -122,7 +122,7 @@ FeatureQualityMatrix.method("addControlPanel", function()
         if(objSource!==undefined) {
 
 
-            attributes = _.filter(objSource.attributes, function(attr){
+            attributes = _.filter(ClaferAPI.getAttributes(context.data.claferProcessor.source), function(attr){
 
                 return attr.indexOf('total_') === -1;
             });

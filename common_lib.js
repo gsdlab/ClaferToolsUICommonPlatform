@@ -410,6 +410,16 @@ var runClaferCompiler = function(key, specifiedArgs, genericArgs, onComplete)
 
 };
 
+// Whether the compiled model is a temporal (behavioral) Clafer model. Instance generation
+// and optimization support only static models; clafer reports temporal models when it
+// cannot produce the Choco output.
+var isTemporalModel = function(process)
+{
+    return process.compiler_message.indexOf("because the model contains temporal operators") >= 0;
+}
+
+var temporalModelMessage = "Temporal Clafer models are not supported: instance generation and optimization work only with static models. You can edit temporal models in ClaferIDE.";
+
 var produceScopes = function(process, backend)
 {
     if (backend.scope_options.produce_scope_file)
@@ -842,3 +852,5 @@ module.exports.runClaferCompiler = runClaferCompiler;
 module.exports.handleControlRequest = handleControlRequest;
 module.exports.produceScopes = produceScopes;
 module.exports.writeCommand = writeCommand;
+module.exports.isTemporalModel = isTemporalModel;
+module.exports.temporalModelMessage = temporalModelMessage;

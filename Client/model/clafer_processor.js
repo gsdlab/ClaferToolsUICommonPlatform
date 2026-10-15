@@ -59,7 +59,7 @@ ClaferProcessor.method("getAllChildren", function(clafer) {
 
 	var processor = this,
 			result =  _.filter(processor.clafers, function(cl){
-													return !cl.isAbstract && cl.parentUID === ClaferAPI.getProperty(clafer, 'uid');
+													return !ClaferAPI.getProperty(cl, 'isAbstract') && ClaferAPI.getProperty(cl, 'parentUID') === ClaferAPI.getProperty(clafer, 'uid');
 												});
 
 		_.each(ClaferAPI.getProperty(clafer, 'supers'), function(superUID){
@@ -146,7 +146,7 @@ ClaferProcessor.method("getTopClaferTree", function(id) { // id can be either 'r
 
 			// Top level concrete clafers
 			var nodes = _.filter(processor.clafers, function(clafer){
-										return !clafer.isAbstract && clafer.parentUID === 'root';
+										return !ClaferAPI.getProperty(clafer, 'isAbstract') && ClaferAPI.getProperty(clafer, 'parentUID') === 'root';
 									});
 
 			var result = $.extend({}, processor.claferTemplate, {
