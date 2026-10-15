@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 var fs = require("fs");
+var os = require("os");
 var config = require('./../config.json');
 var backendConfig = require('./../Backends/backends.json');
 var formatConfig = require('./../Formats/formats.json');
@@ -153,6 +154,15 @@ var resetProcessToCompilerMode = function (process)
     process.mode = "compiler"; 
 //    process.freshError = "";
     return process;
+};
+
+// The maximum number of sessions; each can run the compiler and an instance generator.
+var MAX_SESSIONS = config.maxSessions || 50;
+
+// Whether a new session can be added for the given key (an existing session is replaced).
+var canAddProcess = function (key)
+{
+    return processes.length < MAX_SESSIONS || getProcess(key) != null;
 };
 
 var addProcess = function (process)
@@ -312,18 +322,28 @@ var killProcessIfExists = function(tool)
     {
         var pid = tool.pid;
         tool.removeAllListeners();
-        logNormal("Killing the process with Parent PID = " + pid);
+        logNormal("Killing the process with PID = " + pid);
 
-        // first, try a Windows command
-        var killer_win  = spawn("taskkill", ["/F", "/T", "/PID", pid]);
+        if (!pid)
+            return;
 
-        killer_win.on('error', function (err){  // if error occurs, then we are on Linux
-            var killer_linux = spawn("pkill", ["-TERM", "-P", pid]);                   
+        // the tool's children first (e.g., the Alloy JVM started by claferIG), then the tool
+        var killer = os.platform() == "win32"
+            ? spawn("taskkill", ["/F", "/T", "/PID", String(pid)])
+            : spawn("pkill", ["-KILL", "-P", String(pid)]);
 
-            killer_linux.on('error', function(err){
-                logNormal("Cannot terminate the process.");
-            });
-        });                
+        killer.on('error', function(err){
+            logNormal("Cannot terminate the child processes of " + pid);
+        });
+
+        try
+        {
+            tool.kill("SIGKILL");
+        }
+        catch (e)
+        {
+            logNormal("Cannot terminate the process " + pid);
+        }
     }
 };
 
@@ -345,64 +365,36 @@ var logNormal = function(message)
         console.log(message);
     };
 
+// Whether an optional numeric value from a request (a scope, an integer range, etc.) is
+// absent or an integer.
+var isOptionalInteger = function (value) {
+        return value === undefined || value === "" || (typeof value === "string" && /^-?[0-9]{1,9}$/.test(value));
+    };
+
+// Whether a value from a request can be inserted into a command for an instance generator:
+// no line breaks or other control characters, which would inject further commands.
+var isCommandValue = function (value) {
+        return typeof value === "string" && value.length <= 1000 && !/[\x00-\x1f\x7f]/.test(value);
+    };
+
+// Removes a session's folder with its contents.
 var cleanupOldFiles = function (dir) {
-        logNormal("Cleaning temporary files...");                    
-        //cleanup old files
-        fs.readdir(dir, function(err, files){
-            //if (err) throw err;
-            if (err) 
-            {
-                logSpecific("Could not clear the folder: " + dir, null);
-                return; // cannot get the folder
-            }
-            var results = "";
-            var numFiles = files.length;
-            logSpecific("#Files = " + numFiles, null);
-            if (!numFiles){
-                return finishCleanup(dir, results);
-            } else {
-                files.forEach(function(file){
-                    deleteOld(dir + "/" + file);
-                    results += file + "\n";
-                }); 
-                finishCleanup(dir, results);
-            }
+        if (!dir)
+            return;
+
+        fs.rm(dir, { recursive: true, force: true }, function (err) {
+            if (err)
+                logNormal("Could not delete the session folder: " + dir);
+            else
+                logNormal("Deleted the session folder: " + dir);
         });
     };
 
-var deleteOld = function (path)
-    {
-        fs.exists(path, function(exists)
-        {
-            if (exists)
-            {
-                fs.unlink(path, function (err) 
-                { 
-                    if (err)
-                    {
-                        logNormal("Could not delete the file: " + path);              
-                        logNormal(err);                 
-                    }
-                });
-            }
-        });
-    }
-
-var finishCleanup = function (dir, results)
-    {
-        fs.exists(dir, function(exists)
-        {       
-            if (exists)
-            {
-                fs.rmdir(dir, function (err) {
-                    if (err) 
-                    {
-                        logNormal("Could not finish the cleanup: " + dir);
-                        return;
-                    }
-                    logNormal("Successfully deleted " + dir + " along with contents:\n" + results);
-                });
-            }
+// Removes everything from the uploads folder: sessions do not survive a restart.
+var cleanupUploads = function (dir) {
+        fs.readdirSync(dir).forEach(function (file) {
+            if (file != ".gitignore")
+                fs.rmSync(dir + "/" + file, { recursive: true, force: true });
         });
     };
 
@@ -505,6 +497,7 @@ var buildArg = function (args, config, value)
 
 
 module.exports.addProcess = addProcess;
+module.exports.canAddProcess = canAddProcess;
 module.exports.resetProcessToCompilerMode = resetProcessToCompilerMode;
 module.exports.getProcess = getProcess;
 module.exports.timeoutProcessSetPing = timeoutProcessSetPing;
@@ -520,6 +513,9 @@ module.exports.addDependency = addDependency;
 module.exports.runWithDependencyCheck = runWithDependencyCheck;
 
 module.exports.killProcessIfExists = killProcessIfExists;
+module.exports.cleanupUploads = cleanupUploads;
+module.exports.isOptionalInteger = isOptionalInteger;
+module.exports.isCommandValue = isCommandValue;
 module.exports.logSpecific = logSpecific;
 module.exports.logNormal = logNormal;
 
