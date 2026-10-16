@@ -103,9 +103,11 @@ var configureServer = function(server)
 {
     server.disable("x-powered-by");
 
-    // e.g., "loopback" or 1 behind a reverse proxy, so that rate limits apply per client
-    if (config.trustProxy !== undefined)
-        server.set("trust proxy", config.trustProxy);
+    // e.g., "loopback" or 1 behind a reverse proxy, so that rate limits apply per client;
+    // the TRUST_PROXY environment variable overrides config.json
+    var trustProxy = process.env.TRUST_PROXY !== undefined ? process.env.TRUST_PROXY : config.trustProxy;
+    if (trustProxy !== undefined && trustProxy !== "")
+        server.set("trust proxy", /^[0-9]+$/.test(String(trustProxy)) ? parseInt(trustProxy) : trustProxy);
 
     server.use(function(req, res, next) {
         res.setHeader("X-Content-Type-Options", "nosniff");
@@ -176,7 +178,10 @@ var FILE_EXTENSIONS = [".cfr", ".data"];
 // Prefixes of the URLs from which models can be loaded via ?claferFileURL=..., for example
 // the ClaferWiki URLs "http://<wiki host>:<port>/clafer/". Loading models from URLs is
 // disabled when the list is empty.
-var ALLOWED_MODEL_URLS = config.allowedModelURLs || [];
+// The ALLOWED_MODEL_URLS environment variable (prefixes separated by spaces) overrides config.json.
+var ALLOWED_MODEL_URLS = process.env.ALLOWED_MODEL_URLS !== undefined
+    ? process.env.ALLOWED_MODEL_URLS.split(/\s+/).filter(function(url) { return url !== ""; })
+    : (config.allowedModelURLs || []);
 
 
 var badRequest = function(res, message, key)
