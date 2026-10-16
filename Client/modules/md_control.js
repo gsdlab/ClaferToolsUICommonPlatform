@@ -160,7 +160,7 @@ Control.method("getInitContent", function(){
             context.host.loaded(context); // notify about getting fully loaded
 
         }
-    ).error(function() 
+    ).fail(function() 
         { 
             var options = '<option value="">(Could not load instance generators)</option>';
             $("#backend").html(options);

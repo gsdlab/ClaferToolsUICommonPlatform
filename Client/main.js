@@ -165,7 +165,7 @@ function Host(modules, settings)
             context.loaded(context);
             context.initHelp(data.title, data.version);
         }
-    ).error(function() 
+    ).fail(function() 
         { 
             alert("Could not get server initialization data. Could not print versions");
             context.loaded(context);
@@ -226,9 +226,9 @@ Host.method("getHelpButton", function(moduleName){
 
 Host.method("errorWindow", function(errorRecord){
 
-    var htmlTitle = '<b>' + errorRecord.caption + '</b>'; 
+    var htmlTitle = '<b>' + String(errorRecord.caption).encodeHTML() + '</b>'; 
     var htmlTime = errorRecord.datetime; 
-    var htmlBody = errorRecord.body.replaceAll("\\n", "<br>").replaceAll("\\t", "&nbsp;&nbsp;").replaceAll("\\r", "").replaceAll("\\\"", "\"") + "<br><br>" + errorRecord.contact;
+    var htmlBody = String(errorRecord.body).encodeHTML().replaceAll("\\n", "<br>").replaceAll("\\t", "&nbsp;&nbsp;").replaceAll("\\r", "").replaceAll("\\\"", "\"") + "<br><br>" + errorRecord.contact;
     var content = htmlTime + '<br>' + htmlBody;
 
     var x = $.newWindow({

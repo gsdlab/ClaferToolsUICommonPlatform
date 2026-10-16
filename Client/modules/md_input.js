@@ -346,7 +346,7 @@ Input.method("getInitContent", function()
     result = '<div id = "load_area" style="height:100%;overflow:hidden">';
     result += '<form id="myform" action="' + this.serverAction + '" method="post" enctype="multipart/form-data" style="display: block; height:100%">';
 
-    result += '<input type="hidden" name="claferFileURL" id="claferFileURL" value="' + this.host.claferFileURL + '">';
+    result += '<input type="hidden" name="claferFileURL" id="claferFileURL" value="' + String(this.host.claferFileURL).encodeHTML() + '">';
     result += '<input type="hidden" name="exampleFlag" id="exampleFlag" value="0">';
     result += '<input type="hidden" name="fileExt" id="fileExt" value="' + this.settings.file_extensions[0].ext + '">';
     result += '<input type="hidden" id="fileExtFile" value="' + this.settings.file_extensions[0].ext + '">';
@@ -514,7 +514,7 @@ Input.method("getInitContent", function()
                 context.onBackendChange();
                 context.partLoaded();
             }
-        ).error(function()
+        ).fail(function()
             {
                 var options = '<option value="">(Could not load instance generators)</option>';
                 $("#optimizationBackend").html(options);
@@ -553,7 +553,7 @@ Input.method("getInitContent", function()
             context.partLoaded();
 
         }
-    ).error(function()
+    ).fail(function()
         {
             var optionClass = 'first_option';
             var options = '<option class="' + optionClass + '" value="">Or Choose Example (Could not load examples)</option>';

@@ -43,25 +43,6 @@ function CompiledFormats(host, settings)
     this.saveFormatBasicQuery = "/saveformat?windowKey=" + this.host.key + "&fileid=";
 }
 
-CompiledFormats.method("onDocLoad", function(){
-    this.docLoadCounter = this.docLoadCounter + 1;
-    if (this.docLoadCounter == this.docLoadCount) // all iframes are reloaded
-    {
-        for (var i = 0; i < this.compiled_formats.length; i++)
-        {
-            if (this.compiled_formats[i].displayElement == "iframe")
-            {
-                var iframe = $("#" + this.compiled_formats[i].id + "_format")[0];
-
-                if (iframe.contentWindow)
-                    iframe.contentWindow.document.write(this.compiled_formats[i].result);
-                else
-                    iframe.document.write(this.compiled_formats[i].result);
-            }
-        }
-    }
-});
-
 CompiledFormats.method("getInitContent", function()
 {
     var result = "";
@@ -127,7 +108,8 @@ CompiledFormats.method("onInitRendered", function()
                 
                 if (formats[i].display_element == "iframe") // all iframes have to be put in advance
                 {
-                    views += '<iframe id="' + formats[i].id + '_format" style="' + style + '" scrolling="yes" height = "' + '100%' + '" src="' + ajaxUrl + '" frameborder="0" width="' + '100%' + '"></iframe>';
+                    // sandboxed: the compiled HTML contains the model's comments and must not run scripts
+                    views += '<iframe id="' + formats[i].id + '_format" sandbox="" style="' + style + '" scrolling="yes" height = "' + '100%' + '" frameborder="0" width="' + '100%' + '"></iframe>';
                 }
 //                else if (formats[i].display_element == "xml") // TODO: customize for XML
 //                {
@@ -147,17 +129,10 @@ CompiledFormats.method("onInitRendered", function()
             $("#format_views textarea").remove();
             $("#format_views").append(views);
 
-            var iframes = $("#format_views iframe");
-
-            for (var i = 0; i < iframes.length; i++)
-            {
-                iframes[i].onload = context.onDocLoad.bind(context); 
-            }
-
-            context.host.loaded(context); // notify about getting fully loaded            
+            context.host.loaded(context); // notify about getting fully loaded
 
         }
-    ).error(function() 
+    ).fail(function() 
         { 
             var options = '<option value="">(Could not load formats)</option>';
             $("#formats").html(options);
@@ -169,19 +144,13 @@ CompiledFormats.method("onInitRendered", function()
 
 CompiledFormats.method("setResult", function(data){
 
-    // resetting
-    this.compiled_formats = [];
-    this.docLoadCounter = 0;
-    this.docLoadCount = 0;
     this.compiled_formats = data; // save the results
 
     for (var i = 0; i < data.length; i++)
     {
         if (data[i].displayElement == "iframe")
         {
-            this.docLoadCount = this.docLoadCount + 1;
-            // to iframe : reload, and then put whatever we need
-            $("#" + data[i].id + "_format")[0].src = $("#" + data[i].id + "_format")[0].src; // reloading
+            $("#" + data[i].id + "_format")[0].srcdoc = data[i].result;
         }
         else if (data[i].displayElement == "xml") // to XML Display
         {
@@ -191,10 +160,10 @@ CompiledFormats.method("setResult", function(data){
         {
             $("#" + data[i].id + "_format").val("For download only"); 
         }        
-        else // to textarea: copy directly
+        else // to textarea: copy directly, as text
         {
-            $("#" + data[i].id + "_format").html(data[i].result.replaceAll(" ", "&nbsp;")); 
-        }            
+            $("#" + data[i].id + "_format").val(data[i].result);
+        }
     }
 });
 
