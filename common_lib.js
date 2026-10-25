@@ -23,6 +23,7 @@ SOFTWARE.
 // Libraries and misc functions
 //====================================================
 var fs = require("fs");
+var path = require("path");
 var http = require("http");
 var https = require("https");
 var express = require("express");
@@ -320,7 +321,7 @@ var handleUploads = function(req, res, next, finalCallback, reuseEnabled)
         if (typeof exampleURL !== "string" || exampleURL === "")
             return noFile();
 
-        readExample(exampleURL, function(err, contents) { store(err, contents, false); });
+        readExample(exampleURL, function(err, contents) { store(err, contents, ""); });
     }
     else if (req.body.exampleFlag == "0") // a file or a URL
     {
@@ -332,7 +333,7 @@ var handleUploads = function(req, res, next, finalCallback, reuseEnabled)
                 return badRequest(res, "Loading models from this URL is not allowed", key);
 
             core.logSpecific('Downloading file at "' + claferFileURL + '"...', key);
-            downloadModel(claferFileURL, function(err, contents) { store(err, contents, true); });
+            downloadModel(claferFileURL, function(err, contents) { store(err, contents, claferFileURL); });
             return;
         }
 
@@ -344,18 +345,19 @@ var handleUploads = function(req, res, next, finalCallback, reuseEnabled)
 
         fs.readFile(file.path, function(err, contents) {
             discard(file);
-            store(err ? "Could not read the uploaded file" : null, contents, false);
+            store(err ? "Could not read the uploaded file" : null, contents, "");
         });
     }
-    else // the text from the editor
+    else // the text from the editor, which keeps the URL of a model loaded from one
     {
         var text = req.body.claferText;
-        store(typeof text === "string" ? null : "No model submitted", Buffer.from(text || ""), false);
+        store(typeof text === "string" ? null : "No model submitted", Buffer.from(text || ""), undefined);
     }
 };
 
 // Writes the model into the session's folder: a new folder for a new session, or the
-// folder of the existing session when it is reused (e.g., on reload).
+// folder of the existing session when it is reused (e.g., on reload). urlFile is the URL from
+// which the model was loaded, "" if none, or undefined to keep the session's URL.
 var storeModel = function(req, res, contents, urlFile, callback, reuseEnabled)
 {
     var key = req.body.windowKey;
@@ -375,7 +377,8 @@ var storeModel = function(req, res, contents, urlFile, callback, reuseEnabled)
             if (err)
                 return failed(err);
             core.logSpecific("Proceeding with existing session file " + existingProcess.file, key);
-            existingProcess.urlFile = urlFile;
+            if (urlFile !== undefined)
+                existingProcess.urlFile = urlFile;
             callback(core.resetProcessToCompilerMode(existingProcess));
         });
         return;
@@ -394,19 +397,44 @@ var storeModel = function(req, res, contents, urlFile, callback, reuseEnabled)
             return failed(err);
 
         var file = folder + "/model";
-        fs.writeFile(file + fileExt, contents, function (err) {
+        // the examples can be imported from the session's folder: --import=Examples/<example>
+        fs.symlink(ROOT + "/Examples", folder + "/Examples", "dir", function (err) {
             if (err)
-                return failed(err);
-            core.logSpecific("Proceeding with a new session file " + file, key);
-            callback(core.addProcess({
-                windowKey: key,
-                folder: folder,
-                urlFile: urlFile,
-                file: file}));
+                core.logSpecific("Could not link the examples: " + err, key);
+            fs.writeFile(file + fileExt, contents, function (err) {
+                if (err)
+                    return failed(err);
+                core.logSpecific("Proceeding with a new session file " + file, key);
+                callback(core.addProcess({
+                    windowKey: key,
+                    folder: folder,
+                    urlFile: urlFile || "",
+                    file: file}));
+            });
         });
     });
 };
 
+
+/*
+ * The arguments that restrict the imports of a session's model, which may come from anyone:
+ * local files only from the session's folder and the examples, URLs only from public
+ * addresses, and the imports of a model loaded from a URL relative to that URL. The tools
+ * that read the model (clafer, claferIG) get them; the model cannot change them.
+ */
+var importArgs = function(process)
+{
+    var args = ["--public-imports", "--import-root=" + process.folder, "--import-root=" + ROOT + "/Examples"];
+    if (process.urlFile)
+        args.push("--import-base=" + process.urlFile);
+    return args;
+};
+
+// An argument with the path of the session's model as the model's name in the session's folder.
+var inSession = function(process)
+{
+    return function(arg) { return arg.split(process.file).join(path.basename(process.file)); };
+};
 
 var runClaferCompiler = function(key, specifiedArgs, genericArgs, onComplete)
 { 
@@ -423,9 +451,10 @@ var runClaferCompiler = function(key, specifiedArgs, genericArgs, onComplete)
         formatModeArgs = formatModeArgs.concat(formatConfig.formats[i].compiler_args);
     }
 
-    var finalArgs = genericArgs.concat(specifiedArgs).concat(formatModeArgs);
+    var finalArgs = importArgs(process).concat(genericArgs).concat(specifiedArgs).concat(formatModeArgs).map(inSession(process));
 
-    process.clafer_compiler = spawn("clafer", finalArgs);
+    // in the session's folder, so that the messages name the model, not the server's folders
+    process.clafer_compiler = spawn("clafer", finalArgs, { cwd: process.folder });
 
     process.compiled_formats = new Array();
     process.compiler_message = "";
@@ -665,11 +694,13 @@ var handleControlRequest = function(req, res, settings){
                     },
                     {
                         "needle": "$filepath$", 
-                        "replacement": process.file + format.file_suffix
+                        "replacement": path.basename(process.file) + format.file_suffix
                     }
                 ];
 
             var args = core.replaceTemplateList(backend.tool_args, fileAndPathReplacement);
+            if (format.file_suffix == ".cfr") // the tool reads the model and its imports
+                args = importArgs(process).concat(args);
 
             if (backend.tool_args_forward_from_compiler) // so far forwarding only ss
             {
@@ -727,7 +758,8 @@ var handleControlRequest = function(req, res, settings){
             process.ig_just_started = true;
             process.producedScopes = true;
 
-            process.tool = spawn(toolPath, args);
+            // in the session's folder, so that the messages name the model, not the server's folders
+            process.tool = spawn(toolPath, args, { cwd: process.folder });
 
             // writing a command after the tool exited fails asynchronously (EPIPE)
             process.tool.stdin.on('error', function (err){
