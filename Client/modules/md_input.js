@@ -37,8 +37,8 @@ function Input(host, settings)
     this.posy = this.settings.layout.posy;
 
     this.host = host;
-    this.serverAction = "/upload";
-    this.serverOptimizeAction = "/optimize";
+    this.serverAction = "upload";
+    this.serverOptimizeAction = "optimize";
 
     this.dataFileChosen = false;
 
@@ -143,7 +143,7 @@ Input.method("beginQuery", function(formData, jqForm, options) {
     this.host.makeBusy(true);
 
     $("#load_area #myform").hide();
-    $("#load_area").append('<div id="preloader"><img id="preloader_img" src="/commons/Client/images/preloader.gif" alt="Loading..."/><span id="status_label">Loading and processing...</span><button id="cancel">Cancel</button></div>');
+    $("#load_area").append('<div id="preloader"><img id="preloader_img" src="commons/Client/images/preloader.gif" alt="Loading..."/><span id="status_label">Loading and processing...</span><button id="cancel">Cancel</button></div>');
     $("#cancel").click(this.cancelCall.bind(this));
 
     return true;
@@ -184,7 +184,7 @@ Input.method("onPoll", function(responseObject)
 Input.method("poll", function()
 {
     var options = new Object();
-    options.url = "/poll";
+    options.url = "poll";
     options.type = "post";
     options.timeout = this.pollingTimeout;
     if (!this.toCancel)
@@ -255,7 +255,7 @@ Input.method("submitTextCall", function(){
 
 Input.method("exampleURL", function()
 {
-    return new URL("/Examples/" + encodeURIComponent($("#exampleURL").val()), window.location.href).href;
+    return new URL("Examples/" + encodeURIComponent($("#exampleURL").val()), window.location.href).href;
 });
 
 Input.method("copyExampleURLCall", function()
@@ -547,7 +547,7 @@ Input.method("getInitContent", function()
         result += '</tr></table>';
         result += '</div>';
 
-        $.getJSON('/Backends/backends.json',
+        $.getJSON('Backends/backends.json',
             function(data)
             {
                 var backends = data.backends;
@@ -578,13 +578,13 @@ Input.method("getInitContent", function()
     result += '</form>';
 
 
-//    result += '<form id="saveSourceForm" action="/savesource" method="post" enctype="multipart/form-data">';
+//    result += '<form id="saveSourceForm" action="savesource" method="post" enctype="multipart/form-data">';
 //    result += '<input type="hidden" name="windowKey" value="' + this.host.key + '"/>';
 //    result += '<input type="hidden" name="saveSourceField" id="saveSourceField" value=""></form>';
 
     var context = this;
 
-    $.getJSON('/Examples/examples.json',
+    $.getJSON('Examples/examples.json',
         function(data)
         {
             var examples = data.examples;

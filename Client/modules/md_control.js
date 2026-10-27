@@ -43,7 +43,7 @@ function Control(host, settings)
 }
 
 Control.method("getInitContent", function(){
-    var ret = '<form id="ControlForm" method="post" action="/control" style="display: block; padding:1px;">';
+    var ret = '<form id="ControlForm" method="post" action="control" style="display: block; padding:1px;">';
     ret += '<input type="hidden" id="ControlOp" name="operation" value=""/>';
     ret += '<input type="hidden" id="ControlOpArg1" name="operation_arg1" value=""/>';
     ret += '<input type="hidden" id="ControlOpArg2" name="operation_arg2" value=""/>';
@@ -116,7 +116,7 @@ Control.method("getInitContent", function(){
 
     var context = this;
 
-    $.getJSON('/Backends/backends.json', 
+    $.getJSON('Backends/backends.json', 
         function(data)
         {
             var backends = data.backends;
@@ -425,7 +425,7 @@ Control.method("onPoll", function(responseObject)
 Control.method("poll", function()
 {
     var options = new Object();
-    options.url = "/poll";
+    options.url = "poll";
     options.type = "post";
     options.timeout = this.pollingTimeout;
     if (!this.toCancel)

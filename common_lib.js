@@ -52,7 +52,7 @@ var getMainHTML = function()
     		prefix = '';
     	}
     	else
-    		prefix = '/Client/';
+    		prefix = 'Client/';
 
     	scripts.push('<script type="text/javascript" src="' + prefix + includes.scripts[i] + '"></script>');
     }
@@ -65,7 +65,7 @@ var getMainHTML = function()
     		prefix = '';
     	}
     	else
-    		prefix = '/Client/';
+    		prefix = 'Client/';
 
     	styles.push('<link rel="stylesheet" type="text/css" href="' + prefix + includes.styles[i] + '"/>');
     }

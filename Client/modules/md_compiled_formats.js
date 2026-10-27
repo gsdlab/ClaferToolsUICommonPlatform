@@ -32,7 +32,7 @@ function CompiledFormats(host, settings)
     this.posx = this.settings.layout.posx;
     this.posy = this.settings.layout.posy;
 
-    this.ajaxUrl = "/htmlwrapper";
+    this.ajaxUrl = "htmlwrapper";
     
     this.host = host;
     this.goals = null;
@@ -40,7 +40,7 @@ function CompiledFormats(host, settings)
     this.docLoadCounter = 0;
     this.docLoadCount = 0;
 
-    this.saveFormatBasicQuery = "/saveformat?windowKey=" + this.host.key + "&fileid=";
+    this.saveFormatBasicQuery = "saveformat?windowKey=" + this.host.key + "&fileid=";
 }
 
 CompiledFormats.method("getInitContent", function()
@@ -76,7 +76,7 @@ CompiledFormats.method("onInitRendered", function()
     var ajaxUrl = this.ajaxUrl;
     var context = this;
 
-    $.getJSON('/Formats/formats.json', 
+    $.getJSON('Formats/formats.json', 
         function(data)
         {
             var formats = data.formats;

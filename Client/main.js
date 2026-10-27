@@ -157,7 +157,7 @@ function Host(modules, settings)
 
     var context = this;
 
-    $.getJSON('/initdata', 
+    $.getJSON('initdata', 
         function(data)
         {
             var versions = data.versions;
