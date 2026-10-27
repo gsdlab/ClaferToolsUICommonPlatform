@@ -79,7 +79,7 @@ ClaferProcessor.method("getAllChildren", function(clafer) {
 
 ClaferProcessor.method("calcClaferType", function(clafer) {
 
-	if (clafer.reference === 'integer')
+	if (clafer.reference === 'integer' || clafer.reference === 'decimal') // numbers
 		return 'int';
 
 	if (clafer.superClafer === 'string')

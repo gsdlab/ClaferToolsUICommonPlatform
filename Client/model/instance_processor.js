@@ -105,8 +105,8 @@ InstanceProcessor.method("getFieldValue", function(instanceIndex, claferPath, ty
 
 			if (type == "string")
 				results.push(value);
-			else if (type == "int")
-				results.push(parseInt(value));
+			else if (type == "int") // an integer or a decimal
+				results.push(Number(value));
 			else results.push(value);
 
 		}
@@ -117,7 +117,7 @@ InstanceProcessor.method("getFieldValue", function(instanceIndex, claferPath, ty
 		if (results.length == 1)
 		{
 			if (type == 'int')
-				return parseInt(results[0]); // cannot join integers!
+				return results[0]; // cannot join numbers!
 			else
 				return results[0];
 		}
