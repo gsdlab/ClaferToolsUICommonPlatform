@@ -78,7 +78,7 @@ FeatureQualityMatrix.method("addControlPanel", function()
     $(panel).append('<span id="instanceshown"></span>');
     $(panel).append(vl);
     $(panel).append('<input type="checkbox" id="showQualities" checked="checked"/> Show nested quality attributes');
-    $(panel).append('<form id="saveAllForm" action="/saveinstances" method="post" enctype="multipart/form-data">' + '<input type="hidden" name="data" id="saveAllData" value=""/>' + '<input type="hidden" name="windowKey" value="' + this.host.key + '"/>' + '</form>');
+    $(panel).append('<form id="saveAllForm" action="saveinstances" method="post" enctype="multipart/form-data">' + '<input type="hidden" name="data" id="saveAllData" value=""/>' + '<input type="hidden" name="windowKey" value="' + this.host.key + '"/>' + '</form>');
 
     $("#table").prepend(panel);
 

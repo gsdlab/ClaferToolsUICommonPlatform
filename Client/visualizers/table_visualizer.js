@@ -182,10 +182,10 @@ TableVisualizer.method("refresh", function(sdata)
 
             })
             .on("mouseover", function(d){
-            	d3.select(this).attr("src", "/commons/Client/images/removeMouseOver.png");
+            	d3.select(this).attr("src", "commons/Client/images/removeMouseOver.png");
             })
             .on("mouseout", function(d){
-            	d3.select(this).attr("src", "/commons/Client/images/removeMouseOver.png");
+            	d3.select(this).attr("src", "commons/Client/images/removeMouseOver.png");
             });
    }
 

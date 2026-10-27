@@ -55,7 +55,7 @@ helpGetter.method("initialize", function (title, version){
     if (displayHelp == null)
     {
 		this.createWindow();
-		$.updateWindowContentWithAjax("help", '/Client/help_pages/intro.html?title=' + this.title + '&version=' + this.version);
+		$.updateWindowContentWithAjax("help", 'Client/help_pages/intro.html?title=' + this.title + '&version=' + this.version);
 	}
 });
 
@@ -95,7 +95,7 @@ helpGetter.method("setListeners", function(){
 helpGetter.method("getHelp", function (moduleName)
 {
 	this.createWindow();
-	$.updateWindowContentWithAjax("help", '/Client/help_pages/' + moduleName + '.html?title=' + this.title + '&version=' + this.version);
+	$.updateWindowContentWithAjax("help", 'Client/help_pages/' + moduleName + '.html?title=' + this.title + '&version=' + this.version);
 });
 
 helpGetter.method("getHelpButton", function(moduleName){
