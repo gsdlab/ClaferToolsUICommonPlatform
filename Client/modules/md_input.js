@@ -77,6 +77,8 @@ Input.method("onInitRendered", function()
 
     $("#myform [type='file']").change(this.inputChange.bind(this));
     $("#exampleURL").change(this.exampleChange.bind(this));
+    $("#copyExampleURL").click(this.copyExampleURLCall.bind(this));
+    $("#copyExampleImport").click(this.copyExampleImportCall.bind(this));
     $("#loadExampleInEditor").change(this.exampleChange.bind(this));
 //    $("#saveSourceButton").click(this.saveSourceCall.bind(this));
 
@@ -251,6 +253,52 @@ Input.method("submitTextCall", function(){
 });
 
 
+Input.method("exampleURL", function()
+{
+    return new URL("/Examples/" + encodeURIComponent($("#exampleURL").val()), window.location.href).href;
+});
+
+Input.method("copyExampleURLCall", function()
+{
+    copyToClipboard(this.exampleURL(), $("#copyExampleURL"));
+});
+
+Input.method("copyExampleImportCall", function()
+{
+    copyToClipboard("//# OPTIONS --import=Examples/" + $("#exampleURL").val(), $("#copyExampleImport"));
+});
+
+// Two overlapping sheets, the usual copy icon.
+var copyIcon = '<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" style="vertical-align:-1px;margin-right:2px"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M11 5V3a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h2"/></svg>';
+
+// Copies the text and briefly shows a tick on the button. The Clipboard API works only in a
+// secure context (HTTPS or localhost), so over HTTP the text is copied from a hidden textarea.
+function copyToClipboard(text, button)
+{
+    var done = function() {
+        if (!button.data("label"))
+            button.data("label", button.html());
+        button.html("&#10003; copied");
+        setTimeout(function() { button.html(button.data("label")); }, 1200);
+    };
+
+    if (navigator.clipboard && window.isSecureContext)
+    {
+        navigator.clipboard.writeText(text).then(done, function() { window.prompt("Copy:", text); });
+        return;
+    }
+
+    var area = $('<textarea readonly style="position:fixed;left:-1000px;top:0"></textarea>').val(text).appendTo("body");
+    area[0].select();
+    var copied = false;
+    try { copied = document.execCommand("copy"); } catch (e) {}
+    area.remove();
+    if (copied)
+        done();
+    else
+        window.prompt("Copy:", text);
+}
+
 Input.method("getCaptionsByFileExt", function(fileName)
 {
     var optimizationEnabled = $("#optimize").is(":checked");
@@ -278,6 +326,10 @@ Input.method("getCaptionsByFileExt", function(fileName)
 Input.method("exampleChange", function()
 {
     var fileName = $("#exampleURL").val();
+
+    // the example's URL and import can be copied, e.g., to import it into another model
+    $("#copyExampleURL").prop("disabled", !fileName);
+    $("#copyExampleImport").prop("disabled", !fileName || !/\.cfr$/i.test(fileName));
 
     if (fileName)
     {
@@ -364,19 +416,19 @@ Input.method("getInitContent", function()
 
     result += '</select></div></td>';
     result += '<td><input id="submitExample" type="submit" value="' + this.settings.file_extensions[0].button_example_caption + '" title="' + this.settings.file_extensions[0].button_example_tooltip + '"></input></td>';
-
+    result += '<td style="white-space:nowrap"><button type="button" id="copyExampleURL" class="copyButton" disabled="disabled" title="Copy the URL of the selected example, e.g., to import it with //# OPTIONS --import=URL into a model elsewhere">' + copyIcon + 'URL</button>';
+    result += '<button type="button" id="copyExampleImport" class="copyButton" disabled="disabled" title="Copy //# OPTIONS --import=Examples/... to import the selected example into a model in this tool">' + copyIcon + 'import</button>';
 
     if (this.settings.optimization_backend)
     {
-        result += '<td>';
         var checked = "";
 
         if (this.settings.input_default_cache)
             checked = ' checked = "checked"';
 
-        result += '<input id="useCache" type="checkbox" name="useCache"' + checked + '/><span>Use cached results</span>';
-        result += '</td>';
+        result += '<br/><input id="useCache" type="checkbox" name="useCache"' + checked + '/><span>Use cached results</span>';
     }
+    result += '</td>';
 
 //    result += '<td></td>';
 

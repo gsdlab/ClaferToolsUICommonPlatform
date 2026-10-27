@@ -321,3 +321,10 @@ textarea.child {height:100%;}
 
 
 /* END SIDEBAR */
+
+/* the buttons copying the URL and the import of the selected example */
+.copyButton {
+    margin-left: 2px;
+    padding: 0px 3px;
+    font-size: 0.9em;
+}
