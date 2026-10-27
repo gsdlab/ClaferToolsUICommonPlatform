@@ -1,6 +1,6 @@
 // Reads the JSON intermediate representation of Clafer 0.5.3 (clafer -m json).
 ClaferAPI = {
-	primitiveTypes: ['integer', 'clafer', 'string', 'real', 'double'],
+	primitiveTypes: ['integer', 'decimal', 'clafer', 'string', 'real', 'double'],
 
 	// All values of the given field in the IR, in document order.
 	collect: function(json, field, result) {

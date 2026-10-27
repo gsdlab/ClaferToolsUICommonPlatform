@@ -11,7 +11,7 @@ var ClaferHighlightRules = function() {
     this.$rules = { start: 
        [ { caseInsensitive: true,
            token: 'keyword.control.clafer',
-           regex: '\\b(?:(abstract|or|xor|mux|opt|max|min|this|sum|integer|string))\\b' },
+           regex: '\\b(?:(abstract|or|xor|mux|opt|max|min|this|sum|integer|decimal|string))\\b' },
          { token: 'constant.numeric.clafer',
            regex: '\\b((0(x|X)[0-9a-fA-F]*)|(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))((e|E)(\\+|-)?[0-9]+)?)(L|l|UL|ul|u|U|F|f|ll|LL|ull|ULL)?\\b' },
          { token: 'punctuation.definition.comment.clafer',
