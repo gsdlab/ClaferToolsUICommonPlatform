@@ -750,6 +750,15 @@ var handleControlRequest = function(req, res, settings){
             }
 
 
+            var toggles = (req.body.operation_arg2 || "").split(",");
+            for (var j = 0; j < backend.control_buttons.length; j++)
+            {
+                if (backend.control_buttons[j].run_argument && toggles.indexOf(backend.control_buttons[j].id) >= 0)
+                {
+                    args.push(backend.control_buttons[j].run_argument);
+                }
+            }
+
             var toolPath = core.replaceTemplate(backend.tool, fileAndPathReplacement);
 
             core.logSpecific(args, req.body.windowKey);

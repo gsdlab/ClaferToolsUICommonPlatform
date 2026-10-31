@@ -136,7 +136,8 @@ Control.method("getInitContent", function(){
 
                 for (var j = 0; j < backends[i].control_buttons.length; j++)
                 {
-                    backendButtons += '<button class="control_button" disabled="disabled" id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '" name="' + backends[i].control_buttons[j].id + '"' + (backends[i].control_buttons[j].toggle ? ' data-toggle="true"' : '') + ' title="' + backends[i].control_buttons[j].tooltip + '">' + backends[i].control_buttons[j].label + "</button>";
+                    var button = backends[i].control_buttons[j];
+                    backendButtons += '<button class="control_button' + (button.default_on ? " control_button_on" : "") + '"' + (button.toggle ? "" : ' disabled="disabled"') + ' id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '" name="' + backends[i].control_buttons[j].id + '"' + (backends[i].control_buttons[j].toggle ? ' data-toggle="true"' : '') + ' title="' + backends[i].control_buttons[j].tooltip + '">' + backends[i].control_buttons[j].label + "</button>";
 
                     if (backends[i].control_buttons[j].argument)
                     {
@@ -160,7 +161,15 @@ Control.method("getInitContent", function(){
                     $("#ControlOpArg1").val(argument.val());
                 }
 
-                $(this).filter("[data-toggle]").toggleClass("control_button_on");
+                if ($(this).is("[data-toggle]"))
+                {
+                    $(this).toggleClass("control_button_on");
+
+                    if ($("#RunStop").val() != "Kill") // not running: the next run starts with this setting
+                    {
+                        return false;
+                    }
+                }
 
                 if (context.settings.onControlButtonClick)
                 {
@@ -234,6 +243,13 @@ Control.method("runStopClick", function(){
         if (this.settings.onStart(this))
         {
             $("#ControlOp").val("run");
+
+            // the toggles that are on, whose run arguments the server adds
+            var toggles = $("#" + $( "#backend option:selected" ).val() + "_buttons").children(".control_button_on").map(function(){
+                return this.name;
+            }).get();
+            $("#ControlOpArg2").val(toggles.join(","));
+
             this.host.makeBusy(true);
             this.sessionActive = true; // activating IG session
             $("#ControlForm").submit();
@@ -307,10 +323,9 @@ Control.method("enableRuntimeControls", function(){
 });
 
 Control.method("disableRuntimeControls", function(){
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").attr("disabled", "disabled");
+    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").not("[data-toggle]").attr("disabled", "disabled");
     $("#RunStop").val("Run");
     $("#RunStop").attr("title", "Run the selected backend");
-    $(".control_button_on").removeClass("control_button_on"); // a new run starts with the toggles off
 
     $("#setIndividualScope").attr("disabled", "disabled");
     $("#setDefaultScope").attr("disabled", "disabled");
@@ -335,7 +350,7 @@ Control.method("disableRuntimeControls", function(){
 
 Control.method("disableAll", function(){
     $("#RunStop").attr("disabled", "disabled");
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").attr("disabled", "disabled");
+    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").not("[data-toggle]").attr("disabled", "disabled");
 
     $("#setIndividualScope").attr("disabled", "disabled");
     $("#setDefaultScope").attr("disabled", "disabled");
