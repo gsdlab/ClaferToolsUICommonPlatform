@@ -628,7 +628,7 @@ var handleControlRequest = function(req, res, settings){
         return false;
     }
 
-    // the values end up in the instance generator's arguments and commands
+    // the values end up in the solution generator's arguments and commands
     var integers = [req.body.intHighScopeValue, req.body.defaultScopeValue, req.body.allScopesDelta, req.body.operation_arg1];
     if (!integers.every(core.isOptionalInteger)
         || (req.body.operation_arg2 !== undefined && !core.isCommandValue(req.body.operation_arg2))
@@ -772,15 +772,15 @@ var handleControlRequest = function(req, res, settings){
 
             // writing a command after the tool exited fails asynchronously (EPIPE)
             process.tool.stdin.on('error', function (err){
-                core.logSpecific('Could not send a command to the instance generator: ' + err.message, req.body.windowKey);
+                core.logSpecific('Could not send a command to the solution generator: ' + err.message, req.body.windowKey);
             });
 
             process.tool.on('error', function (err){
-                core.logSpecific('ERROR: Cannot run the chosen instance generator. Please check whether it is installed and accessible.', req.body.windowKey);
+                core.logSpecific('ERROR: Cannot run the chosen solution generator. Please check whether it is installed and accessible.', req.body.windowKey);
                 var process = core.getProcess(req.body.windowKey);
                 if (process != null)
                 {
-                    process.result = '{"message": "' + core.escapeJSON("Error: Cannot run instance generator") + '"}';
+                    process.result = '{"message": "' + core.escapeJSON("Error: Cannot run solution generator") + '"}';
                     process.completed = true;
                     process.tool = null;
                 }

@@ -180,6 +180,12 @@ CompiledFormats.method("setView", function(id, content)
     $("#" + id + "_format")[0].srcdoc = content;
 });
 
+CompiledFormats.method("showView", function(id)
+{
+    $("#formats").val(id);
+    this.onFormatChange();
+});
+
 CompiledFormats.method("adjustSaveFormat", function(id)
 {
     $("#saveFormat").attr("href", this.saveFormatBasicQuery + id);

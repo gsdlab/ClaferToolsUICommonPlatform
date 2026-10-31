@@ -49,12 +49,12 @@ Control.method("getInitContent", function(){
     ret += '<input type="hidden" id="ControlOpArg2" name="operation_arg2" value=""/>';
     ret += '<input type="hidden" id="BackendId" name="backend" value=""/>';
 
-    ret += '<select id="backend" title="Choose an instance generator backend">'; 
+    ret += '<select id="backend" title="Choose a solution generator backend">'; 
         // no name here, because if disabled, then the id is not submitted at all
     ret += '</select>';
 
     ret += '<input type="hidden" id="windowKey" name="windowKey" value="' + this.host.key + '">';
-    ret += '<input type="button" class="inputRunStopButton" id="RunStop" value="Run" title="Run the chosen instance generator" disabled="disabled"/><br>';
+    ret += '<input type="button" class="inputRunStopButton" id="RunStop" value="Run" title="Run the chosen solution generator" disabled="disabled"/><br>';
     ret += '<fieldset id="backendButtonsFieldset"><div id="backendButtons"></div></fieldset>';
 
     ret += '<div style="height:5px;"></div><fieldset id="scopeControl">';
@@ -193,7 +193,7 @@ Control.method("getInitContent", function(){
         }
     ).fail(function() 
         { 
-            var options = '<option value="">(Could not load instance generators)</option>';
+            var options = '<option value="">(Could not load solution generators)</option>';
             $("#backend").html(options);
             context.host.loaded(context); // notify about getting fully loaded
 
@@ -228,7 +228,7 @@ Control.method("onInitRendered", function()
 Control.method("resetControls", function(){
     $("#RunStop").removeAttr("disabled")
                     .val("Run")
-                    .attr("title", "Run the chosen instance generator");
+                    .attr("title", "Run the chosen solution generator");
 
     $('#getInstances').prop('disabled', true);
 
