@@ -136,7 +136,12 @@ Control.method("getInitContent", function(){
 
                 for (var j = 0; j < backends[i].control_buttons.length; j++)
                 {
-                    backendButtons += '<button class="control_button" disabled="disabled" id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '" name="' + backends[i].control_buttons[j].id + '" title="' + backends[i].control_buttons[j].tooltip + '">' + backends[i].control_buttons[j].label + "</button>";
+                    backendButtons += '<button class="control_button" disabled="disabled" id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '" name="' + backends[i].control_buttons[j].id + '"' + (backends[i].control_buttons[j].toggle ? ' data-toggle="true"' : '') + ' title="' + backends[i].control_buttons[j].tooltip + '">' + backends[i].control_buttons[j].label + "</button>";
+
+                    if (backends[i].control_buttons[j].argument)
+                    {
+                        backendButtons += '<input type="number" class="control_argument" disabled="disabled" min="0" id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '-arg" value="' + backends[i].control_buttons[j].argument.default_value + '" title="' + backends[i].control_buttons[j].argument.tooltip + '"/>';
+                    }
                 }
 
                 backendButtons += '</div>';
@@ -149,9 +154,26 @@ Control.method("getInitContent", function(){
             $(".control_button").click(function(){
                 $("#ControlOp").val(this.id);
 
+                var argument = $("#" + this.id + "-arg");
+                if (argument.length)
+                {
+                    $("#ControlOpArg1").val(argument.val());
+                }
+
+                $(this).filter("[data-toggle]").toggleClass("control_button_on");
+
                 if (context.settings.onControlButtonClick)
                 {
                     context.settings.onControlButtonClick(context, this.id);
+                }
+            });
+
+            // Enter runs the button of the argument, not the first button of the form
+            $(".control_argument").keypress(function(event){
+                if (event.which == 13)
+                {
+                    event.preventDefault();
+                    $(this).prev("button").click();
                 }
             });
 
@@ -255,7 +277,7 @@ Control.method("setIntScopeClick", function(){
 });
 
 Control.method("enableRuntimeControls", function(){
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button").removeAttr("disabled");
+    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").removeAttr("disabled");
     $("#RunStop").val("Kill");
     $("#RunStop").attr("title", "Force the running backend to stop");
 
@@ -285,9 +307,10 @@ Control.method("enableRuntimeControls", function(){
 });
 
 Control.method("disableRuntimeControls", function(){
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button").attr("disabled", "disabled");
+    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").attr("disabled", "disabled");
     $("#RunStop").val("Run");
     $("#RunStop").attr("title", "Run the selected backend");
+    $(".control_button_on").removeClass("control_button_on"); // a new run starts with the toggles off
 
     $("#setIndividualScope").attr("disabled", "disabled");
     $("#setDefaultScope").attr("disabled", "disabled");
@@ -312,7 +335,7 @@ Control.method("disableRuntimeControls", function(){
 
 Control.method("disableAll", function(){
     $("#RunStop").attr("disabled", "disabled");
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button").attr("disabled", "disabled");
+    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").attr("disabled", "disabled");
 
     $("#setIndividualScope").attr("disabled", "disabled");
     $("#setDefaultScope").attr("disabled", "disabled");

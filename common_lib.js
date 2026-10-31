@@ -568,15 +568,15 @@ var runClaferCompiler = function(key, specifiedArgs, genericArgs, onComplete)
 
 };
 
-// Whether the compiled model is a temporal (behavioral) Clafer model. Instance generation
-// and optimization support only static models; clafer reports temporal models when it
+// Whether the compiled model is a temporal (behavioral) Clafer model. The Choco backend
+// supports only static models; clafer reports temporal models when it
 // cannot produce the Choco output.
 var isTemporalModel = function(process)
 {
     return process.compiler_message.indexOf("because the model contains temporal operators") >= 0;
 }
 
-var temporalModelMessage = "Temporal Clafer models are not supported: instance generation and optimization work only with static models. You can edit temporal models in ClaferIDE.";
+var temporalModelMessage = "Temporal Clafer models are not supported: instance generation and optimization work only with static models. You can edit and run temporal models in ClaferIDE.";
 
 var produceScopes = function(process, backend)
 {
@@ -1015,7 +1015,14 @@ var handleControlRequest = function(req, res, settings){
         }
 
         core.logSpecific(backend.id + " ==> " + operation.id, req.body.windowKey);
-        writeCommand(process, operation.command);
+        var replacements = [
+                {
+                    "needle": "$value$",
+                    "replacement": req.body.operation_arg1
+                }
+            ];
+
+        writeCommand(process, core.replaceTemplate(operation.command, replacements));
 
         res.writeHead(200, { "Content-Type": "text/html"});
         res.end(operation.id);
