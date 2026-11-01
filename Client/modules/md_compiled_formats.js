@@ -125,6 +125,14 @@ CompiledFormats.method("onInitRendered", function()
                 counter++;
             }
             
+            // views filled by the tool, not by the compiler, so they have no file to download
+            var extraViews = context.settings.extra_views || [];
+            for (var i = 0; i < extraViews.length; i++)
+            {
+                options += '<option value="' + extraViews[i].id + '" data-extra="true" title="' + extraViews[i].tooltip + '">' + extraViews[i].label + '</option>';
+                views += '<iframe id="' + extraViews[i].id + '_format" sandbox="" style="display:none;border:0;" scrolling="yes" height="100%" frameborder="0" width="100%"></iframe>';
+            }
+
             $("#formats").html(options);
             $("#format_views textarea").remove();
             $("#format_views").append(views);
@@ -167,6 +175,17 @@ CompiledFormats.method("setResult", function(data){
     }
 });
 
+CompiledFormats.method("setView", function(id, content)
+{
+    $("#" + id + "_format")[0].srcdoc = content;
+});
+
+CompiledFormats.method("showView", function(id)
+{
+    $("#formats").val(id);
+    this.onFormatChange();
+});
+
 CompiledFormats.method("adjustSaveFormat", function(id)
 {
     $("#saveFormat").attr("href", this.saveFormatBasicQuery + id);
@@ -180,5 +199,6 @@ CompiledFormats.method("onFormatChange", function()
 
     $("#format_views").children("#" + $( "#formats option:selected" ).val() + "_format")[0].style.display = "block";
     this.adjustSaveFormat($( "#formats option:selected" ).val());
+    $("#saveFormat").toggle(!$( "#formats option:selected" ).is("[data-extra]"));
 
 });

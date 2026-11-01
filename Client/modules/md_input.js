@@ -568,7 +568,7 @@ Input.method("getInitContent", function()
             }
         ).fail(function()
             {
-                var options = '<option value="">(Could not load instance generators)</option>';
+                var options = '<option value="">(Could not load solution generators)</option>';
                 $("#optimizationBackend").html(options);
                 context.partLoaded();
 

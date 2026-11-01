@@ -49,12 +49,12 @@ Control.method("getInitContent", function(){
     ret += '<input type="hidden" id="ControlOpArg2" name="operation_arg2" value=""/>';
     ret += '<input type="hidden" id="BackendId" name="backend" value=""/>';
 
-    ret += '<select id="backend" title="Choose an instance generator backend">'; 
+    ret += '<select id="backend" title="Choose a solution generator backend">'; 
         // no name here, because if disabled, then the id is not submitted at all
     ret += '</select>';
 
     ret += '<input type="hidden" id="windowKey" name="windowKey" value="' + this.host.key + '">';
-    ret += '<input type="button" class="inputRunStopButton" id="RunStop" value="Run" title="Run the chosen instance generator" disabled="disabled"/><br>';
+    ret += '<input type="button" class="inputRunStopButton" id="RunStop" value="Run" title="Run the chosen solution generator" disabled="disabled"/><br>';
     ret += '<fieldset id="backendButtonsFieldset"><div id="backendButtons"></div></fieldset>';
 
     ret += '<div style="height:5px;"></div><fieldset id="scopeControl">';
@@ -136,7 +136,13 @@ Control.method("getInitContent", function(){
 
                 for (var j = 0; j < backends[i].control_buttons.length; j++)
                 {
-                    backendButtons += '<button class="control_button" disabled="disabled" id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '" name="' + backends[i].control_buttons[j].id + '" title="' + backends[i].control_buttons[j].tooltip + '">' + backends[i].control_buttons[j].label + "</button>";
+                    var button = backends[i].control_buttons[j];
+                    backendButtons += '<button class="control_button' + (button.default_on ? " control_button_on" : "") + '"' + (button.toggle ? "" : ' disabled="disabled"') + ' id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '" name="' + backends[i].control_buttons[j].id + '"' + (backends[i].control_buttons[j].toggle ? ' data-toggle="true"' : '') + ' title="' + backends[i].control_buttons[j].tooltip + '">' + backends[i].control_buttons[j].label + "</button>";
+
+                    if (backends[i].control_buttons[j].argument)
+                    {
+                        backendButtons += '<input type="number" class="control_argument" disabled="disabled" min="0" id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '-arg" value="' + backends[i].control_buttons[j].argument.default_value + '" title="' + backends[i].control_buttons[j].argument.tooltip + '"/>';
+                    }
                 }
 
                 backendButtons += '</div>';
@@ -149,9 +155,34 @@ Control.method("getInitContent", function(){
             $(".control_button").click(function(){
                 $("#ControlOp").val(this.id);
 
+                var argument = $("#" + this.id + "-arg");
+                if (argument.length)
+                {
+                    $("#ControlOpArg1").val(argument.val());
+                }
+
+                if ($(this).is("[data-toggle]"))
+                {
+                    $(this).toggleClass("control_button_on");
+
+                    if ($("#RunStop").val() != "Kill") // not running: the next run starts with this setting
+                    {
+                        return false;
+                    }
+                }
+
                 if (context.settings.onControlButtonClick)
                 {
                     context.settings.onControlButtonClick(context, this.id);
+                }
+            });
+
+            // Enter runs the button of the argument, not the first button of the form
+            $(".control_argument").keypress(function(event){
+                if (event.which == 13)
+                {
+                    event.preventDefault();
+                    $(this).prev("button").click();
                 }
             });
 
@@ -162,7 +193,7 @@ Control.method("getInitContent", function(){
         }
     ).fail(function() 
         { 
-            var options = '<option value="">(Could not load instance generators)</option>';
+            var options = '<option value="">(Could not load solution generators)</option>';
             $("#backend").html(options);
             context.host.loaded(context); // notify about getting fully loaded
 
@@ -197,7 +228,7 @@ Control.method("onInitRendered", function()
 Control.method("resetControls", function(){
     $("#RunStop").removeAttr("disabled")
                     .val("Run")
-                    .attr("title", "Run the chosen instance generator");
+                    .attr("title", "Run the chosen solution generator");
 
     $('#getInstances').prop('disabled', true);
 
@@ -212,6 +243,13 @@ Control.method("runStopClick", function(){
         if (this.settings.onStart(this))
         {
             $("#ControlOp").val("run");
+
+            // the toggles that are on, whose run arguments the server adds
+            var toggles = $("#" + $( "#backend option:selected" ).val() + "_buttons").children(".control_button_on").map(function(){
+                return this.name;
+            }).get();
+            $("#ControlOpArg2").val(toggles.join(","));
+
             this.host.makeBusy(true);
             this.sessionActive = true; // activating IG session
             $("#ControlForm").submit();
@@ -255,7 +293,7 @@ Control.method("setIntScopeClick", function(){
 });
 
 Control.method("enableRuntimeControls", function(){
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button").removeAttr("disabled");
+    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").removeAttr("disabled");
     $("#RunStop").val("Kill");
     $("#RunStop").attr("title", "Force the running backend to stop");
 
@@ -285,7 +323,7 @@ Control.method("enableRuntimeControls", function(){
 });
 
 Control.method("disableRuntimeControls", function(){
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button").attr("disabled", "disabled");
+    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").not("[data-toggle]").attr("disabled", "disabled");
     $("#RunStop").val("Run");
     $("#RunStop").attr("title", "Run the selected backend");
 
@@ -312,7 +350,7 @@ Control.method("disableRuntimeControls", function(){
 
 Control.method("disableAll", function(){
     $("#RunStop").attr("disabled", "disabled");
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button").attr("disabled", "disabled");
+    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").not("[data-toggle]").attr("disabled", "disabled");
 
     $("#setIndividualScope").attr("disabled", "disabled");
     $("#setDefaultScope").attr("disabled", "disabled");
