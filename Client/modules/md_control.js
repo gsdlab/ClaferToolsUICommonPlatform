@@ -141,7 +141,7 @@ Control.method("getInitContent", function(){
 
                     if (backends[i].control_buttons[j].argument)
                     {
-                        backendButtons += '<input type="number" class="control_argument" disabled="disabled" min="0" id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '-arg" value="' + backends[i].control_buttons[j].argument.default_value + '" title="' + backends[i].control_buttons[j].argument.tooltip + '"/>';
+                        backendButtons += '<input type="number" class="control_argument" disabled="disabled"' + (backends[i].control_buttons[j].argument.allow_negative ? "" : ' min="0"') + ' id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '-arg" value="' + backends[i].control_buttons[j].argument.default_value + '" title="' + backends[i].control_buttons[j].argument.tooltip + '"/>';
                     }
                 }
 
