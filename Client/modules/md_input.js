@@ -112,7 +112,7 @@ Input.method("onInitRendered", function()
 
     this.editor = ace.edit("clafer_editor");
     this.editor.setTheme("ace/theme/eclipse");
-    var ClaferMode = require("ace/mode/clafer").Mode;
+    var ClaferMode = ace.require("ace/mode/clafer").Mode;
     this.editor.getSession().setMode(new ClaferMode());
     this.editor.setShowPrintMargin(false);
 
