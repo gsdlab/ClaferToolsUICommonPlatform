@@ -101,13 +101,8 @@ var MAX_UPLOAD_SIZE = config.maxUploadSize || 16 * 1024 * 1024;
 // dependencies in the package.json of each tool, so that npm audit covers them.
 var VENDOR_FILES = {
     "jquery.min.js": "jquery/dist/jquery.min.js",
-    "jquery.form.min.js": "jquery-form/dist/jquery.form.min.js",
     "d3.min.js": "d3/d3.min.js",
-    "lodash.min.js": "lodash/lodash.min.js",
-    "chosen/chosen.jquery.min.js": "chosen-js/chosen.jquery.min.js",
-    "chosen/chosen.min.css": "chosen-js/chosen.min.css",
-    "chosen/chosen-sprite.png": "chosen-js/chosen-sprite.png",
-    "chosen/chosen-sprite@2x.png": "chosen-js/chosen-sprite@2x.png"
+    "lodash.min.js": "lodash/lodash.min.js"
 };
 
 /*

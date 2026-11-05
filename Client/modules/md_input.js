@@ -88,7 +88,7 @@ Input.method("onInitRendered", function()
     options.error = this.handleError.bind(this);
     options.timeout = this.requestTimeout;
 
-    $('#myform').ajaxForm(options);
+    ajaxForm("#myform", options);
 
     if (this.settings.optimization_backend)
     {

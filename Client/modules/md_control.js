@@ -79,12 +79,13 @@ Control.method("getInitContent", function(){
     ret += '<tr id="claferScopeSettings1">';
     ret += '<td style="padding: 0px 4px 0px 4px" width="60">Custom:</td>';
     ret += '<td colspan="3">';
-    ret += '<input type="text" id="individualClafer" class="fullwidth" placeholder="Clafer name(s)" title="Enter the clafer name, namespace, path or choose ones from a drop down, depending on the backend"></input>';
+    ret += '<input type="text" id="individualClafer" class="fullwidth" placeholder="Clafer name(s)" list="ClaferList" autocomplete="off" title="Enter the clafer name, namespace or path, depending on the backend, or choose one of the suggestions"></input>';
+    ret += '<datalist id="ClaferList"></datalist>';
     ret += '</td>';
     ret += '</tr>';
 
     ret += '<tr id="claferScopeSettings2">';
-    ret += '<td><span id="ClaferListCont" style="width:30px"></span></td>';
+    ret += '<td></td>';
     ret += '<td>';    
     ret += '<input type="text" size="2" value="1" class="scopeInput" id="individualScopeDelta" title="Scope value"/>';
     ret += '<button id="incIndividualScope" title="Increase the scope of the specified clafer(s) by the specified delta">Inc</button>';
@@ -221,7 +222,7 @@ Control.method("onInitRendered", function()
     options.beforeSubmit = this.beginQuery.bind(this);
     options.success = this.showResponse.bind(this);
     options.error = this.handleError.bind(this);
-    $('#ControlForm').ajaxForm(options); 
+    ajaxForm("#ControlForm", options);
 
 });
 
@@ -477,15 +478,15 @@ Control.method("poll", function()
     $.ajax(options);
 });
 
+// The clafers and their scopes as suggestions of the field "Clafer name(s)" (a datalist):
+// choosing one fills in its scope and moves to the scope value.
 Control.method("updateClaferList", function(jsonList){
-
-
-//$( "#backend option:selected" ).val()
-
-    var options = "";
 
     if (!jsonList.length)
         return;
+
+    var scopes = {};
+    var list = $("#ClaferList").empty();
 
     for (var i = 0; i < jsonList.length; i++)
     {
@@ -496,34 +497,25 @@ Control.method("updateClaferList", function(jsonList){
         if (jsonList[i].hierarchy)
             hierarchy = " [" + jsonList[i].hierarchy + "]";
 
-        options += '<option value="' + jsonList[i].lpqName + "|" + jsonList[i].scope + '">' + jsonList[i].lpqName + " [" + jsonList[i].scope + "]" + hierarchy + '</option>';
+        scopes[jsonList[i].lpqName] = jsonList[i].scope;
+        list.append($("<option>").attr("value", jsonList[i].lpqName).attr("label", "[" + jsonList[i].scope + "]" + hierarchy));
     }
 
-    $("#ClaferListCont").html('<select id="ClaferList"></select>');
-    $("#ClaferList").html(options);
+    $("#individualClafer").off("input.claferList").on("input.claferList", function(event) {
+        var name = $(this).val();
+        if (!Object.prototype.hasOwnProperty.call(scopes, name))
+            return;
 
-    $('#ClaferList').on('change', function(event, params) {
-        var s = params.selected;
-        var parts = s.split("|");
-        $('#individualClafer').val(parts[0]);
-        $('#individualScopeValue').val(parts[1]);
-        $('#individualScopeValue').trigger("focus");
-        $('#individualScopeValue').trigger("select");
+        $("#individualScopeValue").val(scopes[name]);
+
+        // a suggestion was chosen, not the last letter of a name typed
+        var inputType = event.originalEvent && event.originalEvent.inputType;
+        if (!inputType || inputType == "insertReplacementText")
+        {
+            $("#individualScopeValue").trigger("focus");
+            $("#individualScopeValue").trigger("select");
+        }
     });
-
-    $('#ClaferList').chosen({"search_contains": "true", "width": "30px"});
-
-    var left = this.posx + "px";
-    var top = 0 + "px";
-
-    var height = "300" + "px";
-    var width = "300" + "px";
-
-    $("#ClaferListCont .chosen-drop")[0].style.left = left;    
-    $("#ClaferListCont .chosen-drop")[0].style.top = top;    
-    $("#ClaferListCont .chosen-drop")[0].style.width = width;    
-    $("#ClaferListCont .chosen-results")[0].style.maxHeight = height;    
-
 });
 
 
