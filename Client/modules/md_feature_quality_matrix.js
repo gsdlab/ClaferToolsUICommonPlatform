@@ -168,7 +168,8 @@ FeatureQualityMatrix.method("onRendered", function()
     this.tableVisualizer = new TableVisualizer("table", {
         sorting: true,
         filtering: true,
-        selectable: true,
+        // the Configurator has no selection of variants
+        selectable: this.settings.instancesSelectable !== false,
         collapsing: true,
         buttonsForRemoval: true
     }, {

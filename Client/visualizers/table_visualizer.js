@@ -173,6 +173,8 @@ TableVisualizer.method("refresh", function(sdata)
             .style("cursor", "pointer")
             .on("click", function(d){
             	var me = d3.select(this);
+            	// not a click on the header too, which would select the removed instance
+            	d3.event.stopPropagation();
             	if (context.chartListeners.removeInstance){
             		
                 context.chartListeners.removeInstance(me.attr("data-id"), context);
@@ -201,15 +203,20 @@ TableVisualizer.method("refresh", function(sdata)
                     context.chartListeners.onDeselected(d);
                 }
             })
-		.on("mouseover", function(d){
+		.style("cursor", "pointer");
+   }
+
+   // highlighting the column also without selection, e.g., in the Configurator
+   if (context.options.selectable || context.chartListeners.onMouseOver){
+
+		context.headers.on("mouseover", function(d){
             context.chartListeners.onMouseOver(d);
             context.makeActive(d);
 		})
 		.on("mouseout", function(d){
             context.chartListeners.onMouseOut(d);
             context.makeInactive(d);
-		})
-		.style("cursor", "pointer");
+		});
    }
 
   var cat1 = context.body.selectAll("tr.field-row").data(data.fields, function(d){return d.path;});
