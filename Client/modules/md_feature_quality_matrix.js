@@ -122,7 +122,7 @@ FeatureQualityMatrix.method("addControlPanel", function()
         if(objSource!==undefined) {
 
 
-            attributes = _.filter(ClaferAPI.getAttributes(context.data.claferProcessor.source), function(attr){
+            attributes = ClaferAPI.getAttributes(context.data.claferProcessor.source).filter(function(attr){
 
                 return attr.indexOf('total_') === -1;
             });
@@ -215,8 +215,6 @@ FeatureQualityMatrix.method('clearSelectionByID', function(id){
    
 
     context.settings.onDeselected(context, getPID(id));
-    selected = _.without(selected, null);
-    selected = _.without(selected, getPID(id));
     // console.log(selected);
     // context.onSelectionChanged(selected);
 
@@ -233,28 +231,28 @@ FeatureQualityMatrix.method("sort", function(path, sortFlag)
 
     this.tableVisualizer.removeAllInstances(); // remove instances from the table
 
-    var groups = _.partition(data.matrix, function(obj){ return typeof obj[path] == 'number' ; }); // groups[0] - numeric values, group[1] - string values 
+    var groups = [data.matrix.filter(function(obj){ return typeof obj[path] == 'number' ; }), data.matrix.filter(function(obj){ return typeof obj[path] != 'number' ; })]; // groups[0] - numeric values, group[1] - string values 
    
 
     switch(sortFlag) {
         case 'asc' : {
-            data.matrix =  _.sortBy(groups[0],function(obj){ return +obj[path] });
+            data.matrix =  groups[0].sort(function(a, b){ return a[path] - b[path]; });
             if(groups.length>1){
-                data.matrix = _.union(groups[1], data.matrix);
+                data.matrix = groups[1].concat(data.matrix);
             }
             break;
         }
 
         case 'desc' : {
-            data.matrix =  _.sortBy(groups[0], function(obj){ return -obj[path] });
+            data.matrix =  groups[0].sort(function(a, b){ return b[path] - a[path]; });
             if(groups.length>1){
-                data.matrix = _.union(data.matrix, groups[1]);
+                data.matrix = data.matrix.concat(groups[1]);
             }
             break
         }
 
         case 'none' : {
-            data.matrix =  _.sortBy(data.matrix, function(obj){ return +obj['id'] });
+            data.matrix =  data.matrix.slice().sort(function(a, b){ return a.id - b.id; });
             break;
         }
     }
@@ -474,9 +472,9 @@ FeatureQualityMatrix.method("featureChecked", function (featurePath, state){
 
 FeatureQualityMatrix.method("removeInstance", function(id){
     var context = this;
-    context.data.matrix =  _.without(context.data.matrix, _.find(context.data.matrix, {id: parseInt(id)}));
+    context.data.matrix =  context.data.matrix.filter(function(obj){ return obj.id !== parseInt(id); });
            
-    context.data.instanceIds =  _.without(context.data.instanceIds, id);
+    context.data.instanceIds =  context.data.instanceIds.filter(function(e){ return e !== id; });
     context.data.instanceCount =  context.data.instanceIds.length;
     context.data.instanceMatch =  context.data.instanceIds.length;
 

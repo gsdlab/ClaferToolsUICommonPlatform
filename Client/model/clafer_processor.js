@@ -50,7 +50,7 @@ ClaferProcessor.method("claferFilter", function(s) {
 ClaferProcessor.method("getByUID", function(uid) {
 	var clafers = this.clafers;
 
-	return _.filter(clafers, function(clafer){
+	return (clafers || []).filter(function(clafer){
 						return ClaferAPI.getProperty(clafer, 'uid') === uid;
 					});
 });
@@ -58,11 +58,11 @@ ClaferProcessor.method("getByUID", function(uid) {
 ClaferProcessor.method("getAllChildren", function(clafer) {
 
 	var processor = this,
-			result =  _.filter(processor.clafers, function(cl){
+			result =  (processor.clafers || []).filter(function(cl){
 													return !ClaferAPI.getProperty(cl, 'isAbstract') && ClaferAPI.getProperty(cl, 'parentUID') === ClaferAPI.getProperty(clafer, 'uid');
 												});
 
-		_.each(ClaferAPI.getProperty(clafer, 'supers'), function(superUID){
+		(ClaferAPI.getProperty(clafer, 'supers') || []).forEach(function(superUID){
 
 			var superClafer = processor.getByUID(superUID)[0],
 					children = processor.getAllChildren(superClafer);
@@ -102,7 +102,7 @@ ClaferProcessor.method("createClaferObject", function(clafer) {
 
 	var processor = this;
 
-	if(clafer === undefined || _.isEmpty(clafer) ) {
+	if(clafer === undefined || Object.keys(clafer).length === 0 ) {
 		return null;
 	}
 
@@ -127,7 +127,7 @@ ClaferProcessor.method("createClaferObject", function(clafer) {
 	//Subclafers
 	var subclafers = processor.getAllChildren(clafer);
 
-	result.subclafers = _.map(subclafers, function(subclafer){
+	result.subclafers = subclafers.map(function(subclafer){
 															return processor.createClaferObject(subclafer);
 														});
 	return result;
@@ -145,7 +145,7 @@ ClaferProcessor.method("getTopClaferTree", function(id) { // id can be either 'r
 		if (id === 'root'){ // if we request the entire tree from the root
 
 			// Top level concrete clafers
-			var nodes = _.filter(processor.clafers, function(clafer){
+			var nodes = processor.clafers.filter(function(clafer){
 										return !ClaferAPI.getProperty(clafer, 'isAbstract') && ClaferAPI.getProperty(clafer, 'parentUID') === 'root';
 									});
 
