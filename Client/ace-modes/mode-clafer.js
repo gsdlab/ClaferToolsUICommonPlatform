@@ -1,11 +1,12 @@
-ace.define('ace/mode/clafer', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/text', 'ace/tokenizer', 'ace/mode/clafer_highlight_rules', 'ace/mode/folding/coffee'], function(require, exports, module) {
+ace.define('ace/mode/clafer', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/text', 'ace/tokenizer', 'ace/mode/clafer_highlight_rules', 'ace/mode/folding/clafer'], function(require, exports, module) {
 
 
 var oop = require("../lib/oop");
 var TextMode = require("./text").Mode;
 var Tokenizer = require("../tokenizer").Tokenizer;
-var ClaferHighlightRules = require("./clafer_highlight_rules").ClaferHighlightRules;
-var FoldMode = require("./folding/coffee").FoldMode;
+var ClaferHighlightRules = require("./clafer_highlight_rules").ClaferHighlightRules;
+
+var FoldMode = require("./folding/clafer").FoldMode;
 
 var Mode = function() {
     this.HighlightRules = ClaferHighlightRules;
@@ -29,64 +30,54 @@ exports.Mode = Mode;
 var oop = require("../lib/oop");
 var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 
-var ClaferHighlightRules = function() {
+// The same tokens as the TextMate grammar of the VS Code extension (clafer-vscode,
+// syntaxes/clafer.tmLanguage.json): keep the two in step. Names may contain apostrophes
+// (x'), so words are delimited by (?<![\w']) and (?![\w']), not \b.
+var ClaferHighlightRules = function() {
 
-    this.$rules = { start: 
-       [ { caseInsensitive: true,
-           token: 'keyword.control.clafer',
-           regex: '\\b(?:(abstract|or|xor|mux|opt|max|min|this|sum|integer|decimal|string))\\b' },
-         { token: 'constant.numeric.clafer',
-           regex: '\\b((0(x|X)[0-9a-fA-F]*)|(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))((e|E)(\\+|-)?[0-9]+)?)(L|l|UL|ul|u|U|F|f|ll|LL|ull|ULL)?\\b' },
-         { token: 'punctuation.definition.comment.clafer',
-           regex: '//.*$',
-           push_: 
-            [ { token: 'comment.line.double-slash.clafer.two',
-                regex: '$',
-                next: 'pop' },
-              { defaultToken: 'comment.line.double-slash.clafer.two' } ] },
-         { token: 'punctuation.definition.comment.clafer',
-           regex: '\\/\\*',
-           push: 
-            [ { token: 'punctuation.definition.comment.clafer',
-                regex: '\\*\\/',
-                next: 'pop' },
-              { defaultToken: 'comment.block.clafer.one' } ] },
-         { token: 'punctuation.definition.comment.clafer',
-           regex: '\\{',
-           push: 
-            [ { token: 'punctuation.definition.comment.clafer',
-                regex: '\\}',
-                next: 'pop' },
-              { defaultToken: 'comment.block.clafer.two' } ] },
-         { token: 'punctuation.definition.string.begin.clafer',
-           regex: '"',
-           push: 
-            [ { token: 'constant.character.escape.clafer', regex: '\\\\.' },
-              { token: 'punctuation.definition.string.end.clafer',
-                regex: '"',
-                next: 'pop' },
-              { defaultToken: 'string.quoted.double.clafer' } ],
-            },
-         { token: 'punctuation.definition.string.begin.clafer',
-           regex: '\'',
-           push: 
-            [ { token: 'constant.character.escape.apostrophe.clafer',
-                regex: '\'\'' },
-              { token: 'punctuation.definition.string.end.clafer',
-                regex: '\'',
-                next: 'pop' },
-              { defaultToken: 'string.quoted.single.clafer' } ] },
-          { token: 'keyword.operator',
-           regex: '->>|->|[+\\-;,/*%:]|:=|=|\\.|->' },
-          { token: 'keyword.optional',
-           regex: '\\?' },
-          { token: 'keyword.constraint',
-           regex: '\\[|\\]' },
-          { token: 'keyword.operator.logical',
-           regex: '&&|\\|\\||!' },
-          { token: 'keyword.goal',
-           regex: '<<|>>' } ] }
-    
+    var word = function(words) {
+        return "(?<![\\w'])(?:" + words + ")(?![\\w'])";
+    };
+
+    this.$rules = {
+        start: [
+            { token: ["keyword.other.directive.clafer", "text", "keyword.other.directive.clafer", "variable.parameter.option.clafer"],
+              regex: "^(//#)( )(OPTIONS|FRAGMENT|GRAPH|STATS|SUMMARY)(.*)$" },
+            { token: "comment.line.double-slash.clafer", regex: "//.*$" },
+            { token: "comment.block.clafer", regex: "/\\*", next: "blockComment" },
+            { token: "keyword.other.embedded.clafer", regex: "\\[(?:alloy|choco)\\|", next: "embedded" },
+            { token: "string.quoted.double.clafer", regex: "\"", next: "string" },
+            { token: "constant.numeric.clafer", regex: "\\b\\d+(?:\\.\\d+(?:e-?\\d+)?)?\\b" },
+            { token: "storage.modifier.clafer", regex: word("abstract|initial|final|finalref|finaltarget") },
+            { token: "keyword.other.clafer", regex: word("enum|assert|minimize|maximize") },
+            { token: "keyword.control.clafer", regex: word("if|then|else|let") },
+            { token: "keyword.control.temporal.clafer",
+              regex: word("never|sometime|lonce|always|must|precede|follow|initially|finally|until|weakuntil|eventually|globally|next|before|after|between|U|W|F|G|X") },
+            { token: "keyword.operator.word.clafer", regex: word("xor|or|mux|opt|all|disj|no|not|lone|one|some|in|and") },
+            { token: "support.function.clafer", regex: word("sum|product|min|max") },
+            { token: "variable.language.clafer", regex: word("this|parent|dref|root|children") },
+            { token: "support.type.clafer", regex: word("clafer|int|integer|decimal|string|real|double|boolean") },
+            { token: "identifier", regex: "[A-Za-z_][\\w']*" },
+            { token: "keyword.operator.clafer",
+              regex: "\\]->>|-->>|\\]->|-->|<=>|->>|-\\[|->|<:|:>|&&|\\|\\||\\+\\+|\\*\\*|--|:=|!=|>=|<=|=>|\\.\\.|<<|>>|[#?*+:\\-/%.\\\\,=<>!&|;`]" },
+            { token: "paren.clafer", regex: "[\\[\\]{}()]" }
+        ],
+        blockComment: [
+            { token: "comment.block.clafer", regex: "\\*/", next: "start" },
+            { defaultToken: "comment.block.clafer" }
+        ],
+        embedded: [
+            { token: "keyword.other.embedded.clafer", regex: "\\|\\]", next: "start" },
+            { defaultToken: "text" }
+        ],
+        string: [
+            { token: "constant.character.escape.clafer", regex: "\\\\[\"\\\\nt]" },
+            { token: "invalid.illegal.escape.clafer", regex: "\\\\." },
+            { token: "string.quoted.double.clafer", regex: "\"", next: "start" },
+            { defaultToken: "string.quoted.double.clafer" }
+        ]
+    };
+
     this.normalizeRules();
 };
 
@@ -95,7 +86,8 @@ oop.inherits(ClaferHighlightRules, TextHighlightRules);
 exports.ClaferHighlightRules = ClaferHighlightRules;
 });
 
-ace.define('ace/mode/folding/coffee', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/folding/fold_mode', 'ace/range'], function(require, exports, module) {
+// folding by indentation (the coffee folding of Ace 1.1)
+ace.define('ace/mode/folding/clafer', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/folding/fold_mode', 'ace/range'], function(require, exports, module) {
 
 
 var oop = require("../../lib/oop");
@@ -140,7 +132,8 @@ oop.inherits(FoldMode, BaseFoldMode);
             var endColumn = session.getLine(endRow).length;
             return new Range(startRow, startColumn, endRow, endColumn);
         }
-    };
+    };
+
     this.getFoldWidget = function(session, foldStyle, row) {
         var line = session.getLine(row);
         var indent = line.search(/\S/);
@@ -152,7 +145,8 @@ oop.inherits(FoldMode, BaseFoldMode);
         if (indent == -1) {
             session.foldWidgets[row - 1] = prevIndent!= -1 && prevIndent < nextIndent ? "start" : "";
             return "";
-        }
+        }
+
         if (prevIndent == -1) {
             if (indent == nextIndent && line[indent] == "#" && next[indent] == "#") {
                 session.foldWidgets[row - 1] = "";

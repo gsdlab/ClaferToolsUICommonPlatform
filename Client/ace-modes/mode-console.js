@@ -1,4 +1,4 @@
-ace.define('ace/mode/console', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/text', 'ace/tokenizer', 'ace/mode/console_highlight_rules', 'ace/mode/folding/coffee'], function(require, exports, module) {
+ace.define('ace/mode/console', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/text', 'ace/tokenizer', 'ace/mode/console_highlight_rules', 'ace/mode/folding/console'], function(require, exports, module) {
 
 
 var oop = require("../lib/oop");
@@ -6,7 +6,7 @@ var TextMode = require("./text").Mode;
 var Tokenizer = require("../tokenizer").Tokenizer;
 var ConsoleHighlightRules = require("./console_highlight_rules").ConsoleHighlightRules;
 
-var FoldMode = require("./folding/coffee").FoldMode;
+var FoldMode = require("./folding/console").FoldMode;
 
 var Mode = function() {
     this.HighlightRules = ConsoleHighlightRules;
@@ -52,7 +52,7 @@ oop.inherits(ConsoleHighlightRules, TextHighlightRules);
 exports.ConsoleHighlightRules = ConsoleHighlightRules;
 });
 
-ace.define('ace/mode/folding/coffee', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/folding/fold_mode', 'ace/range'], function(require, exports, module) {
+ace.define('ace/mode/folding/console', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/folding/fold_mode', 'ace/range'], function(require, exports, module) {
 
 
 var oop = require("../../lib/oop");
