@@ -314,7 +314,7 @@ TableVisualizer.method("refresh", function(sdata)
       					}).each(function(){
       						$(this).filter(function(){
       							return $(this).parent().find('.emvalue.no').length;
-      						}).click();
+      						}).trigger("click");
       					});
 	            }
 

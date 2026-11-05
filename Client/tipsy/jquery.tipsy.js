@@ -171,13 +171,13 @@
             }
         };
         
-        if (!options.live) this.each(function() { get(this); });
-        
+        // options.live is not supported: jQuery 1.9 removed .live()
+        this.each(function() { get(this); });
+
         if (options.trigger != 'manual') {
-            var binder   = options.live ? 'live' : 'bind',
-                eventIn  = options.trigger == 'hover' ? 'mouseenter' : 'focus',
+            var eventIn  = options.trigger == 'hover' ? 'mouseenter' : 'focus',
                 eventOut = options.trigger == 'hover' ? 'mouseleave' : 'blur';
-            this[binder](eventIn, enter)[binder](eventOut, leave);
+            this.on(eventIn, enter).on(eventOut, leave);
         }
         
         return this;

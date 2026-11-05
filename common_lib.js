@@ -96,6 +96,19 @@ core.cleanupUploads(UPLOADS);
 // The size limit of submitted models and instance data, and of request bodies.
 var MAX_UPLOAD_SIZE = config.maxUploadSize || 16 * 1024 * 1024;
 
+// The client libraries in app.html: vendor/<name> → node_modules/<file>. They are
+// dependencies in the package.json of each tool, so that npm audit covers them.
+var VENDOR_FILES = {
+    "jquery.min.js": "jquery/dist/jquery.min.js",
+    "jquery.form.min.js": "jquery-form/dist/jquery.form.min.js",
+    "d3.min.js": "d3/d3.min.js",
+    "lodash.min.js": "lodash/lodash.min.js",
+    "chosen/chosen.jquery.min.js": "chosen-js/chosen.jquery.min.js",
+    "chosen/chosen.min.css": "chosen-js/chosen.min.css",
+    "chosen/chosen-sprite.png": "chosen-js/chosen-sprite.png",
+    "chosen/chosen-sprite@2x.png": "chosen-js/chosen-sprite@2x.png"
+};
+
 /*
  * Sets up the common middleware of a web tool: security headers, static files, request
  * parsing with size limits, and rate limits of the requests that start processes.
@@ -127,6 +140,14 @@ var configureServer = function(server)
 
     server.use("/commons/Client", express.static(ROOT + "/commons/Client"));
     server.use("/Client", express.static(ROOT + "/Client"));
+
+    // the client libraries installed with npm (the tool's package.json), only these files
+    server.get(/^\/vendor\/(.+)$/, function(req, res) {
+        var file = VENDOR_FILES[req.params[0]];
+        if (!file)
+            return res.status(404).end();
+        res.sendFile(file, { root: ROOT + "/node_modules" });
+    });
 
     var limiter = function(limit) {
         return rateLimit({

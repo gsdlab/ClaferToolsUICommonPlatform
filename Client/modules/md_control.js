@@ -152,7 +152,7 @@ Control.method("getInitContent", function(){
             $("#backend").html(options);
             $("#backendButtons").html(backendButtons);
 
-            $(".control_button").click(function(){
+            $(".control_button").on("click", function(){
                 $("#ControlOp").val(this.id);
 
                 var argument = $("#" + this.id + "-arg");
@@ -178,11 +178,11 @@ Control.method("getInitContent", function(){
             });
 
             // Enter runs the button of the argument, not the first button of the form
-            $(".control_argument").keypress(function(event){
+            $(".control_argument").on("keypress", function(event){
                 if (event.which == 13)
                 {
                     event.preventDefault();
-                    $(this).prev("button").click();
+                    $(this).prev("button").trigger("click");
                 }
             });
 
@@ -226,7 +226,7 @@ Control.method("onInitRendered", function()
 });
 
 Control.method("resetControls", function(){
-    $("#RunStop").removeAttr("disabled")
+    $("#RunStop").prop("disabled", false)
                     .val("Run")
                     .attr("title", "Run the chosen solution generator");
 
@@ -252,7 +252,7 @@ Control.method("runStopClick", function(){
 
             this.host.makeBusy(true);
             this.sessionActive = true; // activating IG session
-            $("#ControlForm").submit();
+            $("#ControlForm").trigger("submit");
         }
     }
     else
@@ -260,7 +260,7 @@ Control.method("runStopClick", function(){
         if (this.settings.onStop(this))
         {
             $("#ControlOp").val("stop");
-            $("#ControlForm").submit();
+            $("#ControlForm").trigger("submit");
         }
     }
 });
@@ -293,29 +293,29 @@ Control.method("setIntScopeClick", function(){
 });
 
 Control.method("enableRuntimeControls", function(){
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").removeAttr("disabled");
+    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").prop("disabled", false);
     $("#RunStop").val("Kill");
     $("#RunStop").attr("title", "Force the running backend to stop");
 
-    $("#setIndividualScope").removeAttr("disabled");
-    $("#setDefaultScope").removeAttr("disabled");
-    $("#defaultScopeValue").removeAttr("disabled");    
-    $("#individualScopeValue").removeAttr("disabled");    
-    $("#individualClafer").removeAttr("disabled");   
+    $("#setIndividualScope").prop("disabled", false);
+    $("#setDefaultScope").prop("disabled", false);
+    $("#defaultScopeValue").prop("disabled", false);    
+    $("#individualScopeValue").prop("disabled", false);    
+    $("#individualClafer").prop("disabled", false);   
 
-    $("#incIndividualScope").removeAttr("disabled");
-    $("#individualScopeDelta").removeAttr("disabled");    
-    $("#incAllScopes").removeAttr("disabled");
-    $("#allScopesDelta").removeAttr("disabled");
+    $("#incIndividualScope").prop("disabled", false);
+    $("#individualScopeDelta").prop("disabled", false);    
+    $("#incAllScopes").prop("disabled", false);
+    $("#allScopesDelta").prop("disabled", false);
 
-//    $("#intLowScopeValue").removeAttr("disabled");    
-    $("#intHighScopeValue").removeAttr("disabled");   
-    $("#setIntScope").removeAttr("disabled");   
+//    $("#intLowScopeValue").prop("disabled", false);    
+    $("#intHighScopeValue").prop("disabled", false);   
+    $("#setIntScope").prop("disabled", false);   
     
-//    $("#bitwidthValue").removeAttr("disabled");   
-//    $("#setBitwidth").removeAttr("disabled");   
+//    $("#bitwidthValue").prop("disabled", false);   
+//    $("#setBitwidth").prop("disabled", false);   
 
-    $("#backend").attr("disabled", "disabled");
+    $("#backend").prop("disabled", true);
 
     $('#getInstances').prop('disabled', false);
 
@@ -323,23 +323,23 @@ Control.method("enableRuntimeControls", function(){
 });
 
 Control.method("disableRuntimeControls", function(){
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").not("[data-toggle]").attr("disabled", "disabled");
+    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").not("[data-toggle]").prop("disabled", true);
     $("#RunStop").val("Run");
     $("#RunStop").attr("title", "Run the selected backend");
 
-    $("#setIndividualScope").attr("disabled", "disabled");
-    $("#setDefaultScope").attr("disabled", "disabled");
-    $("#defaultScopeValue").attr("disabled", "disabled");    
-    $("#individualScopeValue").attr("disabled", "disabled");    
-    $("#individualClafer").attr("disabled", "disabled");    
+    $("#setIndividualScope").prop("disabled", true);
+    $("#setDefaultScope").prop("disabled", true);
+    $("#defaultScopeValue").prop("disabled", true);    
+    $("#individualScopeValue").prop("disabled", true);    
+    $("#individualClafer").prop("disabled", true);    
 
-    $("#incIndividualScope").attr("disabled", "disabled");
-    $("#individualScopeDelta").attr("disabled", "disabled");    
-    $("#incAllScopes").attr("disabled", "disabled");
-    $("#allScopesDelta").attr("disabled", "disabled");
-    $("#setIntScope").attr("disabled", "disabled");
+    $("#incIndividualScope").prop("disabled", true);
+    $("#individualScopeDelta").prop("disabled", true);    
+    $("#incAllScopes").prop("disabled", true);
+    $("#allScopesDelta").prop("disabled", true);
+    $("#setIntScope").prop("disabled", true);
 
-    $("#backend").removeAttr("disabled");
+    $("#backend").prop("disabled", false);
 
     $('#getInstances').prop('disabled', true);
 
@@ -349,24 +349,24 @@ Control.method("disableRuntimeControls", function(){
 });
 
 Control.method("disableAll", function(){
-    $("#RunStop").attr("disabled", "disabled");
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").not("[data-toggle]").attr("disabled", "disabled");
+    $("#RunStop").prop("disabled", true);
+    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").not("[data-toggle]").prop("disabled", true);
 
-    $("#setIndividualScope").attr("disabled", "disabled");
-    $("#setDefaultScope").attr("disabled", "disabled");
-    $("#defaultScopeValue").attr("disabled", "disabled");    
-    $("#individualScopeValue").attr("disabled", "disabled");    
-    $("#individualClafer").attr("disabled", "disabled");    
+    $("#setIndividualScope").prop("disabled", true);
+    $("#setDefaultScope").prop("disabled", true);
+    $("#defaultScopeValue").prop("disabled", true);    
+    $("#individualScopeValue").prop("disabled", true);    
+    $("#individualClafer").prop("disabled", true);    
 
-    $("#incIndividualScope").attr("disabled", "disabled"); 
-    $("#individualScopeDelta").attr("disabled", "disabled");    
-    $("#incAllScopes").attr("disabled", "disabled"); 
-    $("#allScopesDelta").attr("disabled", "disabled"); 
+    $("#incIndividualScope").prop("disabled", true); 
+    $("#individualScopeDelta").prop("disabled", true);    
+    $("#incAllScopes").prop("disabled", true); 
+    $("#allScopesDelta").prop("disabled", true); 
 
-    $("#intHighScopeValue").attr("disabled", "disabled");   
-    $("#setIntScope").attr("disabled", "disabled");   
+    $("#intHighScopeValue").prop("disabled", true);   
+    $("#setIntScope").prop("disabled", true);   
 
-    $("#backend").removeAttr("disabled");    
+    $("#backend").prop("disabled", false);    
 });
 
 Control.method("beginQuery", function(formData, jqForm, options){
@@ -507,8 +507,8 @@ Control.method("updateClaferList", function(jsonList){
         var parts = s.split("|");
         $('#individualClafer').val(parts[0]);
         $('#individualScopeValue').val(parts[1]);
-        $('#individualScopeValue').focus();
-        $('#individualScopeValue').select();
+        $('#individualScopeValue').trigger("focus");
+        $('#individualScopeValue').trigger("select");
     });
 
     $('#ClaferList').chosen({"search_contains": "true", "width": "30px"});
@@ -541,11 +541,11 @@ Control.method("adjustBackendSettings", function(backend)
 
         if (backend.scope_options.set_int_scope.argument)
         {
-            $("#intHighScopeValue").removeAttr("disabled");   
+            $("#intHighScopeValue").prop("disabled", false);   
         }
         else 
         {
-            $("#intHighScopeValue").attr("disabled", "disabled");   
+            $("#intHighScopeValue").prop("disabled", true);   
         }                
 
         hasIntScopeSettings = true;
@@ -575,11 +575,11 @@ Control.method("adjustBackendSettings", function(backend)
 
         if (backend.scope_options.inc_all_scopes.argument)
         {
-            $("#allScopesDelta").removeAttr("disabled");   
+            $("#allScopesDelta").prop("disabled", false);   
         }
         else 
         {
-            $("#allScopesDelta").attr("disabled", "disabled");   
+            $("#allScopesDelta").prop("disabled", true);   
         }                
 
         if (backend.scope_options.inc_all_scopes.default_value)
@@ -601,11 +601,11 @@ Control.method("adjustBackendSettings", function(backend)
 
         if (backend.scope_options.set_default_scope.argument)
         {
-            $("#defaultScopeValue").removeAttr("disabled");   
+            $("#defaultScopeValue").prop("disabled", false);   
         }
         else 
         {
-            $("#defaultScopeValue").attr("disabled", "disabled");   
+            $("#defaultScopeValue").prop("disabled", true);   
         }                
 
         if (backend.scope_options.set_default_scope.default_value)
@@ -636,29 +636,29 @@ Control.method("adjustBackendArgumentSettings", function()
         {
             if (this.backends[i].scope_options && this.backends[i].scope_options.set_int_scope && this.backends[i].scope_options.set_int_scope.argument)
             {
-                $("#intHighScopeValue").removeAttr("disabled");   
+                $("#intHighScopeValue").prop("disabled", false);   
             }
             else 
             {
-                $("#intHighScopeValue").attr("disabled", "disabled");   
+                $("#intHighScopeValue").prop("disabled", true);   
             }
 
             if (this.backends[i].scope_options && this.backends[i].scope_options.set_default_scope && this.backends[i].scope_options.set_default_scope.argument)
             {
-                $("#defaultScopeValue").removeAttr("disabled");   
+                $("#defaultScopeValue").prop("disabled", false);   
             }
             else 
             {
-                $("#defaultScopeValue").attr("disabled", "disabled");   
+                $("#defaultScopeValue").prop("disabled", true);   
             }            
 
             if (this.backends[i].scope_options && this.backends[i].scope_options.inc_all_scopes && this.backends[i].scope_options.inc_all_scopes.argument)
             {
-                $("#allScopesDelta").removeAttr("disabled");   
+                $("#allScopesDelta").prop("disabled", false);   
             }
             else 
             {
-                $("#allScopesDelta").attr("disabled", "disabled");   
+                $("#allScopesDelta").prop("disabled", true);   
             }            
 
             break;
@@ -701,7 +701,7 @@ Control.method("reload", function()
 
     if ($(reloadButton).length > 0) // has reload button
     {
-        reloadButton.click();
+        reloadButton.trigger("click");
         return true;
     }
     else

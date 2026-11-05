@@ -84,14 +84,14 @@ FeatureQualityMatrix.method("addControlPanel", function()
 
 
     $('#toggle_link').html("Distinct");
-    $('#toggle_link').click(function(event){
+    $('#toggle_link').on("click", function(event){
         context.toggleDistinct();
     }).css("cursor", "pointer");
 
     // Reset button for reseting filters
 
     $('#filter_reset').html("Reset filters");
-    $('#filter_reset').click(function(event){
+    $('#filter_reset').on("click", function(event){
     /*
         context.filter.cleanFilters();
         context.filter.filterContent();
@@ -105,17 +105,17 @@ FeatureQualityMatrix.method("addControlPanel", function()
     }).css("cursor", "pointer");
 
     // add handler to search bar
-    $('#search').keyup(function(){
+    $('#search').on("keyup", function(){
         context.applySearch();
     }); 
 
-    $('#search').click(function(event){
+    $('#search').on("click", function(event){
     //        event.stopPropagation(); //to keep table from sorting by instance number
     });
 
     var context = this;
 
-    $('#showQualities').click(function(){
+    $('#showQualities').on("click", function(){
        
         var objSource = context.data.claferProcessor.source.objectives;
 
@@ -136,7 +136,7 @@ FeatureQualityMatrix.method("addControlPanel", function()
        
     });
 
-    $('#saveAll').click(this.saveAll.bind(this)).css("cursor", "pointer");
+    $('#saveAll').on("click", this.saveAll.bind(this)).css("cursor", "pointer");
 
 });
 
@@ -500,7 +500,7 @@ FeatureQualityMatrix.method("saveAll", function(){
         data += parser.getInstanceData(i) + "\n";
     }
     $("#saveAllData").val(data);
-    $("#saveAllForm").submit();
+    $("#saveAllForm").trigger("submit");
 });
 
 // this function is called every time a user filters by features or quality values
