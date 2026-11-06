@@ -83,8 +83,10 @@ Output.method("onInitRendered", function(){
 
     $("#clearOutput")[0].onclick = this.onClearClick.bind(this);
 
-    this.editor.getSession().setUseWrapMode(false);   
-    this.editor.setReadOnly(true); 
+    this.editor.getSession().setUseWrapMode(false);
+    // Ace's default of 2 scrolls the console by about a page per step of the mouse wheel
+    this.editor.setScrollSpeed(1);
+    this.editor.setReadOnly(true);
     this.editor.setHighlightActiveLine(false);   
     this.editor.renderer.setShowGutter(false);
 });

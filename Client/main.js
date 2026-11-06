@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-$(document).ready(function()
+$(function()
 {
     var configuration = getConfiguration();    
     
@@ -32,11 +32,11 @@ Host.method("makeBusy", function(isOn)
 {
     if (isOn)
     {
-        $(window).bind("beforeunload", exitConfirmation);
+        $(window).on("beforeunload", exitConfirmation);
     }
     else
     {
-        $(window).unbind("beforeunload");
+        $(window).off("beforeunload");
     }
 
 });
@@ -252,8 +252,8 @@ Host.method("errorWindow", function(errorRecord){
 });
 
 (function($){
-  $(document).ready(function(){
-     $(document).delegate('.sidemenu .sm-open','click',function(e){
+  $(function(){
+     $(document).on('click','.sidemenu .sm-open',function(e){
       // TODO: fix sidemenu z-index bug
       e.preventDefault();
       

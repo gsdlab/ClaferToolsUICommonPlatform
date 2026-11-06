@@ -68,19 +68,19 @@ Input.method("onInitRendered", function()
     this.addInstancesFlag = 1;
     this.toCancel = false;
 
-    $("#submitFile").click(this.submitFileCall.bind(this));
-    $("#submitExample").click(this.submitExampleCall.bind(this));
-    $("#submitText").click(this.submitTextCall.bind(this));
-    $("#submitExample").attr("disabled", "disabled");
+    $("#submitFile").on("click", this.submitFileCall.bind(this));
+    $("#submitExample").on("click", this.submitExampleCall.bind(this));
+    $("#submitText").on("click", this.submitTextCall.bind(this));
+    $("#submitExample").prop("disabled", true);
 
-    $("#submitFile").attr("disabled", "disabled");
+    $("#submitFile").prop("disabled", true);
 
-    $("#myform [type='file']").change(this.inputChange.bind(this));
-    $("#exampleURL").change(this.exampleChange.bind(this));
-    $("#copyExampleURL").click(this.copyExampleURLCall.bind(this));
-    $("#copyExampleImport").click(this.copyExampleImportCall.bind(this));
-    $("#loadExampleInEditor").change(this.exampleChange.bind(this));
-//    $("#saveSourceButton").click(this.saveSourceCall.bind(this));
+    $("#myform [type='file']").on("change", this.inputChange.bind(this));
+    $("#exampleURL").on("change", this.exampleChange.bind(this));
+    $("#copyExampleURL").on("click", this.copyExampleURLCall.bind(this));
+    $("#copyExampleImport").on("click", this.copyExampleImportCall.bind(this));
+    $("#loadExampleInEditor").on("change", this.exampleChange.bind(this));
+//    $("#saveSourceButton").on("click", this.saveSourceCall.bind(this));
 
     var options = new Object();
     options.beforeSubmit = this.beginQuery.bind(this);
@@ -88,7 +88,7 @@ Input.method("onInitRendered", function()
     options.error = this.handleError.bind(this);
     options.timeout = this.requestTimeout;
 
-    $('#myform').ajaxForm(options);
+    ajaxForm("#myform", options);
 
     if (this.settings.optimization_backend)
     {
@@ -112,11 +112,11 @@ Input.method("onInitRendered", function()
 
     this.editor = ace.edit("clafer_editor");
     this.editor.setTheme("ace/theme/eclipse");
-    var ClaferMode = require("ace/mode/clafer").Mode;
+    var ClaferMode = ace.require("ace/mode/clafer").Mode;
     this.editor.getSession().setMode(new ClaferMode());
     this.editor.setShowPrintMargin(false);
 
-    // $('#myform').submit(); MOVED TO another location
+    // $('#myform').trigger("submit"); MOVED TO another location
 });
 
 /*
@@ -144,7 +144,7 @@ Input.method("beginQuery", function(formData, jqForm, options) {
 
     $("#load_area #myform").hide();
     $("#load_area").append('<div id="preloader"><img id="preloader_img" src="commons/Client/images/preloader.gif" alt="Loading..."/><span id="status_label">Loading and processing...</span><button id="cancel">Cancel</button></div>');
-    $("#cancel").click(this.cancelCall.bind(this));
+    $("#cancel").on("click", this.cancelCall.bind(this));
 
     return true;
 });
@@ -336,21 +336,21 @@ Input.method("exampleChange", function()
         var captions = this.getCaptionsByFileExt(fileName);
         if (captions)
         {
-            $("#submitExample").removeAttr("disabled");
+            $("#submitExample").prop("disabled", false);
             $("#fileExtExample").val(captions.ext);
             $("#submitExample").val(captions.button_example_caption);
         }
         else
         {
             $("#submitExample").val("Unknown");
-            $("#submitExample").attr("disabled", "disabled");
+            $("#submitExample").prop("disabled", true);
             $("#fileExtExample").val("");
         }
     }
     else
     { // no example
         fileName = "any.cfr";
-        $("#submitExample").attr("disabled", "disabled");
+        $("#submitExample").prop("disabled", true);
         $("#submitExample").val(this.getCaptionsByFileExt(fileName).button_example_caption);
         $("#fileExtExample").val("");
     }
@@ -365,20 +365,20 @@ Input.method("inputChange", function(){
         var captions = this.getCaptionsByFileExt(fileName);
         if (captions)
         {
-            $("#submitFile").removeAttr("disabled");
+            $("#submitFile").prop("disabled", false);
             $("#fileExtFile").val(captions.ext);
             $("#submitFile").val(captions.button_file_caption);
         }
         else
         {
             $("#submitFile").val("Unknown");
-            $("#submitFile").attr("disabled", "disabled");
+            $("#submitFile").prop("disabled", true);
             $("#fileExtFile").val("");
         }
     }
     else{ // no file
         fileName = "any.cfr";
-        $("#submitFile").attr("disabled", "disabled");
+        $("#submitFile").prop("disabled", true);
         $("#submitFile").val(this.getCaptionsByFileExt(fileName).button_file_caption);
         $("#fileExtFile").val("");
     }
@@ -670,9 +670,9 @@ Input.method("onBackendChange", function()
 
 Input.method("updateOptimizationSettings", function(config, id)
 {
-    $("#optimizer" + id + "Override").unbind("change");
+    $("#optimizer" + id + "Override").off("change");
 
-    $("#optimizer" + id + "Override").change(function(){
+    $("#optimizer" + id + "Override").on("change", function(){
         $("#optimizer" + id).prop("disabled", !$("#optimizer" + id + "Override").is(":checked"));
     });
 
@@ -688,7 +688,7 @@ Input.method("updateOptimizationSettings", function(config, id)
             $("#optimizer" + id + "Label").html(config.label);
         }
 
-        $("#optimizer" + id + "Override").change();
+        $("#optimizer" + id + "Override").trigger("change");
     }
     else
     {
@@ -699,7 +699,7 @@ Input.method("updateOptimizationSettings", function(config, id)
 
 Input.method("onOptimizeChecked", function(){
     var value = $("#optimize").is(":checked");
-    $('#optimizationBackend').attr('disabled', !value);
+    $('#optimizationBackend').prop("disabled", !value);
     $('.optimizationBackendSetting').toggle(value);
     $('#useCache').toggle(value);
     $('#useCache').next("span").toggle(value);

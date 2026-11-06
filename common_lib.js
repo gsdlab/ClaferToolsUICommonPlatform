@@ -96,6 +96,14 @@ core.cleanupUploads(UPLOADS);
 // The size limit of submitted models and instance data, and of request bodies.
 var MAX_UPLOAD_SIZE = config.maxUploadSize || 16 * 1024 * 1024;
 
+// The client libraries in app.html: vendor/<name> → node_modules/<file>, and vendor/ace/<file>.js →
+// node_modules/ace-builds/src-min-noconflict/<file>.js (the Clafer modes are in Client/ace-modes). They are
+// dependencies in the package.json of each tool, so that npm audit covers them.
+var VENDOR_FILES = {
+    "jquery.min.js": "jquery/dist/jquery.min.js",
+    "d3.min.js": "d3/d3.min.js"
+};
+
 /*
  * Sets up the common middleware of a web tool: security headers, static files, request
  * parsing with size limits, and rate limits of the requests that start processes.
@@ -118,15 +126,20 @@ var configureServer = function(server)
         next();
     });
 
-    // only the editor itself, not the demos and tests of ace
-    server.use("/commons/Client/ace", function(req, res, next) {
-        if (/^\/ace-builds\/src(-min)?(-noconflict)?\/[\w.-]+\.js$/.test(req.path))
-            return next();
-        res.status(404).end();
-    });
-
     server.use("/commons/Client", express.static(ROOT + "/commons/Client"));
     server.use("/Client", express.static(ROOT + "/Client"));
+
+    // the client libraries installed with npm (the tool's package.json), only these files;
+    // vendor/ace/ is the editor, which loads its themes, modes and workers from there
+    server.get(/^\/vendor\/(.+)$/, function(req, res) {
+        var aceFile = /^ace\/([\w-]+\.js)$/.exec(req.params[0]);
+        if (aceFile)
+            return res.sendFile("ace-builds/src-min-noconflict/" + aceFile[1], { root: ROOT + "/node_modules" });
+        var file = VENDOR_FILES[req.params[0]];
+        if (!file)
+            return res.status(404).end();
+        res.sendFile(file, { root: ROOT + "/node_modules" });
+    });
 
     var limiter = function(limit) {
         return rateLimit({
@@ -148,6 +161,9 @@ var configureServer = function(server)
         limits: { fieldSize: MAX_UPLOAD_SIZE, fileSize: MAX_UPLOAD_SIZE, files: 1, fields: 50 }
     }).any());
     server.use(function(req, res, next) { // uploaded files by field name, e.g., req.files.claferFile.path
+        // Express 5 leaves req.body undefined without a request body (e.g., GET /initdata)
+        if (req.body === undefined)
+            req.body = {};
         var files = {};
         (req.files || []).forEach(function(file) { files[file.fieldname] = file; });
         req.files = files;

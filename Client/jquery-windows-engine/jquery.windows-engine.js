@@ -158,7 +158,7 @@ jQuery.extend({
         };
         
         //Attach a mousedown event to the window's title bar to allow dragging
-        $titleBarContent.bind('mousedown.jquerywindow', function(e) {
+        $titleBarContent.on('mousedown.jquerywindow', function(e) {
             $obj = $(e.target).parent().parent();
             setFocus($obj);
             disableSelection();
@@ -180,15 +180,15 @@ jQuery.extend({
                 lastMouseX = e.clientX;
                 lastMouseY = e.clientY;
 
-                $(document).bind('mousemove.jquerywindow', function(e) {
+                $(document).on('mousemove.jquerywindow', function(e) {
                     dragging(e, $obj);
                 });
 
-                $(document).bind('mouseup.jquerywindow', function(e) {
+                $(document).on('mouseup.jquerywindow', function(e) {
                     if (options.type === "iframe") $("#jquery-window-engine-iframe-cover").remove();
                     if (options.onDragEnd != null) options.onDragEnd();
-                    $(document).unbind('mousemove.jquerywindow');
-                    $(document).unbind('mouseup.jquerywindow');
+                    $(document).off('mousemove.jquerywindow');
+                    $(document).off('mouseup.jquerywindow');
                     enableSelection();
                 });
 
@@ -201,13 +201,13 @@ jQuery.extend({
         });
         
         //Attach a double click event to the window's title bar to allow maximization
-        $titleBarContent.dblclick(function(e) {
+        $titleBarContent.on("dblclick", function(e) {
             $obj = $(e.target).parent().parent();
-            $obj.find(".window-maximizeButton").click();
+            $obj.find(".window-maximizeButton").trigger("click");
         });
         
         //Attach a mousedown event to the window's resize icon to allow resizing
-        $windowResizeIcon.bind('mousedown.jquerywindow', function(e) {
+        $windowResizeIcon.on('mousedown.jquerywindow', function(e) {
             $obj = $(e.target).parent().parent();
             setFocus($obj);
             disableSelection();
@@ -229,15 +229,15 @@ jQuery.extend({
                 lastMouseX = e.clientX;
                 lastMouseY = e.clientY;
 
-                $(document).bind('mousemove.jquerywindow', function(e) {
+                $(document).on('mousemove.jquerywindow', function(e) {
                     resizing(e, $obj);
                 });
 
-                $(document).bind('mouseup.jquerywindow', function(e) {
+                $(document).on('mouseup.jquerywindow', function(e) {
                     if (options.type === "iframe") $("#jquery-window-engine-iframe-cover").remove();
                     if (options.onResizeEnd != null) options.onResizeEnd();
-                    $(document).unbind('mousemove.jquerywindow');
-                    $(document).unbind('mouseup.jquerywindow');
+                    $(document).off('mousemove.jquerywindow');
+                    $(document).off('mouseup.jquerywindow');
                     enableSelection();
                 });
 
@@ -247,7 +247,7 @@ jQuery.extend({
         });
         
         //Attach a click event to the window's minimize button to allow window minimization
-        $windowMinimizeButton.bind('click.jquerywindow', function(e) {
+        $windowMinimizeButton.on('click.jquerywindow', function(e) {
             $obj = $(e.target).parent().parent();
             setFocus($obj);
             if ($obj.data("state") === "minimized") {
@@ -260,11 +260,11 @@ jQuery.extend({
                 $obj.find(".window-content").slideToggle("slow", function() { $obj.css("height", 0); });
             }
             else {
-                $obj.find(".window-maximizeButton").click();
+                $obj.find(".window-maximizeButton").trigger("click");
             }
         });
 
-        $windowMaximizeButton.bind('click.jquerywindow', function(e) {
+        $windowMaximizeButton.on('click.jquerywindow', function(e) {
             $obj = $(e.target).parent().parent();
             setFocus($obj);
             
@@ -273,7 +273,7 @@ jQuery.extend({
             //////////////////////////////////////////////////////////
             
             if ($obj.data("state") === "minimized") {
-                $obj.find(".window-minimizeButton").click();
+                $obj.find(".window-minimizeButton").trigger("click");
             }
             else if ($obj.data("state") === "normal") {
                 $obj.animate({
@@ -313,7 +313,7 @@ jQuery.extend({
         });
         
         //Attach a click event to the popup's close button to allow closing
-        $windowCloseButton.bind('click.jquerywindow', function(e) {
+        $windowCloseButton.on('click.jquerywindow', function(e) {
             var $window = $(e.target).parent().parent();
             $window.fadeOut(function() { $window.remove(); });
             if (options.onWindowClose != null) options.onWindowClose();
@@ -323,14 +323,14 @@ jQuery.extend({
         });
         
         //Attach a click event to the popup's background to allow closing
-        $modalBackground.bind('click.jquerywindow', function(e) {
-            $windowCloseButton.click();
+        $modalBackground.on('click.jquerywindow', function(e) {
+            $windowCloseButton.trigger("click");
         });
 
-        $windowContent.click(function(e) {
+        $windowContent.on("click", function(e) {
             setFocus($(e.target).parent());
         });
-        $windowStatusBar.click(function(e) {
+        $windowStatusBar.on("click", function(e) {
             setFocus($(e.target).parent());
         });
 
@@ -389,11 +389,11 @@ jQuery.extend({
     },
 
     minimizeWindow: function(id) {
-        $("#" + id + " .window-minimizeButton").click();
+        $("#" + id + " .window-minimizeButton").trigger("click");
     },
 
     maximizeWindow: function(id) {
-        $("#" + id + " .window-maximizeButton").click();
+        $("#" + id + " .window-maximizeButton").trigger("click");
     },
 
     showWindow: function(id) {
@@ -405,11 +405,11 @@ jQuery.extend({
     },
 
     closeWindow: function(id) {
-        $("#" + id + " .window-closeButton").click();
+        $("#" + id + " .window-closeButton").trigger("click");
     },
 
     closeAllWindows: function() {
-        $(".window-container .window-closeButton").click();
+        $(".window-container .window-closeButton").trigger("click");
     }
 
 });

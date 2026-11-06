@@ -173,6 +173,8 @@ TableVisualizer.method("refresh", function(sdata)
             .style("cursor", "pointer")
             .on("click", function(d){
             	var me = d3.select(this);
+            	// not a click on the header too, which would select the removed instance
+            	d3.event.stopPropagation();
             	if (context.chartListeners.removeInstance){
             		
                 context.chartListeners.removeInstance(me.attr("data-id"), context);
@@ -201,15 +203,20 @@ TableVisualizer.method("refresh", function(sdata)
                     context.chartListeners.onDeselected(d);
                 }
             })
-		.on("mouseover", function(d){
+		.style("cursor", "pointer");
+   }
+
+   // highlighting the column also without selection, e.g., in the Configurator
+   if (context.options.selectable || context.chartListeners.onMouseOver){
+
+		context.headers.on("mouseover", function(d){
             context.chartListeners.onMouseOver(d);
             context.makeActive(d);
 		})
 		.on("mouseout", function(d){
             context.chartListeners.onMouseOut(d);
             context.makeInactive(d);
-		})
-		.style("cursor", "pointer");
+		});
    }
 
   var cat1 = context.body.selectAll("tr.field-row").data(data.fields, function(d){return d.path;});
@@ -314,7 +321,7 @@ TableVisualizer.method("refresh", function(sdata)
       					}).each(function(){
       						$(this).filter(function(){
       							return $(this).parent().find('.emvalue.no').length;
-      						}).click();
+      						}).trigger("click");
       					});
 	            }
 
@@ -561,12 +568,14 @@ TableVisualizer.method("unselect", function(d)
 });
 
 
+// A value or a path of clafers by their UIDs, which are their names, qualified only where a
+// name is not unique (x__size): they are shown as they are.
 TableVisualizer.method("filterClaferValue", function(s){
-	return s.replace(/c[0-9]*_/g, "").replaceAll("$0", "");
+	return s.replaceAll("$0", "");
 });
 
 TableVisualizer.method("prettifyPath", function(s){
-	return s.replace(/c[0-9]*_/g, "").replaceAll("-", ".").substring(5);
+	return s.replaceAll("-", ".").substring(5);
 });
 
 TableVisualizer.method("prettifyClaferSet", function(s){

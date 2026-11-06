@@ -80,7 +80,7 @@ helpGetter.method("setListeners", function(){
 //	alert(length);//.contents().find("#noIDEHelpChoice").length);
 //	$("#helpFrame").contents().find("#noIDEHelpChoice").on('click', function(event) { alert('test'); });
 /*
-	$(".fadeOverlay").click(function(){
+	$(".fadeOverlay").on("click", function(){
 		$("#help").hide(500);
 		$(".fadeOverlay").hide(500);
 		if($("#helpContainer").contents().find("#noIDEHelpChoice").length > 0){
@@ -102,13 +102,12 @@ helpGetter.method("getHelpButton", function(moduleName){
 	var that = this;
 	var button = '<div class="window-helpButton"></div>';
 	button = $(button);
-	$(button).click(function(){
+	$(button).on("click", function(){
 		that.getHelp(moduleName);
 	});
-	$(button).hover(function(){
+	$(button).on("mouseenter", function(){
 		$(this).addClass("active");
-	},
-	function(){
+	}).on("mouseleave", function(){
 		$(this).removeClass("active");
 	});
 	return button;
