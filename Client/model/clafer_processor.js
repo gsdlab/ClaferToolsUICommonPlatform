@@ -42,9 +42,10 @@ function ClaferProcessor (sourceJSON) {
 
 }
 
-//returns claferid without the cXX_ extension
+// the name of a goal's expression, e.g., total_cost: the UIDs of its clafers are their names,
+// qualified only where a name is not unique (x__size), so they are shown as they are
 ClaferProcessor.method("claferFilter", function(s) {
-	return s.replace(/c[0-9]*_/g, "");
+	return s;
 });
 
 ClaferProcessor.method("getByUID", function(uid) {

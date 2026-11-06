@@ -568,12 +568,14 @@ TableVisualizer.method("unselect", function(d)
 });
 
 
+// A value or a path of clafers by their UIDs, which are their names, qualified only where a
+// name is not unique (x__size): they are shown as they are.
 TableVisualizer.method("filterClaferValue", function(s){
-	return s.replace(/c[0-9]*_/g, "").replaceAll("$0", "");
+	return s.replaceAll("$0", "");
 });
 
 TableVisualizer.method("prettifyPath", function(s){
-	return s.replace(/c[0-9]*_/g, "").replaceAll("-", ".").substring(5);
+	return s.replaceAll("-", ".").substring(5);
 });
 
 TableVisualizer.method("prettifyClaferSet", function(s){
