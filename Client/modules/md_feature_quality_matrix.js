@@ -84,14 +84,14 @@ FeatureQualityMatrix.method("addControlPanel", function()
 
 
     $('#toggle_link').html("Distinct");
-    $('#toggle_link').click(function(event){
+    $('#toggle_link').on("click", function(event){
         context.toggleDistinct();
     }).css("cursor", "pointer");
 
     // Reset button for reseting filters
 
     $('#filter_reset').html("Reset filters");
-    $('#filter_reset').click(function(event){
+    $('#filter_reset').on("click", function(event){
     /*
         context.filter.cleanFilters();
         context.filter.filterContent();
@@ -105,24 +105,24 @@ FeatureQualityMatrix.method("addControlPanel", function()
     }).css("cursor", "pointer");
 
     // add handler to search bar
-    $('#search').keyup(function(){
+    $('#search').on("keyup", function(){
         context.applySearch();
     }); 
 
-    $('#search').click(function(event){
+    $('#search').on("click", function(event){
     //        event.stopPropagation(); //to keep table from sorting by instance number
     });
 
     var context = this;
 
-    $('#showQualities').click(function(){
+    $('#showQualities').on("click", function(){
        
         var objSource = context.data.claferProcessor.source.objectives;
 
         if(objSource!==undefined) {
 
 
-            attributes = _.filter(ClaferAPI.getAttributes(context.data.claferProcessor.source), function(attr){
+            attributes = ClaferAPI.getAttributes(context.data.claferProcessor.source).filter(function(attr){
 
                 return attr.indexOf('total_') === -1;
             });
@@ -136,7 +136,7 @@ FeatureQualityMatrix.method("addControlPanel", function()
        
     });
 
-    $('#saveAll').click(this.saveAll.bind(this)).css("cursor", "pointer");
+    $('#saveAll').on("click", this.saveAll.bind(this)).css("cursor", "pointer");
 
 });
 
@@ -145,9 +145,6 @@ FeatureQualityMatrix.method("refresh", function()
     this.tableVisualizer.refresh(this.data);    
 
     this.updateIndicators();
-
-    //    $(".field-item").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 'w', html: true});
-    //    $(".content-cell").tipsy({delayIn: 2000, delayOut: 500, fade: true, gravity: 's', html: true});
 
     //    this.filter.resetFilters(this.SavedFilters, this.permahidden);
 
@@ -171,7 +168,8 @@ FeatureQualityMatrix.method("onRendered", function()
     this.tableVisualizer = new TableVisualizer("table", {
         sorting: true,
         filtering: true,
-        selectable: true,
+        // the Configurator has no selection of variants
+        selectable: this.settings.instancesSelectable !== false,
         collapsing: true,
         buttonsForRemoval: true
     }, {
@@ -218,8 +216,6 @@ FeatureQualityMatrix.method('clearSelectionByID', function(id){
    
 
     context.settings.onDeselected(context, getPID(id));
-    selected = _.without(selected, null);
-    selected = _.without(selected, getPID(id));
     // console.log(selected);
     // context.onSelectionChanged(selected);
 
@@ -236,28 +232,28 @@ FeatureQualityMatrix.method("sort", function(path, sortFlag)
 
     this.tableVisualizer.removeAllInstances(); // remove instances from the table
 
-    var groups = _.partition(data.matrix, function(obj){ return typeof obj[path] == 'number' ; }); // groups[0] - numeric values, group[1] - string values 
+    var groups = [data.matrix.filter(function(obj){ return typeof obj[path] == 'number' ; }), data.matrix.filter(function(obj){ return typeof obj[path] != 'number' ; })]; // groups[0] - numeric values, group[1] - string values 
    
 
     switch(sortFlag) {
         case 'asc' : {
-            data.matrix =  _.sortBy(groups[0],function(obj){ return +obj[path] });
+            data.matrix =  groups[0].sort(function(a, b){ return a[path] - b[path]; });
             if(groups.length>1){
-                data.matrix = _.union(groups[1], data.matrix);
+                data.matrix = groups[1].concat(data.matrix);
             }
             break;
         }
 
         case 'desc' : {
-            data.matrix =  _.sortBy(groups[0], function(obj){ return -obj[path] });
+            data.matrix =  groups[0].sort(function(a, b){ return b[path] - a[path]; });
             if(groups.length>1){
-                data.matrix = _.union(data.matrix, groups[1]);
+                data.matrix = data.matrix.concat(groups[1]);
             }
             break
         }
 
         case 'none' : {
-            data.matrix =  _.sortBy(data.matrix, function(obj){ return +obj['id'] });
+            data.matrix =  data.matrix.slice().sort(function(a, b){ return a.id - b.id; });
             break;
         }
     }
@@ -477,9 +473,9 @@ FeatureQualityMatrix.method("featureChecked", function (featurePath, state){
 
 FeatureQualityMatrix.method("removeInstance", function(id){
     var context = this;
-    context.data.matrix =  _.without(context.data.matrix, _.find(context.data.matrix, {id: parseInt(id)}));
+    context.data.matrix =  context.data.matrix.filter(function(obj){ return obj.id !== parseInt(id); });
            
-    context.data.instanceIds =  _.without(context.data.instanceIds, id);
+    context.data.instanceIds =  context.data.instanceIds.filter(function(e){ return e !== id; });
     context.data.instanceCount =  context.data.instanceIds.length;
     context.data.instanceMatch =  context.data.instanceIds.length;
 
@@ -500,7 +496,7 @@ FeatureQualityMatrix.method("saveAll", function(){
         data += parser.getInstanceData(i) + "\n";
     }
     $("#saveAllData").val(data);
-    $("#saveAllForm").submit();
+    $("#saveAllForm").trigger("submit");
 });
 
 // this function is called every time a user filters by features or quality values

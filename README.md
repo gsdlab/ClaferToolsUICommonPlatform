@@ -73,6 +73,15 @@ When building the tools, the branches should match.
 Releases from branches `master` are guaranteed to work well together.
 Development versions from branches `develop` should work well together but this might not always be the case.
 
+Tests
+-----
+
+The tests in `test/` load the client code into a page simulated by [jsdom](https://github.com/jsdom/jsdom), with the jQuery and d3 of the tool. In the `Server` folder of a tool, after `npm install`:
+
+```
+npm test
+```
+
 Need help?
 ==========
 

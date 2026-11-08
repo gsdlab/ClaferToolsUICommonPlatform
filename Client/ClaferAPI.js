@@ -5,7 +5,7 @@ ClaferAPI = {
 	// All values of the given field in the IR, in document order.
 	collect: function(json, field, result) {
 		result = result || [];
-		if (_.isArray(json)) {
+		if (Array.isArray(json)) {
 			for (var i = 0; i < json.length; i++) {
 				ClaferAPI.collect(json[i], field, result);
 			}
@@ -45,14 +45,14 @@ ClaferAPI = {
 		// Apply the filter
 		switch(opt.filter) {
 			case 'concrete' : {
-				iClafers = _.filter(iClafers, function(clafer){
+				iClafers = iClafers.filter(function(clafer){
 												return !ClaferAPI.getProperty(clafer, 'isAbstract');
 										});
 				break;
 			}
 
 			case 'abstract': {
-				iClafers = _.filter(iClafers, function(clafer){
+				iClafers = iClafers.filter(function(clafer){
 												return ClaferAPI.getProperty(clafer, 'isAbstract');
 										});
 				break;
@@ -60,7 +60,7 @@ ClaferAPI = {
 		}
 
 		if (opt.topLevel) {
-			iClafers = _.filter(iClafers, function(clafer){
+			iClafers = iClafers.filter(function(clafer){
 												return ClaferAPI.getProperty(clafer, 'parentUID') === claferUID;
 										});
 		}
@@ -70,17 +70,17 @@ ClaferAPI = {
 
 	// The expressions of the goals: << min e >> and << max e >>.
 	getGoals: function(json){
-		var goals = _.filter(_.get(json, 'iModule._mDecls') || [], function(element){
+		var goals = (json?.iModule?._mDecls || []).filter(function(element){
 						return element.tag === 'IEGoal';
 					});
-		return _.map(goals, function(goal){
+		return goals.map(function(goal){
 						return goal._cpexp;
 					});
 	},
 
 	// The UIDs of the quality attributes.
 	getAttributes: function(json){
-		return _.get(json, 'objectives._attributes') || [];
+		return json?.objectives?._attributes || [];
 	},
 
 	getProperty: function(clafer, property, defValue) {
@@ -88,33 +88,33 @@ ClaferAPI = {
 
 		switch(property) {
 			//Clafers
-			case 'isAbstract'		: result = _.get(clafer, '_modifiers._abstract'); break;
-			case 'card'					: result = _.get(clafer, '_card'); break;
-			case 'uid'					: result = _.get(clafer, '_uid'); break;
-			case 'ident'				: result = _.get(clafer, '_ident'); break;
-			case 'parentUID'		: result = _.get(clafer, '_parentUID'); break;
-			case 'superClafer'	: result = ClaferAPI.bindingName(_.get(clafer, '_super._exp._binding')); break;
-			case 'supers'				: result = _.get(clafer, '_super._iType._hi'); break;
+			case 'isAbstract'		: result = clafer?._modifiers?._abstract; break;
+			case 'card'					: result = clafer?._card; break;
+			case 'uid'					: result = clafer?._uid; break;
+			case 'ident'				: result = clafer?._ident; break;
+			case 'parentUID'		: result = clafer?._parentUID; break;
+			case 'superClafer'	: result = ClaferAPI.bindingName(clafer?._super?._exp?._binding); break;
+			case 'supers'				: result = clafer?._super?._iType?._hi; break;
 			case 'reference'		: {
-				var exp = _.get(clafer, '_reference._ref._exp');
+				var exp = clafer?._reference?._ref?._exp;
 				// Reference to a nested clafer: the last clafer of the path
 				if (exp && exp._exps) {
-					exp = _.get(_.last(exp._exps), '_exp');
+					exp = exp._exps.at(-1)?._exp;
 				}
-				result = ClaferAPI.bindingName(_.get(exp, '_binding'));
+				result = ClaferAPI.bindingName(exp?._binding);
 				break;
 			}
 			//Goals
-			case 'goalOperation': result = _.get(clafer, '_op'); break;
+			case 'goalOperation': result = clafer?._op; break;
 			case 'goalExpId'		: {
-				result = ClaferAPI.bindingName(_.get(clafer, '_binding'));
-				if (result === null && _.get(clafer, '_sident') === 'dref') {
+				result = ClaferAPI.bindingName(clafer?._binding);
+				if (result === null && clafer?._sident === 'dref') {
 					result = 'dref';
 				}
 				break;
 			}
-			case 'goalExps'			: result = _.get(clafer, '_exps'); break;
-			case 'goalExp'			: result = _.get(clafer, '_exp'); break;
+			case 'goalExps'			: result = clafer?._exps; break;
+			case 'goalExp'			: result = clafer?._exp; break;
 		}
 
 		if (result === undefined) {
