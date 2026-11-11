@@ -723,6 +723,11 @@ var handleControlRequest = function(req, res, settings){
                 args.push(process.ss);
             }
 
+            if (process.temporal && backend.temporal_args) // e.g., the trace length for temporal models
+            {
+                args = args.concat(backend.temporal_args);
+            }
+
             if (backend.scope_options && backend.scope_options.set_int_scope && backend.scope_options.set_int_scope.argument) 
             {
                 var replacement = [
