@@ -1,4 +1,4 @@
-// Reads the JSON intermediate representation of Clafer 0.5.3 (clafer -m json).
+// Reads the JSON intermediate representation of Clafer 0.5.9 (clafer -m json): the rich IR.
 ClaferAPI = {
 	primitiveTypes: ['integer', 'decimal', 'clafer', 'string', 'real', 'double'],
 

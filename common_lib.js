@@ -452,136 +452,189 @@ var inSession = function(process)
     return function(arg) { return arg.split(process.file).join(path.basename(process.file)); };
 };
 
+// The mode and arguments of each format compiled in the given run: the main run (null) or a
+// format's own run ("compiler_run", e.g., "core" for the outputs of `--core`, which applies to
+// all the modes of a run, so they cannot be compiled together with the rich outputs).
+var modeArgs = function(run)
+{
+    var args = [];
+    for (var i = 1; i < formatConfig.formats.length; i++)
+        // we skip the default source .CFR format, since it's already there
+    {
+        var format = formatConfig.formats[i];
+        if ((format.compiler_run || null) !== run)
+            continue;
+        args.push("-m");
+        args.push(format.compiler_mode);
+        args = args.concat(format.compiler_args);
+    }
+    return args;
+};
+
+// The runs other than the main one, in the order of their first format.
+var separateRuns = function()
+{
+    var runs = [];
+    formatConfig.formats.forEach(function(format)
+    {
+        if (format.compiler_run && runs.indexOf(format.compiler_run) < 0)
+            runs.push(format.compiler_run);
+    });
+    return runs;
+};
+
 var runClaferCompiler = function(key, specifiedArgs, genericArgs, onComplete)
 { 
-    var formatModeArgs = [];
     var process = core.getProcess(key);
 
     process.compiler_args = genericArgs.concat(specifiedArgs).join(" ").replace(process.file, "file") + " {mode args}";
 
-    for (var i = 1; i < formatConfig.formats.length; i++)
-        // we skip the default source .CFR format, since it's already there
-    {
-        formatModeArgs.push("-m");
-        formatModeArgs.push(formatConfig.formats[i].compiler_mode);
-        formatModeArgs = formatModeArgs.concat(formatConfig.formats[i].compiler_args);
-    }
-
-    var finalArgs = importArgs(process).concat(genericArgs).concat(specifiedArgs).concat(formatModeArgs).map(inSession(process));
-
-    // in the session's folder, so that the messages name the model, not the server's folders
-    process.clafer_compiler = spawn("clafer", finalArgs, { cwd: process.folder });
+    var baseArgs = importArgs(process).concat(genericArgs).concat(specifiedArgs);
 
     process.compiled_formats = new Array();
     process.compiler_message = "";
+    process.compiler_codes = {};
 
-    process.clafer_compiler.on("error", function (err)
-    {
-        core.logSpecific("ERROR: Cannot run the Clafer compiler: " + err.message, key);
-    });
-
-    process.clafer_compiler.stdout.on("data", function (data)
+    // Runs the compiler with the given arguments in the session's folder, so that the messages
+    // name the model, not the server's folders; onClose gets the exit code and the output,
+    // or is not called if the session ended.
+    var compile = function(args, onClose)
     {
         var process = core.getProcess(key);
-        if (process != null)
-        {                    
-            process.compiler_message += data;
+        var output = "";
+
+        process.clafer_compiler = spawn("clafer", args.map(inSession(process)), { cwd: process.folder });
+
+        process.clafer_compiler.on("error", function (err)
+        {
+            core.logSpecific("ERROR: Cannot run the Clafer compiler: " + err.message, key);
+        });
+
+        process.clafer_compiler.stdout.on("data", function (data) { output += data; });
+        process.clafer_compiler.stderr.on("data", function (data) { output += data; });
+
+        process.clafer_compiler.on('close', function (code)
+        {
+            var process = core.getProcess(key);
+            if (process != null)
+            {
+                process.clafer_compiler = null;
+                onClose(code, output);
+            }
+        });
+    };
+
+    // the outputs of the separate runs, one after another, after the main run
+    var runSeparately = function(runs, onDone)
+    {
+        if (runs.length == 0)
+        {
+            onDone();
+            return;
+        }
+
+        var run = runs[0];
+        var process = core.getProcess(key);
+
+        // no output of a previous compilation may be shown for a failed one
+        formatConfig.formats.forEach(function(format)
+        {
+            if (format.compiler_run === run)
+                fs.rm(process.file + format.file_suffix, { force: true }, function () {});
+        });
+
+        compile(baseArgs.concat(modeArgs(run)), function (code, output)
+        {
+            var process = core.getProcess(key);
+            core.logSpecific("CC (" + run + "): " + (code != 0 ? "Non-zero" : "Zero") + " Return Value", key);
+            process.compiler_codes[run] = code;
+            if (code != 0) // its messages, if they differ from those of the main run
+                process.compiler_message += output;
+            runSeparately(runs.slice(1), onDone);
+        });
+    };
+
+    compile(baseArgs.concat(modeArgs(null)), function (code, output)
+    {
+        var process = core.getProcess(key);
+        process.compiler_message += output;
+
+        if (code != 0) // if the result is non-zero, means compilation error
+        {
+            core.logSpecific("CC: Non-zero Return Value", key);
+            process.compiler_result = '{"message": "' + core.escapeJSON("Error: Compilation Error") + '"}';
+            process.compiler_code = 1;
+            collectFormats(key, onComplete);
+        }
+        else
+        {
+            core.logSpecific("CC: Zero Return Value", key);
+            process.compiler_result = '{"message": "' + core.escapeJSON("Success") + '"}';
+            process.compiler_code = 0;
+            runSeparately(separateRuns(), function () { collectFormats(key, onComplete); });
         }
     });
+};
 
-    process.clafer_compiler.stderr.on("data", function (data)
+// Reads the compiled files of the formats.
+var collectFormats = function(key, onComplete)
+{
+    var process = core.getProcess(key);
+    if (process == null)
+        return;
+
+    // it makes sense to get the compiled files for the models (e.g., HTML)
+    // that may show syntax errors
+    var formats_for_process = formatConfig.formats.map(function(format)
     {
-        var process = core.getProcess(key);
-        if (process != null)
-        {
-            process.compiler_message += data;
-        }
+        var run = format.compiler_run;
+        return {
+            id: format.id,
+            file_suffix: format.file_suffix,
+            display_element: format.display_element,
+            // "true" or "false" in the configuration: read also after a failed compilation
+            shows_compilation_errors: String(format.shows_compilation_errors) === "true",
+            // a format of a separate run compiled if its run succeeded, which follows the main run
+            compiled: process.compiler_code == 0 && (!run || process.compiler_codes[run] == 0)
+        };
     });
-    
-    process.clafer_compiler.on('close', function (code)
-    {	
-        var process = core.getProcess(key);
-        if (process != null)
+
+    var add = function(obj)
+    {
+        process.compiled_formats.push(obj);
+        if (formats_for_process.length == process.compiled_formats.length)
+            onComplete();
+    };
+
+    formats_for_process.forEach(function(item)
+    {
+        if (item.shows_compilation_errors || item.compiled)
         {
-            process.clafer_compiler = null;
-
-            if (code != 0) // if the result is non-zero, means compilation error
+            fs.readFile(process.file + item.file_suffix, function (err, file_contents)
             {
-                core.logSpecific("CC: Non-zero Return Value", key);
-                process.compiler_result = '{"message": "' + core.escapeJSON("Error: Compilation Error") + '"}';
-                process.compiler_code = 1;
-            }
-            else
-            {
-                core.logSpecific("CC: Zero Return Value", key);
-                process.compiler_result = '{"message": "' + core.escapeJSON("Success") + '"}';
-                process.compiler_code = 0;
-            }
-
-
-            // it makes sense to get the compiled files for the models (e.g., HTML) 
-            // that may show syntax errors
-
-            var formats_for_process = [];
-
-            for (var j = 0; j < formatConfig.formats.length; j++)
-            {
-                var format = new Object();
-                format.id = formatConfig.formats[j].id;
-                format.file_suffix = formatConfig.formats[j].file_suffix;
-                format.display_element = formatConfig.formats[j].display_element;
-                format.shows_compilation_errors = formatConfig.formats[j].shows_compilation_errors;
-                format.process = process;
-                formats_for_process.push(format);
-            }
-
-            formats_for_process.forEach(function(item) 
-            {
-                if (item.shows_compilation_errors || (item.process.compiler_code == 0))
+                var obj = new Object();
+                obj.id = item.id;
+                obj.fileSuffix = item.file_suffix;
+                obj.displayElement = item.display_element;
+                if (err) // error reading HTML, maybe it is not really present, means a fatal compilation error
                 {
-                    fs.readFile(process.file + item.file_suffix, function (err, file_contents) 
-                    {
-                        var obj = new Object();
-                        obj.id = item.id;
-                        obj.fileSuffix = item.file_suffix;
-                        obj.displayElement = item.display_element;
-                        if (err) // error reading HTML, maybe it is not really present, means a fatal compilation error
-                        {
-                            core.logSpecific('ERROR: Cannot read the compiled file.', key);
-                            obj.message = "compile_error";
-                            obj.result = "";
-                        }
-                        else
-                        {
-                            obj.message = "OK";
-                            obj.result = file_contents.toString();
-                        }
-
-                        item.process.compiled_formats.push(obj);
-
-                        if (formats_for_process.length == item.process.compiled_formats.length)
-                        {
-                        	onComplete();
-                        }
-                    });
-                }
-                else 
-                {
-                    var obj = new Object();
-                    obj.id = item.id;
+                    core.logSpecific('ERROR: Cannot read the compiled file.', key);
                     obj.message = "compile_error";
                     obj.result = "";
-                    item.process.compiled_formats.push(obj);
-
-                    if (formats_for_process.length == item.process.compiled_formats.length)
-                    {
-                        onComplete();
-                    }
                 }
+                else
+                {
+                    obj.message = "OK";
+                    obj.result = file_contents.toString();
+                }
+                add(obj);
             });
         }
+        else
+        {
+            add({ id: item.id, message: "compile_error", result: "" });
+        }
     });
-
 };
 
 // Whether the compiled model is a temporal (behavioral) Clafer model. The Choco backend
