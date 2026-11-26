@@ -43,7 +43,7 @@ By default, `<bin>=/home/clafertools040/bin`
 
 * Install [ClaferIG](https://github.com/gsdlab/claferIG) following the installation instructions into `<bin>`.
 
-* Install [chocosolver](https://github.com/gsdlab/chocosolver) following the installation instructions into `<bin>`.
+* Install [clafersg](https://github.com/gsdlab/chocosolver) (from the repository chocosolver) following the installation instructions into `<bin>`.
 
 Upgrading to the latest platform
 --------------------------------
