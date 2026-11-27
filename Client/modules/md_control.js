@@ -40,6 +40,7 @@ function Control(host, settings)
     this.host = host;
 
     this.sessionActive = false;
+    this.temporal = null; // unknown until the host tells, see setTemporal
 }
 
 Control.method("getInitContent", function(){
@@ -138,11 +139,13 @@ Control.method("getInitContent", function(){
                 for (var j = 0; j < backends[i].control_buttons.length; j++)
                 {
                     var button = backends[i].control_buttons[j];
-                    backendButtons += '<button class="control_button' + (button.default_on ? " control_button_on" : "") + '"' + (button.toggle ? "" : ' disabled="disabled"') + ' id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '" name="' + backends[i].control_buttons[j].id + '"' + (backends[i].control_buttons[j].toggle ? ' data-toggle="true"' : '') + ' title="' + backends[i].control_buttons[j].tooltip + '">' + backends[i].control_buttons[j].label + "</button>";
+                    // a button of the temporal models only, e.g., clafersg's Fork: disabled for a static model
+                    var temporalOnly = button.temporal_only ? ' data-temporal-only="true"' : '';
+                    backendButtons += '<button class="control_button' + (button.default_on ? " control_button_on" : "") + '"' + (button.toggle ? "" : ' disabled="disabled"') + temporalOnly + ' id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '" name="' + backends[i].control_buttons[j].id + '"' + (backends[i].control_buttons[j].toggle ? ' data-toggle="true"' : '') + ' title="' + backends[i].control_buttons[j].tooltip + '">' + backends[i].control_buttons[j].label + "</button>";
 
                     if (backends[i].control_buttons[j].argument)
                     {
-                        backendButtons += '<input type="number" class="control_argument" disabled="disabled"' + (backends[i].control_buttons[j].argument.allow_negative ? "" : ' min="0"') + ' id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '-arg" value="' + backends[i].control_buttons[j].argument.default_value + '" title="' + backends[i].control_buttons[j].argument.tooltip + '"/>';
+                        backendButtons += '<input type="number" class="control_argument" disabled="disabled"' + temporalOnly + (backends[i].control_buttons[j].argument.allow_negative ? "" : ' min="0"') + ' id="' + backends[i].id + "-" + backends[i].control_buttons[j].id + '-arg" value="' + backends[i].control_buttons[j].argument.default_value + '" title="' + backends[i].control_buttons[j].argument.tooltip + '"/>';
                     }
                 }
 
@@ -293,8 +296,19 @@ Control.method("setIntScopeClick", function(){
     $("#ControlOpArg1").val($ ("#intHighScopeValue").val());
 });
 
+// Whether the model compiled last is temporal (its solutions are traces), or null if the tool
+// does not tell: the buttons of the temporal models only are disabled for a static model.
+Control.method("setTemporal", function(temporal){
+    this.temporal = temporal;
+});
+
 Control.method("enableRuntimeControls", function(){
-    $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input").prop("disabled", false);
+    var buttons = $("#" + $( "#backend option:selected" ).val() + "_buttons").children("button, input");
+    buttons.prop("disabled", false);
+    if (this.temporal === false)
+    {
+        buttons.filter("[data-temporal-only]").prop("disabled", true);
+    }
     $("#RunStop").val("Kill");
     $("#RunStop").attr("title", "Force the running backend to stop");
 

@@ -52,7 +52,7 @@ var ClaferHighlightRules = function() {
             { token: "keyword.other.clafer", regex: word("enum|assert|minimize|maximize") },
             { token: "keyword.control.clafer", regex: word("if|then|else|let") },
             { token: "keyword.control.temporal.clafer",
-              regex: word("never|sometime|lonce|always|must|precede|follow|initially|finally|until|weakuntil|eventually|globally|next|before|after|between|U|W|F|G|X") },
+              regex: word("never|sometime|lonce|always|must|precede|follow|initially|finally|until|weakuntil|eventually|globally|next|previous|once|historically|since|triggered|before|after|between|U|W|F|G|X") },
             { token: "keyword.operator.word.clafer", regex: word("xor|or|mux|opt|all|disj|no|not|lone|one|some|in|and") },
             { token: "support.function.clafer", regex: word("sum|product|min|max") },
             { token: "variable.language.clafer", regex: word("this|parent|dref|root|children") },
