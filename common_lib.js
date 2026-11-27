@@ -436,7 +436,7 @@ var storeModel = function(req, res, contents, urlFile, callback, reuseEnabled)
  * The arguments that restrict the imports of a session's model, which may come from anyone:
  * local files only from the session's folder and the examples, URLs only from public
  * addresses, and the imports of a model loaded from a URL relative to that URL. The tools
- * that read the model (clafer, claferIG) get them; the model cannot change them.
+ * that read the model (clafer, claferIG, clafersg) get them; the model cannot change them.
  */
 var importArgs = function(process)
 {
@@ -638,11 +638,16 @@ var collectFormats = function(key, onComplete)
 };
 
 // Whether the compiled model is a temporal (behavioral) Clafer model. The Choco backend
-// supports only static models; clafer reports temporal models when it
-// cannot produce the Choco output.
+// supports only static models. The compiler gives the rich explicit model of a temporal model
+// a trace length in its options ("//# OPTIONS --explicit --tl=10"), and that of a static one
+// none, so each tool compiles the format "rich_explicit_clafer" (-m clafer).
 var isTemporalModel = function(process)
 {
-    return process.compiler_message.indexOf("because the model contains temporal operators") >= 0;
+    var explicit = (process.compiled_formats || []).find(function(format)
+    {
+        return format.id == "rich_explicit_clafer";
+    });
+    return !!explicit && /^\/\/# OPTIONS .*--tl=/.test(explicit.result);
 }
 
 var temporalModelMessage = "Temporal Clafer models are not supported: instance generation and optimization work only with static models. You can edit and run temporal models in ClaferIDE.";
@@ -1124,4 +1129,5 @@ module.exports.handleControlRequest = handleControlRequest;
 module.exports.produceScopes = produceScopes;
 module.exports.writeCommand = writeCommand;
 module.exports.isTemporalModel = isTemporalModel;
+module.exports.importArgs = importArgs;
 module.exports.temporalModelMessage = temporalModelMessage;
