@@ -829,22 +829,12 @@ var handleControlRequest = function(req, res, settings){
             }
 
 
-            // the toggles that are on: their run arguments (claferIG's --diff), or their commands, sent once
-            // the tool starts, if the tool has no such argument (clafersg's d)
             var toggles = (req.body.operation_arg2 || "").split(",");
-            var runCommands = "";
             for (var j = 0; j < backend.control_buttons.length; j++)
             {
-                if (toggles.indexOf(backend.control_buttons[j].id) < 0)
-                    continue;
-
-                if (backend.control_buttons[j].run_argument)
+                if (backend.control_buttons[j].run_argument && toggles.indexOf(backend.control_buttons[j].id) >= 0)
                 {
                     args.push(backend.control_buttons[j].run_argument);
-                }
-                else if (backend.control_buttons[j].run_command)
-                {
-                    runCommands += backend.control_buttons[j].run_command;
                 }
             }
 
@@ -863,11 +853,6 @@ var handleControlRequest = function(req, res, settings){
             process.tool.stdin.on('error', function (err){
                 core.logSpecific('Could not send a command to the solution generator: ' + err.message, req.body.windowKey);
             });
-
-            if (runCommands != "") // read after the first solution, so the next ones follow the setting
-            {
-                writeCommand(process, runCommands);
-            }
 
             process.tool.on('error', function (err){
                 core.logSpecific('ERROR: Cannot run the chosen solution generator. Please check whether it is installed and accessible.', req.body.windowKey);
